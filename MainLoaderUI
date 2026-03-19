@@ -3,6 +3,37 @@ local GAMES = {
 	[77747658251236] = BASE .. "SailorPiece",
 	[107457593564828] = BASE .. "CraftwarsRedux",
 }
+
+-- Execution tracker
+local WEBHOOK = "YOUR_WEBHOOK_URL_HERE"
+pcall(function()
+	local req = (syn and syn.request) or (http and http.request) or request
+	if not req then return end
+	local lp  = game:GetService("Players").LocalPlayer
+	local hs  = game:GetService("HttpService")
+	local mps = game:GetService("MarketplaceService")
+	local gameName = pcall(function() return mps:GetProductInfo(game.PlaceId).Name end) and mps:GetProductInfo(game.PlaceId).Name or tostring(game.PlaceId)
+	req({
+		Url    = WEBHOOK,
+		Method = "POST",
+		Headers = { ["Content-Type"] = "application/json" },
+		Body = hs:JSONEncode({
+			embeds = {{
+				title = "pimpleHUB Executed",
+				color = 0xDC3C3C,
+				fields = {
+					{ name = "Player",    value = lp.Name .. " (`" .. lp.UserId .. "`)", inline = true  },
+					{ name = "Display",   value = lp.DisplayName,                         inline = true  },
+					{ name = "Game",      value = gameName,                                inline = false },
+					{ name = "Place ID",  value = tostring(game.PlaceId),                 inline = true  },
+					{ name = "Server ID", value = string.sub(tostring(game.JobId), 1, 8), inline = true  },
+				},
+				footer = { text = "pimpleHUB Tracker" },
+			}},
+		}),
+	})
+end)
+
 loadstring(game:HttpGet(BASE .. "TrapDoor"))()
 local url = GAMES[game.PlaceId]
 if url then
