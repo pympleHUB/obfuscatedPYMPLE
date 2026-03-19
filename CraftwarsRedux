@@ -170,8 +170,11 @@ local Flags = {
 	MovementMode = "None",
 	MovementOffset = 5,
 	MovementInterval = 0.3,
-	TweenSpeed = 0.5,
+	TweenSpeed = 50,
 	AntiSit = false,
+	AimAssist = false,
+	AimSmoothness = 0.15,
+	RadiusESP = false,
 }
 
 local SaveableKeys = {
@@ -221,9 +224,14 @@ local SaveableKeys = {
 	"MovementInterval",
 	"TweenSpeed",
 	"AntiSit",
+	"AimAssist",
+	"AimSmoothness",
+	"RadiusESP",
 }
 
 local TOTAL_BIOMES = 41
+local RadiusESPFolder = nil
+
 local CooldownTimer, BiomeCheckTimer, CutsceneCheckTimer, MeteorTimer, SwingTimer, AbilityTimer, GodTimer, BossAlertTimer, MovementTimer =
 	0, 0, 0, 0, 0, 0, 0, 0, 0
 local CachedWeapon, CachedArmour, LastWeaponCheck, LastArmourCheck, CACHE_DURATION = nil, nil, 0, 0, 0.5
@@ -1066,8 +1074,11 @@ local function TweenToTarget(target)
 		ActiveMoveTween:Cancel()
 	end
 	pcall(function()
-		local goal = { CFrame = CFrame.new(GetTargetOffset(rp, hd)) }
-		local info = TweenInfo.new(math.max(0.05, Flags.TweenSpeed), Enum.EasingStyle.Linear)
+		local destPos = GetTargetOffset(rp, hd)
+		local dist = (rp.Position - destPos).Magnitude
+		local duration = math.max(0.05, dist / math.max(1, Flags.TweenSpeed))
+		local goal = { CFrame = CFrame.new(destPos) }
+		local info = TweenInfo.new(duration, Enum.EasingStyle.Linear)
 		ActiveMoveTween = TweenService:Create(rp, info, goal)
 		ActiveMoveTween:Play()
 	end)
@@ -1081,6 +1092,66 @@ local function WalkToTarget(target)
 	if not h or not hd then return end
 	pcall(function()
 		h:MoveTo(hd.Position)
+	end)
+end
+
+local ESP_SEGMENTS = 64
+local function BuildRadiusESP()
+	if RadiusESPFolder then
+		pcall(function() RadiusESPFolder:Destroy() end)
+	end
+	RadiusESPFolder = Instance.new("Folder")
+	RadiusESPFolder.Name = "PympleRadiusESP"
+	RadiusESPFolder.Parent = workspace
+	for _ = 1, ESP_SEGMENTS do
+		local p = Instance.new("Part")
+		p.Anchored = true
+		p.CanCollide = false
+		p.CanQuery = false
+		p.CanTouch = false
+		p.CastShadow = false
+		p.Material = Enum.Material.Neon
+		p.Color = Color3.fromRGB(220, 50, 50)
+		p.Transparency = 0.25
+		p.Parent = RadiusESPFolder
+	end
+end
+
+local function UpdateRadiusESP()
+	if not RadiusESPFolder or not RadiusESPFolder.Parent then return end
+	local c = LocalPlayer.Character
+	local rp = c and c:FindFirstChild("HumanoidRootPart")
+	if not rp then return end
+	local center = rp.Position
+	local radius = Flags.KillAuraRadius
+	local y = center.Y - 2.5
+	local parts = RadiusESPFolder:GetChildren()
+	local n = #parts
+	local segLen = (2 * math.pi * radius) / n + 0.05
+	for i, p in ipairs(parts) do
+		local a = ((i - 0.5) / n) * 2 * math.pi
+		local x = center.X + radius * math.cos(a)
+		local z = center.Z + radius * math.sin(a)
+		p.Size = Vector3.new(0.2, 0.2, segLen)
+		p.CFrame = CFrame.new(x, y, z) * CFrame.Angles(0, -a - math.pi / 2, 0)
+	end
+end
+
+local function DestroyRadiusESP()
+	if RadiusESPFolder then
+		pcall(function() RadiusESPFolder:Destroy() end)
+		RadiusESPFolder = nil
+	end
+end
+
+local function AimAtEnemy(target)
+	local cam = workspace.CurrentCamera
+	if not cam then return end
+	local hd = target:FindFirstChild("Head") or target:FindFirstChild("HumanoidRootPart")
+	if not hd then return end
+	pcall(function()
+		local lookCF = CFrame.new(cam.CFrame.Position, hd.Position)
+		cam.CFrame = cam.CFrame:Lerp(lookCF, math.clamp(Flags.AimSmoothness, 0.01, 1))
 	end)
 end
 
@@ -12366,6 +12437,20 @@ KillAuraSection:AddSlider({
 		Flags.KillAuraRadius = v
 	end,
 })
+local RadiusESPToggle = KillAuraSection:AddToggle({
+	Name = "Radius ESP",
+	Flag = "RadiusESP",
+	Default = Flags.RadiusESP,
+	Callback = function(v)
+		Flags.RadiusESP = v
+		if v then
+			BuildRadiusESP()
+		else
+			DestroyRadiusESP()
+		end
+	end,
+})
+RadiusESPToggle.Link:AddHelper({ Text = "Show radius circle in world" })
 
 local AttackSection = MainTab:DrawSection({ Name = "Attack Settings", Position = "left" })
 AttackSection:AddDropdown({
@@ -12457,14 +12542,47 @@ MovementSection:AddSlider({
 	end,
 })
 MovementSection:AddSlider({
-	Name = "Tween Speed",
-	Min = 0.05,
-	Max = 2,
+	Name = "Tween Speed (studs/s)",
+	Min = 10,
+	Max = 500,
 	Default = Flags.TweenSpeed,
-	Round = 2,
+	Round = 0,
 	Flag = "TweenSpeed",
 	Callback = function(v)
 		Flags.TweenSpeed = v
+	end,
+})
+local AimAssistToggle = MovementSection:AddToggle({
+	Name = "Aim Assist",
+	Flag = "AimAssist",
+	Default = Flags.AimAssist,
+	Callback = function(v)
+		Flags.AimAssist = v
+		if not v then
+			pcall(function()
+				workspace.CurrentCamera.CameraType = Enum.CameraType.Custom
+				local c = LocalPlayer.Character
+				if c then
+					workspace.CurrentCamera.CameraSubject = c:FindFirstChildOfClass("Humanoid")
+				end
+			end)
+		else
+			pcall(function()
+				workspace.CurrentCamera.CameraType = Enum.CameraType.Scriptable
+			end)
+		end
+	end,
+})
+AimAssistToggle.Link:AddHelper({ Text = "Camera tracks nearest enemy" })
+MovementSection:AddSlider({
+	Name = "Aim Smoothness",
+	Min = 0.01,
+	Max = 1,
+	Default = Flags.AimSmoothness,
+	Round = 2,
+	Flag = "AimSmoothness",
+	Callback = function(v)
+		Flags.AimSmoothness = v
 	end,
 })
 
@@ -13250,6 +13368,15 @@ RunService.RenderStepped:Connect(function(dt)
 				WalkToTarget(target)
 			end
 		end
+	end
+	if Flags.AimAssist then
+		local target = GetNearestEnemy()
+		if target then
+			AimAtEnemy(target)
+		end
+	end
+	if Flags.RadiusESP then
+		UpdateRadiusESP()
 	end
 	if Flags.SpeedLock then
 		UpdateWalkSpeed(Flags.WalkSpeed)
