@@ -5496,7 +5496,7 @@ function PYMPLE:_LoadElement(Parent: Frame , EnabledLine: boolean , Signal , Dis
 		Button.BackgroundTransparency = 1.000
 		Button.BorderColor3 = Color3.fromRGB(0, 0, 0)
 		Button.BorderSizePixel = 0
-		Button.Size = UDim2.new(1, -1, 0, 30)
+		Button.Size = UDim2.new(1, -1, 0, 38)
 		Button.ZIndex = Zindex + 5
 
 		BlockLine.Name = PYMPLE:_RandomString()
@@ -5518,11 +5518,12 @@ function PYMPLE:_LoadElement(Parent: Frame , EnabledLine: boolean , Signal , Dis
 		Frame.Parent = Button
 		Frame.AnchorPoint = Vector2.new(0.5, 0.5)
 		Frame.BackgroundColor3 = PYMPLE.Colors.Highlight
-		Frame.BackgroundTransparency = 0.100
+		Frame.BackgroundTransparency = 0
 		Frame.BorderColor3 = Color3.fromRGB(0, 0, 0)
 		Frame.BorderSizePixel = 0
+		Frame.ClipsDescendants = true
 		Frame.Position = UDim2.new(0.5, 0, 0.5, 0)
-		Frame.Size = UDim2.new(1, -15, 1, -5)
+		Frame.Size = UDim2.new(1, -10, 1, -4)
 		Frame.ZIndex = Zindex + 7;
 
 		table.insert(PYMPLE.Elements.Highlight,{
@@ -5531,6 +5532,7 @@ function PYMPLE:_LoadElement(Parent: Frame , EnabledLine: boolean , Signal , Dis
 		});
 
 		UIStroke.Color = PYMPLE.Colors.StrokeColor
+		UIStroke.Thickness = 1.5
 		UIStroke.Parent = Frame
 
 		table.insert(PYMPLE.Elements.StrokeColor,{
@@ -5538,8 +5540,27 @@ function PYMPLE:_LoadElement(Parent: Frame , EnabledLine: boolean , Signal , Dis
 			Property = "Color"
 		});
 
-		UICorner.CornerRadius = UDim.new(0, 3)
+		UICorner.CornerRadius = UDim.new(0, 8)
 		UICorner.Parent = Frame
+
+		local GlossOverlay = Instance.new("Frame")
+		local GlossGradient = Instance.new("UIGradient")
+		GlossOverlay.Name = PYMPLE:_RandomString()
+		GlossOverlay.Parent = Frame
+		GlossOverlay.AnchorPoint = Vector2.new(0.5, 0)
+		GlossOverlay.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+		GlossOverlay.BorderSizePixel = 0
+		GlossOverlay.Position = UDim2.new(0.5, 0, 0, 3)
+		GlossOverlay.Size = UDim2.new(0.6, 0, 0, 2)
+		GlossOverlay.ZIndex = Zindex + 8
+		GlossGradient.Transparency = NumberSequence.new({
+			NumberSequenceKeypoint.new(0, 1),
+			NumberSequenceKeypoint.new(0.2, 0.6),
+			NumberSequenceKeypoint.new(0.8, 0.6),
+			NumberSequenceKeypoint.new(1, 1),
+		})
+		GlossGradient.Rotation = 0
+		GlossGradient.Parent = GlossOverlay
 
 		TextLabel.Parent = Frame
 		TextLabel.AnchorPoint = Vector2.new(0.5, 0.5)
@@ -5548,11 +5569,11 @@ function PYMPLE:_LoadElement(Parent: Frame , EnabledLine: boolean , Signal , Dis
 		TextLabel.BorderSizePixel = 0
 		TextLabel.Position = UDim2.new(0.5, 0, 0.5, 0)
 		TextLabel.Size = UDim2.new(1, 0, 1, 0)
-		TextLabel.ZIndex = Zindex + 8
-		TextLabel.Font = Enum.Font.GothamMedium
+		TextLabel.ZIndex = Zindex + 10
+		TextLabel.Font = Enum.Font.GothamBold
 		TextLabel.Text = Config.Name;
 		TextLabel.TextColor3 = PYMPLE.Colors.SwitchColor
-		TextLabel.TextSize = 12.000
+		TextLabel.TextSize = 13
 		TextLabel.TextStrokeTransparency = 0.900
 
 		table.insert(PYMPLE.Elements.SwitchColor , {
@@ -5587,7 +5608,7 @@ function PYMPLE:_LoadElement(Parent: Frame , EnabledLine: boolean , Signal , Dis
 				});
 
 				PYMPLE:_Animation(Frame, TweenInfo.new(0.35),{
-					BackgroundTransparency = 0.1
+					BackgroundTransparency = 0
 				});
 
 				PYMPLE:_Animation(UIStroke, TweenInfo.new(0.35),{
@@ -11199,7 +11220,7 @@ pimpleHUB.Colors.Toggle = Color3.fromRGB(220,60,60)
 -- Loading screen
 pimpleHUB:Loader(AVATAR_ICON,2).yield()
 
-local Window = pimpleHUB.new({Name="PIMPLE v6.0 - Craftwars Redux",Keybind="LeftAlt",Logo=AVATAR_ICON,TextSize=18,Font=Enum.Font.GothamBold})
+local Window = pimpleHUB.new({Name='<font size="22">PYMPLE</font>\n<font size="10">VERSION 6.0</font>',Keybind="LeftAlt",Logo=AVATAR_ICON,TextSize=18,Font=Enum.Font.GothamBold})
 
 Window.OnToggle = function(visible) UIOpen = visible end
 
@@ -11554,7 +11575,7 @@ UISec:AddButton({Name="Destroy GUI",Callback=function()
 	end)
 end})
 local InfoSec = SetTab:DrawSection({Name="Info",Position="right"})
-InfoSec:AddParagraph({Title="pimpleHUB v6.0",Content="Craftwars Redux Script\n\nKeybinds:\nLeft Alt - Toggle UI\nX - Toggle Auto Swing\nT - Toggle Auto Abilities"})
+InfoSec:AddParagraph({Title="PYMPLE v6.0",Content="Craftwars Redux Script\n\nKeybinds:\nLeft Alt - Toggle UI\nX - Toggle Auto Swing\nT - Toggle Auto Abilities"})
 local ThSec = ThTab:DrawSection({Name="UI Themes",Position="left"})
 ThSec:AddDropdown({Name="Select Theme",Default="Default",Values={"Default","Dark Green","Dark Blue","Purple Rose","Skeet"},Callback=function(v) pimpleHUB:SetTheme(v) end})
 local CfgUI = Window:DrawConfig({Name="Config",Icon="folder",Config=ConfigManager})
