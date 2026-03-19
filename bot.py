@@ -8,6 +8,7 @@ DISCORD_TOKEN = os.environ["DISCORD_TOKEN"]
 GITHUB_TOKEN = os.environ["GITHUB_TOKEN"]
 GITHUB_REPO = "pympleHUB/obfuscatedPYMPLE"
 KEY_FILE = "pympleKeyBot"
+ANNOUNCE_CHANNEL_ID = int(os.environ["ANNOUNCE_CHANNEL_ID"])
 
 intents = discord.Intents.default()
 intents.message_content = True
@@ -36,6 +37,9 @@ def update_key(new_key):
 async def setkey(ctx, new_key: str):
     if update_key(new_key):
         await ctx.send(f"Key updated to: `{new_key}`")
+        channel = bot.get_channel(ANNOUNCE_CHANNEL_ID)
+        if channel:
+            await channel.send(f"NEW KEY: {new_key}")
     else:
         await ctx.send("Failed to update key.")
 
