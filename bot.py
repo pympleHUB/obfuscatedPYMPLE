@@ -33,6 +33,18 @@ GREETINGS = [
     "New Key Available!",
     "PYMPLE Key Update!",
     "New Key Just Dropped!",
+    "Access Granted — New Key!",
+    "The Vault Has Been Unlocked!",
+    "Your New Key Awaits!",
+    "Key Has Been Refreshed!",
+    "Stay Sharp — New Key!",
+    "New Key, Who Dis?",
+    "The Key Has Changed!",
+    "Locked and Loaded — New Key!",
+    "Don't Miss This — New Key!",
+    "Key Alert — Act Fast!",
+    "Fresh Access, Fresh Key!",
+    "Time to Update Your Key!",
 ]
 
 def generate_key():
