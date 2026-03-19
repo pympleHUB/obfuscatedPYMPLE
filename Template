@@ -1,4 +1,4 @@
-﻿--[[ PYMPLE v6.0 - pimpleHUB UI Template ]]
+﻿--[[ PYMPLE v1.0 - pimpleHUB UI Template ]]
 
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
@@ -10663,7 +10663,7 @@ pimpleHUB.Colors.Toggle    = Color3.fromRGB(220, 60, 60)
 pimpleHUB:Loader(AVATAR_ICON, 2).yield()
 
 local Window = pimpleHUB.new({
-	Name     = '<font size="22">PYMPLE</font>\n<font size="10">VERSION 6.0</font>',
+	Name     = '<font size="22">PYMPLE</font>\n<font size="10">VERSION 1.0</font>',
 	Keybind  = "LeftAlt",
 	Logo     = AVATAR_ICON,
 	TextSize = 22,
@@ -10803,7 +10803,7 @@ task.spawn(function()
 		pcall(function() LiveTime:SetText(pimpleHUB:GetTimeNow()) end)
 	end
 end)
-Watermark:AddText({ Icon = "server", Text = "v6.0" })
+Watermark:AddText({ Icon = "server", Text = "v1.0" })
 
 -- OWNER/MEMBER rank
 Window:Update({ Username = LocalPlayer.DisplayName, ExpireDate = "Loading..." })
@@ -10968,7 +10968,7 @@ UISection:AddButton({
 
 local InfoSection = SetTab:DrawSection({ Name = "Info", Position = "right" })
 InfoSection:AddParagraph({
-	Title = "pimpleHUB v6.0",
+	Title = "pimpleHUB v1.0",
 	Content = "Template Script\n\nKeybinds:\nLeft Alt - Toggle UI",
 })
 
