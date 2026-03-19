@@ -6497,12 +6497,6 @@ function PYMPLE.new(Config : Window)
 	WindowLabel.TextSize = Config.TextSize
 	WindowLabel.TextXAlignment = Enum.TextXAlignment.Left
 
-	local TitleGlow = Instance.new("UIStroke")
-	TitleGlow.Color = Color3.fromRGB(255, 255, 255)
-	TitleGlow.Thickness = 3
-	TitleGlow.Transparency = 0.55
-	TitleGlow.Parent = WindowLabel
-
 	table.insert(_lib.Elements.SwitchColor , {
 		Element = WindowLabel,
 		Property = 'TextColor3'
