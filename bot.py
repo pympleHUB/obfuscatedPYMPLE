@@ -83,37 +83,37 @@ async def announce_key(new_key, expires_at=None):
     if not channel:
         return
 
-    today = datetime.now().strftime("%d/%m/%Y")
     color = random.choice(COLORS)
     greeting = random.choice(GREETINGS)
 
-    desc = f"## `{new_key}`\n\n"
+    desc = f"# `{new_key}`\n\n"
     if expires_at:
         ts = int(expires_at.timestamp())
-        desc += f"Key will reset <t:{ts}:R>!"
+        desc += f"Key will be resetting <t:{ts}:R>! Please check out #scripts for all of my projects!"
     else:
-        desc += "Key will reset in 24 hours!"
+        desc += "Key will be resetting soon! Please check out #scripts for all of my projects!"
 
+    today = datetime.now().strftime("%d %B %Y")
     embed = discord.Embed(title=greeting, description=desc, color=color)
     embed.set_footer(text=f"PYMPLE • {today}")
 
     msg = await channel.send(embed=embed)
     last_announce_msg_id = msg.id
 
-@tasks.loop(hours=24)
+@tasks.loop(hours=12)
 async def auto_rotate_key():
     if auto_rotate_key.current_loop == 0:
         return
     new_key = generate_key()
     if update_key(new_key):
-        await announce_key(new_key, expires_at=datetime.now() + timedelta(hours=24))
+        await announce_key(new_key, expires_at=datetime.now() + timedelta(hours=12))
 
 @bot.command()
 async def setkey(ctx, new_key: str):
     if update_key(new_key):
         auto_rotate_key.restart()
         await ctx.send(f"Key updated to: `{new_key}`")
-        await announce_key(new_key, expires_at=datetime.now() + timedelta(hours=24))
+        await announce_key(new_key, expires_at=datetime.now() + timedelta(hours=12))
     else:
         await ctx.send("Failed to update key.")
 
