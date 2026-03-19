@@ -5008,6 +5008,10 @@ function PYMPLE:_LoadElement(Parent: Frame , EnabledLine: boolean , Signal , Dis
 		UICorner.CornerRadius = UDim.new(0, 3)
 		UICorner.Parent = Frame
 
+		local BtnScale = Instance.new("UIScale")
+		BtnScale.Scale = 1
+		BtnScale.Parent = Frame
+
 		TextLabel.Parent = Frame
 		TextLabel.AnchorPoint = Vector2.new(0.5, 0.5)
 		TextLabel.BackgroundTransparency = 1.000
@@ -5032,11 +5036,17 @@ function PYMPLE:_LoadElement(Parent: Frame , EnabledLine: boolean , Signal , Dis
 				PYMPLE:_Animation(Frame,TweenInfo.new(0.2),{
 					BackgroundTransparency = 0
 				})
+				PYMPLE:_Animation(BtnScale,TweenInfo.new(0.18,Enum.EasingStyle.Quint),{
+					Scale = 1.04
+				})
 			end;
 		end,function()
 			if Signal:GetValue() then
 				PYMPLE:_Animation(Frame,TweenInfo.new(0.2),{
 					BackgroundTransparency = 0.1
+				})
+				PYMPLE:_Animation(BtnScale,TweenInfo.new(0.18,Enum.EasingStyle.Quint),{
+					Scale = 1.0
 				})
 			end;
 		end);
@@ -6145,6 +6155,7 @@ function PYMPLE:_LoadElement(Parent: Frame , EnabledLine: boolean , Signal , Dis
 		return Args;
 	end;
 
+	Args._Root = Parent;
 	return Args;
 end;
 
@@ -10939,37 +10950,107 @@ UISection:AddSlider({
 		_applyGlowIntensity(v / 100)
 	end,
 })
-UISection:AddButton({
-	Name = "Copy Discord",
-	Callback = function()
-		pcall(function() setclipboard(DISCORD_INVITE) end)
-		Notifier.new({ Title = "Copied", Content = "Discord link copied!", Duration = 2, Icon = AVATAR_ICON })
-	end,
-})
-UISection:AddButton({
-	Name = "Destroy GUI",
-	Callback = function()
-		task.delay(0.1, function()
-			pcall(function() Window:Destroy() end)
-			pcall(function() pimpleHUB:Destroy() end)
-			local function nukeGuis(parent)
-				pcall(function()
-					for _, gui in ipairs(parent:GetChildren()) do
-						if gui:IsA("ScreenGui") then
-							local n = gui.Name:lower()
-							if n:find("pimple") or n:find("pymple") or n:find("notify") or n:find("loader") or n:find("watermark") then
-								gui:Destroy()
-							end
+local function _glowButton(parentOrSection, labelText, callback)
+	local sRoot = (type(parentOrSection) == "table" and parentOrSection._Root) or parentOrSection
+	local Container = Instance.new("Frame")
+	Container.Name = pimpleHUB:_RandomString()
+	Container.Parent = sRoot
+	Container.BackgroundTransparency = 1
+	Container.BorderSizePixel = 0
+	Container.Size = UDim2.new(1, -6, 0, 38)
+	Container.ZIndex = sRoot.ZIndex + 5
+
+	local Btn = Instance.new("Frame")
+	Btn.AnchorPoint = Vector2.new(0.5, 0.5)
+	Btn.BackgroundColor3 = pimpleHUB.Colors.Highlight
+	Btn.BackgroundTransparency = 0.1
+	Btn.BorderSizePixel = 0
+	Btn.Position = UDim2.new(0.5, 0, 0.5, 0)
+	Btn.Size = UDim2.new(1, -8, 1, -6)
+	Btn.ZIndex = Container.ZIndex + 1
+	Btn.Parent = Container
+	local BtnCorner = Instance.new("UICorner")
+	BtnCorner.CornerRadius = UDim.new(0, 4)
+	BtnCorner.Parent = Btn
+	local BtnStroke = Instance.new("UIStroke")
+	BtnStroke.Color = pimpleHUB.Colors.Highlight
+	BtnStroke.Thickness = 1.5
+	BtnStroke.Transparency = 0.1
+	BtnStroke.Parent = Btn
+	local ShimmerGradient = Instance.new("UIGradient")
+	ShimmerGradient.Transparency = NumberSequence.new({
+		NumberSequenceKeypoint.new(0,    0.85),
+		NumberSequenceKeypoint.new(0.12, 0),
+		NumberSequenceKeypoint.new(0.38, 0.75),
+		NumberSequenceKeypoint.new(0.62, 0.75),
+		NumberSequenceKeypoint.new(0.88, 0),
+		NumberSequenceKeypoint.new(1,    0.85),
+	})
+	ShimmerGradient.Parent = BtnStroke
+	task.spawn(function()
+		local ts = game:GetService("TweenService")
+		while Btn and Btn.Parent do
+			ts:Create(ShimmerGradient, TweenInfo.new(3, Enum.EasingStyle.Linear), { Rotation = 360 }):Play()
+			task.wait(3.05)
+			if ShimmerGradient and ShimmerGradient.Parent then ShimmerGradient.Rotation = 0 end
+		end
+	end)
+
+	local Scale = Instance.new("UIScale")
+	Scale.Scale = 1
+	Scale.Parent = Btn
+
+	local Label = Instance.new("TextLabel")
+	Label.AnchorPoint = Vector2.new(0.5, 0.5)
+	Label.BackgroundTransparency = 1
+	Label.Position = UDim2.new(0.5, 0, 0.5, 0)
+	Label.Size = UDim2.new(1, 0, 1, 0)
+	Label.ZIndex = Btn.ZIndex + 1
+	Label.Font = Enum.Font.GothamMedium
+	Label.Text = labelText
+	Label.TextColor3 = Color3.fromRGB(255, 255, 255)
+	Label.TextSize = 12
+	Label.TextStrokeTransparency = 0.9
+	Label.Parent = Btn
+
+	pimpleHUB:_Input(Btn, callback)
+
+	pimpleHUB:_Hover(Btn, function()
+		pimpleHUB:_Animation(Scale, TweenInfo.new(0.18, Enum.EasingStyle.Quint), { Scale = 1.04 })
+		pimpleHUB:_Animation(BtnStroke, TweenInfo.new(0.18), { Transparency = 0.0 })
+		pimpleHUB:_Animation(Btn, TweenInfo.new(0.18), { BackgroundTransparency = 0 })
+	end, function()
+		pimpleHUB:_Animation(Scale, TweenInfo.new(0.18, Enum.EasingStyle.Quint), { Scale = 1.0 })
+		pimpleHUB:_Animation(BtnStroke, TweenInfo.new(0.18), { Transparency = 0.1 })
+		pimpleHUB:_Animation(Btn, TweenInfo.new(0.18), { BackgroundTransparency = 0.1 })
+	end)
+end
+
+_glowButton(UISection, "Copy Discord", function()
+	pcall(function() setclipboard(DISCORD_INVITE) end)
+	Notifier.new({ Title = "Copied", Content = "Discord link copied!", Duration = 2, Icon = AVATAR_ICON })
+end)
+_glowButton(UISection, "Destroy GUI", function()
+	task.delay(0.1, function()
+		pcall(function() Window:Destroy() end)
+		pcall(function() pimpleHUB:Destroy() end)
+		local function nukeGuis(parent)
+			pcall(function()
+				for _, gui in ipairs(parent:GetChildren()) do
+					if gui:IsA("ScreenGui") then
+						local n = gui.Name:lower()
+						if n:find("pimple") or n:find("pymple") or n:find("notify") or n:find("loader") or n:find("watermark") then
+							gui:Destroy()
 						end
 					end
-				end)
-			end
-			nukeGuis(LocalPlayer.PlayerGui)
-			pcall(function() nukeGuis(game:GetService("CoreGui")) end)
-			pcall(function() if gethui then nukeGuis(gethui()) end end)
-		end)
-	end,
-})
+				end
+			end)
+		end
+		nukeGuis(LocalPlayer.PlayerGui)
+		pcall(function() nukeGuis(game:GetService("CoreGui")) end)
+		pcall(function() if gethui then nukeGuis(gethui()) end end)
+	end)
+end)
 
 local InfoSection = SetTab:DrawSection({ Name = "Info", Position = "right" })
 InfoSection:AddParagraph({
@@ -10989,6 +11070,96 @@ ThSec:AddDropdown({
 
 local CfgUI = Window:DrawConfig({ Name = "Config", Icon = "folder", Config = ConfigManager })
 CfgUI:Init()
+task.defer(function()
+	for _, lbl in ipairs(Window.Root:GetDescendants()) do
+		if lbl:IsA("TextLabel") and lbl.Text == "Add Config" then
+			local btn = lbl.Parent -- Frame_2
+			if btn and btn:IsA("Frame") and btn.BackgroundColor3 == pimpleHUB.Colors.Highlight then
+				local Button    = btn.Parent       -- outer 25px button frame
+				local AddConfig = Button and Button.Parent -- the panel
+				-- Resize containers to match _glowButton (38px tall)
+				if Button and Button:IsA("Frame") then
+					Button.Size = UDim2.new(1, -7, 0, 38)
+				end
+				if AddConfig and AddConfig:IsA("Frame") then
+					AddConfig.Size = UDim2.new(1, -10, 0, 108)
+					-- Reposition the 1px separator so it stays between textbox and button
+					for _, child in ipairs(AddConfig:GetChildren()) do
+						if child:IsA("Frame") and child.Size.Y.Offset == 1 then
+							child.Position = UDim2.new(0.5, 0, 0, 58)
+						end
+					end
+				end
+				-- Match _glowButton Btn sizing and corner
+				btn.Size = UDim2.new(1, -8, 1, -6)
+				local corner = btn:FindFirstChildOfClass("UICorner")
+				if corner then corner.CornerRadius = UDim.new(0, 4) end
+				-- Apply red shimmer stroke (same as _glowButton)
+				local cfgStroke = btn:FindFirstChildOfClass("UIStroke")
+				if not cfgStroke then
+					cfgStroke = Instance.new("UIStroke")
+					cfgStroke.Parent = btn
+				end
+				cfgStroke.Color = pimpleHUB.Colors.Highlight
+				cfgStroke.Thickness = 1.5
+				cfgStroke.Transparency = 0.1
+				local cfgGradient = Instance.new("UIGradient")
+				cfgGradient.Transparency = NumberSequence.new({
+					NumberSequenceKeypoint.new(0,    0.85),
+					NumberSequenceKeypoint.new(0.12, 0),
+					NumberSequenceKeypoint.new(0.38, 0.75),
+					NumberSequenceKeypoint.new(0.62, 0.75),
+					NumberSequenceKeypoint.new(0.88, 0),
+					NumberSequenceKeypoint.new(1,    0.85),
+				})
+				cfgGradient.Parent = cfgStroke
+				task.spawn(function()
+					local ts = game:GetService("TweenService")
+					while btn and btn.Parent do
+						ts:Create(cfgGradient, TweenInfo.new(3, Enum.EasingStyle.Linear), { Rotation = 360 }):Play()
+						task.wait(3.05)
+						if cfgGradient and cfgGradient.Parent then cfgGradient.Rotation = 0 end
+					end
+				end)
+				-- UIScale + hover matching _glowButton exactly
+				local cfgScale = btn:FindFirstChildOfClass("UIScale")
+				if not cfgScale then
+					cfgScale = Instance.new("UIScale")
+					cfgScale.Scale = 1
+					cfgScale.Parent = btn
+				end
+				pimpleHUB:_Hover(btn, function()
+					pimpleHUB:_Animation(cfgScale,   TweenInfo.new(0.18, Enum.EasingStyle.Quint), { Scale = 1.04 })
+					pimpleHUB:_Animation(cfgStroke,  TweenInfo.new(0.18), { Transparency = 0.0 })
+					pimpleHUB:_Animation(btn,        TweenInfo.new(0.18), { BackgroundTransparency = 0 })
+				end, function()
+					pimpleHUB:_Animation(cfgScale,   TweenInfo.new(0.18, Enum.EasingStyle.Quint), { Scale = 1.0 })
+					pimpleHUB:_Animation(cfgStroke,  TweenInfo.new(0.18), { Transparency = 0.1 })
+					pimpleHUB:_Animation(btn,        TweenInfo.new(0.18), { BackgroundTransparency = 0.1 })
+				end)
+				break
+			end
+		end
+	end
+end)
+
+-- Black text outline on all text elements
+do
+	local function _applyStroke(inst)
+		if inst:IsA("TextLabel") or inst:IsA("TextButton") or inst:IsA("TextBox") then
+			inst.TextStrokeColor3 = Color3.fromRGB(0, 0, 0)
+			inst.TextStrokeTransparency = 0.5
+		end
+	end
+	task.defer(function()
+		for _, desc in ipairs(Window.Root:GetDescendants()) do
+			pcall(_applyStroke, desc)
+		end
+		Window.Root.DescendantAdded:Connect(function(desc)
+			task.defer(function() pcall(_applyStroke, desc) end)
+		end)
+	end)
+end
 
 task.spawn(function()
 	local _x=bit32.bxor
