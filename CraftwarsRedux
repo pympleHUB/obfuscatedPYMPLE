@@ -128,8 +128,8 @@ local Flags = {
 	AutoMines = false,
 	AttackCooldown = 0.5,
 	HitMode = "Damage",
-	DamageValue = math.huge,
-	DamageInput = "inf",
+	DamageValue = 1000000,
+	DamageInput = "1m",
 	MineTargets = { Mine = true, Mine2 = true, Mine3 = true },
 	AutoBiomeLock = false,
 	TargetBiome = 0,
@@ -163,6 +163,8 @@ local Flags = {
 	MeteorRadius = 200,
 	MeteorRadiusEnabled = false,
 	SpeedLock = false,
+	AutoBossAlert = false,
+	BossAlertInterval = 2,
 }
 
 local SaveableKeys = {
@@ -204,15 +206,18 @@ local SaveableKeys = {
 	"MeteorRadius",
 	"MeteorRadiusEnabled",
 	"SpeedLock",
+	"AutoBossAlert",
+	"BossAlertInterval",
 }
 
 local TOTAL_BIOMES = 41
-local CooldownTimer, BiomeCheckTimer, CutsceneCheckTimer, MeteorTimer, SwingTimer, AbilityTimer, GodTimer =
-	0, 0, 0, 0, 0, 0, 0
+local CooldownTimer, BiomeCheckTimer, CutsceneCheckTimer, MeteorTimer, SwingTimer, AbilityTimer, GodTimer, BossAlertTimer =
+	0, 0, 0, 0, 0, 0, 0, 0
 local CachedWeapon, CachedArmour, LastWeaponCheck, LastArmourCheck, CACHE_DURATION = nil, nil, 0, 0, 0.5
 local IsInCutscene, BossDetected = false, false
 local SummonBiomeRemote, BossCutsceneRemote = nil, nil
 local AutoSwingToggle, AutoAbilitiesToggle = nil, nil
+local LastBossNames = {}
 
 local function CanUseFileSystem()
 	local s = pcall(function()
@@ -993,18 +998,36 @@ local function ToggleAutoAbilities()
 	UpdateToggleState(AutoAbilitiesToggle, Flags.AutoAbilities)
 end
 
+local function IsBossEnemy(m)
+	if m:FindFirstChild("BossMain") then return true end
+	if IsSpecialBoss(m) then return true end
+	local h = m:FindFirstChild("Humanoid")
+	if h and type(h.MaxHealth) == "number" and h.MaxHealth > 100000 then return true end
+	local n = m.Name:lower()
+	for _, b in ipairs(BossNames) do
+		if n:find(b:lower(), 1, true) then return true end
+	end
+	return false
+end
+
+local function ScanEnemies()
+	local bosses, regular = {}, {}
+	for _, m in ipairs(GetAllEnemies()) do
+		if IsBossEnemy(m) then
+			table.insert(bosses, m.Name)
+		else
+			table.insert(regular, m.Name)
+		end
+	end
+	return bosses, regular
+end
+
 local function GetFilteredEnemies()
 	local c = LocalPlayer.Character
 	local rp = c and c:FindFirstChild("HumanoidRootPart")
 	local list = {}
 	for _, m in ipairs(GetAllEnemies()) do
-		local isBoss = m:FindFirstChild("BossMain") ~= nil
-			or IsSpecialBoss(m)
-			or (function()
-				local h = m:FindFirstChild("Humanoid")
-				return h and type(h.MaxHealth) == "number" and h.MaxHealth > 100000
-			end)()
-		if Flags.TargetMode == "Bosses Only" and not isBoss then
+		if Flags.TargetMode == "Bosses Only" and not IsBossEnemy(m) then
 			continue
 		end
 		if Flags.KillAuraRadiusEnabled and rp then
@@ -12252,46 +12275,6 @@ local MinesToggle = KillAuraSection:AddToggle({
 })
 MinesToggle.Link:AddHelper({ Text = "Auto-mine ores" })
 
-KillAuraSection:AddSlider({
-	Name = "Swing Speed",
-	Min = 0.01,
-	Max = 1,
-	Default = Flags.SwingCooldown,
-	Round = 3,
-	Flag = "SwingCooldown",
-	Callback = function(v)
-		Flags.SwingCooldown = v
-	end,
-})
-KillAuraSection:AddDropdown({
-	Name = "Mode",
-	Default = Flags.HitMode,
-	Flag = "HitMode",
-	Values = { "Damage", "Heal" },
-	Callback = function(v)
-		Flags.HitMode = v
-	end,
-})
-KillAuraSection:AddTextBox({
-	Name = "Damage",
-	Placeholder = "inf, 500m, 1k...",
-	Default = Flags.DamageInput,
-	Callback = function(v)
-		Flags.DamageInput = v
-		Flags.DamageValue = ParseDamage(v)
-	end,
-})
-KillAuraSection:AddSlider({
-	Name = "Cooldown",
-	Min = 0.1,
-	Max = 2,
-	Default = Flags.AttackCooldown,
-	Round = 2,
-	Flag = "AttackCooldown",
-	Callback = function(v)
-		Flags.AttackCooldown = v
-	end,
-})
 KillAuraSection:AddDropdown({
 	Name = "Target Mode",
 	Default = Flags.TargetMode,
@@ -12322,6 +12305,48 @@ KillAuraSection:AddSlider({
 	end,
 })
 
+local AttackSection = MainTab:DrawSection({ Name = "Attack Settings", Position = "left" })
+AttackSection:AddDropdown({
+	Name = "Mode",
+	Default = Flags.HitMode,
+	Flag = "HitMode",
+	Values = { "Damage", "Heal" },
+	Callback = function(v)
+		Flags.HitMode = v
+	end,
+})
+AttackSection:AddTextBox({
+	Name = "Damage",
+	Placeholder = "1m, 500k, inf...",
+	Default = Flags.DamageInput,
+	Callback = function(v)
+		Flags.DamageInput = v
+		Flags.DamageValue = ParseDamage(v)
+	end,
+})
+AttackSection:AddSlider({
+	Name = "Attack Cooldown",
+	Min = 0.1,
+	Max = 2,
+	Default = Flags.AttackCooldown,
+	Round = 2,
+	Flag = "AttackCooldown",
+	Callback = function(v)
+		Flags.AttackCooldown = v
+	end,
+})
+AttackSection:AddSlider({
+	Name = "Swing Speed",
+	Min = 0.01,
+	Max = 1,
+	Default = Flags.SwingCooldown,
+	Round = 3,
+	Flag = "SwingCooldown",
+	Callback = function(v)
+		Flags.SwingCooldown = v
+	end,
+})
+
 local PlayerSection = MainTab:DrawSection({ Name = "Player", Position = "right" })
 PlayerSection:AddSlider({
 	Name = "Walk Speed",
@@ -12347,15 +12372,6 @@ PlayerSection:AddSlider({
 		UpdateJumpPower(v)
 	end,
 })
-PlayerSection:AddButton({
-	Name = "Reset Movement",
-	Callback = function()
-		Flags.WalkSpeed, Flags.JumpPower = 16, 50
-		UpdateWalkSpeed(16)
-		UpdateJumpPower(50)
-		Notifier.new({ Title = "Reset", Content = "Speed: 16 | Jump: 50", Duration = 3, Icon = AVATAR_ICON })
-	end,
-})
 local SpeedLockToggle = PlayerSection:AddToggle({
 	Name = "Speed Lock",
 	Flag = "SpeedLock",
@@ -12365,6 +12381,15 @@ local SpeedLockToggle = PlayerSection:AddToggle({
 	end,
 })
 SpeedLockToggle.Link:AddHelper({ Text = "Maintain speed every frame" })
+PlayerSection:AddButton({
+	Name = "Reset Movement",
+	Callback = function()
+		Flags.WalkSpeed, Flags.JumpPower = 16, 50
+		UpdateWalkSpeed(16)
+		UpdateJumpPower(50)
+		Notifier.new({ Title = "Reset", Content = "Speed: 16 | Jump: 50", Duration = 3, Icon = AVATAR_ICON })
+	end,
+})
 
 local MineSection = MainTab:DrawSection({ Name = "Mine Targets", Position = "right" })
 MineSection:AddDropdown({
@@ -12407,6 +12432,113 @@ task.spawn(function()
 	UpdateWalkSpeed(Flags.WalkSpeed)
 	UpdateJumpPower(Flags.JumpPower)
 end)
+
+-- ==================== TRACKER TAB ====================
+local TrackerTab = Window:DrawTab({ Name = "Tracker", Icon = "search", EnableScrolling = true })
+
+local BossTrackerSection = TrackerTab:DrawSection({ Name = "Boss Tracker", Position = "left" })
+local AutoBossAlertToggle = BossTrackerSection:AddToggle({
+	Name = "Auto Alert",
+	Flag = "AutoBossAlert",
+	Default = Flags.AutoBossAlert,
+	Callback = function(v)
+		Flags.AutoBossAlert = v
+		if v then LastBossNames = {} end
+	end,
+})
+AutoBossAlertToggle.Link:AddHelper({ Text = "Notify when bosses appear/despawn" })
+BossTrackerSection:AddSlider({
+	Name = "Check Interval",
+	Min = 0.5,
+	Max = 10,
+	Default = Flags.BossAlertInterval,
+	Round = 1,
+	Flag = "BossAlertInterval",
+	Callback = function(v)
+		Flags.BossAlertInterval = v
+	end,
+})
+BossTrackerSection:AddButton({
+	Name = "Scan Now",
+	Callback = function()
+		local bosses, regular = ScanEnemies()
+		local lines = {}
+		if #bosses > 0 then
+			table.insert(lines, "Bosses (" .. #bosses .. "): " .. table.concat(bosses, ", "))
+		end
+		if #regular > 0 then
+			table.insert(lines, "Mobs: " .. #regular .. " active")
+		end
+		local content = #lines > 0 and table.concat(lines, "\n") or "No enemies found"
+		Notifier.new({ Title = "Enemy Scan", Content = content, Duration = 6, Icon = AVATAR_ICON })
+	end,
+})
+BossTrackerSection:AddButton({
+	Name = "List Bosses",
+	Callback = function()
+		local bosses, _ = ScanEnemies()
+		if #bosses == 0 then
+			Notifier.new({ Title = "No Bosses", Content = "No bosses found", Duration = 3, Icon = AVATAR_ICON })
+		else
+			local unique = {}
+			local seen = {}
+			for _, n in ipairs(bosses) do
+				if not seen[n] then
+					seen[n] = true
+					table.insert(unique, n)
+				end
+			end
+			Notifier.new({
+				Title = "Bosses (" .. #bosses .. ")",
+				Content = table.concat(unique, "\n"),
+				Duration = 8,
+				Icon = AVATAR_ICON,
+			})
+		end
+	end,
+})
+
+local EnemyScanSection = TrackerTab:DrawSection({ Name = "Enemy Count", Position = "right" })
+EnemyScanSection:AddButton({
+	Name = "Count All",
+	Callback = function()
+		local bosses, regular = ScanEnemies()
+		Notifier.new({
+			Title = "Enemy Count",
+			Content = "Bosses: " .. #bosses .. "\nMobs: " .. #regular .. "\nTotal: " .. (#bosses + #regular),
+			Duration = 5,
+			Icon = AVATAR_ICON,
+		})
+	end,
+})
+EnemyScanSection:AddButton({
+	Name = "Nearest Enemy",
+	Callback = function()
+		local e = GetNearestEnemy()
+		if e then
+			local c = LocalPlayer.Character
+			local rp = c and c:FindFirstChild("HumanoidRootPart")
+			local hd = e:FindFirstChild("Head")
+			local dist = (rp and hd) and math.floor((hd.Position - rp.Position).Magnitude) or 0
+			local bossTag = IsBossEnemy(e) and " [BOSS]" or ""
+			Notifier.new({
+				Title = "Nearest Enemy",
+				Content = e.Name .. bossTag .. "\nDistance: " .. dist .. " studs",
+				Duration = 4,
+				Icon = AVATAR_ICON,
+			})
+		else
+			Notifier.new({ Title = "Nearest Enemy", Content = "None found", Duration = 3, Icon = AVATAR_ICON })
+		end
+	end,
+})
+EnemyScanSection:AddButton({
+	Name = "Reset Tracker",
+	Callback = function()
+		LastBossNames = {}
+		Notifier.new({ Title = "Tracker Reset", Content = "Boss history cleared", Duration = 3, Icon = AVATAR_ICON })
+	end,
+})
 
 -- ==================== ABILITIES TAB ====================
 Window:DrawCategory({ Name = "ABILITIES" })
@@ -12965,8 +13097,8 @@ end)
 RunService.RenderStepped:Connect(function(dt)
 	CooldownTimer, BiomeCheckTimer, CutsceneCheckTimer =
 		CooldownTimer + dt, BiomeCheckTimer + dt, CutsceneCheckTimer + dt
-	MeteorTimer, SwingTimer, AbilityTimer, LastAutoSave, GodTimer =
-		MeteorTimer + dt, SwingTimer + dt, AbilityTimer + dt, LastAutoSave + dt, GodTimer + dt
+	MeteorTimer, SwingTimer, AbilityTimer, LastAutoSave, GodTimer, BossAlertTimer =
+		MeteorTimer + dt, SwingTimer + dt, AbilityTimer + dt, LastAutoSave + dt, GodTimer + dt, BossAlertTimer + dt
 
 	if Flags.AutoSaveEnabled and LastAutoSave >= AutoSaveInterval then
 		LastAutoSave = 0
@@ -12979,6 +13111,25 @@ RunService.RenderStepped:Connect(function(dt)
 	if Flags.SpeedLock then
 		UpdateWalkSpeed(Flags.WalkSpeed)
 		UpdateJumpPower(Flags.JumpPower)
+	end
+	if Flags.AutoBossAlert and BossAlertTimer >= Flags.BossAlertInterval then
+		BossAlertTimer = 0
+		task.spawn(function()
+			local bosses, _ = ScanEnemies()
+			local newSet = {}
+			for _, n in ipairs(bosses) do newSet[n] = true end
+			for _, n in ipairs(bosses) do
+				if not LastBossNames[n] then
+					Notifier.new({ Title = "Boss Spawned!", Content = n, Duration = 5, Icon = AVATAR_ICON })
+				end
+			end
+			for n in pairs(LastBossNames) do
+				if not newSet[n] then
+					Notifier.new({ Title = "Boss Defeated", Content = n, Duration = 4, Icon = AVATAR_ICON })
+				end
+			end
+			LastBossNames = newSet
+		end)
 	end
 	if CutsceneCheckTimer >= 1 then
 		BossDetected = DetectBossPresence()
