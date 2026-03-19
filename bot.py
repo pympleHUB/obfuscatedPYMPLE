@@ -57,6 +57,11 @@ GREETINGS = [
 class CopyKeyView(discord.ui.View):
     def __init__(self):
         super().__init__(timeout=None)
+
+        copy_btn = discord.ui.Button(label="Copy Key", style=discord.ButtonStyle.secondary, emoji="📋", custom_id="pymple_copy_key")
+        copy_btn.callback = self._copy_key
+        self.add_item(copy_btn)
+
         self.add_item(discord.ui.Button(
             label="Watch on YouTube",
             style=discord.ButtonStyle.link,
@@ -64,16 +69,18 @@ class CopyKeyView(discord.ui.View):
             emoji="📌"
         ))
 
-    @discord.ui.button(label="Copy Key", style=discord.ButtonStyle.secondary, emoji="📋", custom_id="pymple_copy_key")
-    async def copy_key(self, interaction: discord.Interaction, button: discord.ui.Button):
+        report_btn = discord.ui.Button(label="Report Issue", style=discord.ButtonStyle.danger, emoji="🚨", custom_id="pymple_report_issue")
+        report_btn.callback = self._report_issue
+        self.add_item(report_btn)
+
+    async def _copy_key(self, interaction: discord.Interaction):
         key = "Key not found"
         if interaction.message and interaction.message.embeds:
             first_line = (interaction.message.embeds[0].description or "").split("\n")[0]
             key = first_line.replace("# ", "").replace("`", "").strip()
         await interaction.response.send_message(key, ephemeral=True)
 
-    @discord.ui.button(label="Report Issue", style=discord.ButtonStyle.danger, emoji="🚨", custom_id="pymple_report_issue")
-    async def report_issue(self, interaction: discord.Interaction, button: discord.ui.Button):
+    async def _report_issue(self, interaction: discord.Interaction):
         key = "Unknown"
         if interaction.message and interaction.message.embeds:
             first_line = (interaction.message.embeds[0].description or "").split("\n")[0]
@@ -86,9 +93,7 @@ class CopyKeyView(discord.ui.View):
             )
         except:
             pass
-        await interaction.response.send_message(
-            "Your report has been sent. Thank you!", ephemeral=True
-        )
+        await interaction.response.send_message("Your report has been sent. Thank you!", ephemeral=True)
 
 
 # --- GitHub helpers ---
