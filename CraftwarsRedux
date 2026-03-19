@@ -11203,9 +11203,21 @@ local Window = pimpleHUB.new({Name="PIMPLE v6.0 - Craftwars Redux",Keybind="Left
 
 Window.OnToggle = function(visible) UIOpen = visible end
 
+local _glowEnabled = true
+local _glowMF, _gwhub, _gwrap, _gs
+local _rgStrokes = {}
+local _glowBaseTransp = {0.82, 0.91, 0.95, 0.98}
+local function _applyGlowIntensity(intensity)
+	for i, s in ipairs(_rgStrokes) do
+		local base = _glowBaseTransp[i] or 0.9
+		s.Transparency = 1 - (1 - base) * intensity
+	end
+end
+local function _applyWhiteIntensity(intensity)
+	if _gs then _gs.Transparency = 1 - intensity end
+end
 do
 	-- White rotating shimmer outline + red multi-layer bloom around the main window
-	local _glowEnabled = true
 	task.defer(function()
 		local _ts = game:GetService("TweenService")
 		local _pg = Window.Root
@@ -11214,6 +11226,7 @@ do
 			if _c:IsA("Frame") and _c.ZIndex == 4 then _mf = _c break end
 		end
 		if not _mf then return end
+		_glowMF = _mf
 
 		-- Find sidebar TabFrame (AnchorPoint.X == 1)
 		local _tf = nil
@@ -11221,10 +11234,8 @@ do
 			if _c:IsA("Frame") and _c.AnchorPoint.X == 1 then _tf = _c break end
 		end
 
-		local _rgStrokes = {}
-
 		-- WHITE SHIMMER: mirrors MainFrame position/size, rotates gradient for ray effect
-		local _gwhub = Instance.new("Frame")
+		_gwhub = Instance.new("Frame")
 		_gwhub.BackgroundTransparency = 1
 		_gwhub.BorderSizePixel        = 0
 		_gwhub.ZIndex                 = 3
@@ -11238,7 +11249,7 @@ do
 		_gw.ZIndex                 = 3
 		_gw.Parent                 = _gwhub
 		Instance.new("UICorner", _gw).CornerRadius = UDim.new(0, 18)
-		local _gs = Instance.new("UIStroke", _gw)
+		_gs = Instance.new("UIStroke", _gw)
 		_gs.Color     = Color3.fromRGB(255, 255, 255)
 		_gs.Thickness = 2.5
 		local _gg = Instance.new("UIGradient", _gs)
@@ -11264,14 +11275,13 @@ do
 		_mf:GetPropertyChangedSignal("Visible"):Connect(_syncHub)
 
 		-- RED BLOOM: covers MainFrame + sidebar protrusion, 4 layered UIStrokes
-		local _gwrap = Instance.new("Frame")
+		_gwrap = Instance.new("Frame")
 		_gwrap.BackgroundTransparency = 1
 		_gwrap.BorderSizePixel        = 0
 		_gwrap.AnchorPoint            = Vector2.new(0, 0)
 		_gwrap.ZIndex                 = 3
 		_gwrap.Parent                 = _pg
 
-		local _glowBaseTransp = {0.82, 0.91, 0.95, 0.98}
 		local function _mkRG(thick, transp)
 			local f = Instance.new("Frame")
 			f.BackgroundTransparency = 1
@@ -11492,40 +11502,63 @@ end})
 
 -- ==================== SETTINGS TAB ====================
 Window:DrawCategory({Name="SETTINGS"})
-local SettingsTab = Window:DrawTab({Name="Settings",Icon="settings-3",EnableScrolling=true})
-
-local ConfigSection = SettingsTab:DrawSection({Name="Config",Position="left"})
-
-ConfigSection:AddToggle({Name="Auto Save",Flag="AutoSaveEnabled",Default=Flags.AutoSaveEnabled,Callback=function(v) Flags.AutoSaveEnabled=v end})
-ConfigSection:AddButton({Name="Save Config",Callback=function() if SaveConfig() then Notifier.new({Title="Saved",Content="Config saved!",Duration=3,Icon=AVATAR_ICON}) end end})
-ConfigSection:AddButton({Name="Load Config",Callback=function()
-    if LoadConfig() then
-        UpdateWalkSpeed(Flags.WalkSpeed) UpdateJumpPower(Flags.JumpPower)
-        if Flags.NameSpoofEnabled then NameSpoofEnabled=true StartNameSpoof() end
-        Notifier.new({Title="Loaded",Content="Config loaded!",Duration=3,Icon=AVATAR_ICON})
-    end
+local SetTab = Window:DrawTab({Name="Settings",Icon="settings-3",Type="Single",EnableScrolling=true})
+local ThTab = Window:DrawTab({Name="Themes",Icon="paintbrush",Type="Single"})
+local UISec = SetTab:DrawSection({Name="UI Settings",Position="left"})
+UISec:AddToggle({Name="Always Show Frame",Default=false,Callback=function(v) Window.AlwayShowTab=v end})
+UISec:AddColorPicker({Name="Highlight",Default=pimpleHUB.Colors.Highlight,Callback=function(v) pimpleHUB.Colors.Highlight=v pimpleHUB:RefreshCurrentColor() end})
+UISec:AddColorPicker({Name="Toggle Color",Default=pimpleHUB.Colors.Toggle,Callback=function(v) pimpleHUB.Colors.Toggle=v pimpleHUB:RefreshCurrentColor() end})
+UISec:AddColorPicker({Name="Drop Color",Default=pimpleHUB.Colors.DropColor,Callback=function(v) pimpleHUB.Colors.DropColor=v pimpleHUB:RefreshCurrentColor() end})
+UISec:AddColorPicker({Name="Block Color",Default=pimpleHUB.Colors.BlockColor,Callback=function(v) pimpleHUB.Colors.BlockColor=v pimpleHUB:RefreshCurrentColor() end})
+UISec:AddColorPicker({Name="Background Color",Default=pimpleHUB.Colors.BGDBColor,Callback=function(v) pimpleHUB.Colors.BGDBColor=v pimpleHUB:RefreshCurrentColor() end})
+UISec:AddColorPicker({Name="Stroke Color",Default=pimpleHUB.Colors.StrokeColor,Callback=function(v) pimpleHUB.Colors.StrokeColor=v pimpleHUB:RefreshCurrentColor() end})
+UISec:AddToggle({Name="Glow Effect",Default=true,Callback=function(v)
+	_glowEnabled = v
+	local mfv = not _glowMF or _glowMF.Visible
+	if _gwhub then _gwhub.Visible = v and mfv end
+	if _gwrap then _gwrap.Visible = v and mfv end
 end})
-ConfigSection:AddParagraph({Title="Config Info",Content="Auto-saves every 30s\nFile: "..CONFIG_FILE})
-
-local UISection = SettingsTab:DrawSection({Name="UI Settings",Position="right"})
-
-UISection:AddToggle({Name="Always Show Frame",Default=false,Callback=function(v) Window.AlwayShowTab=v end})
-
-UISection:AddColorPicker({Name="Highlight",Default=pimpleHUB.Colors.Highlight,Flag="HighlightColor",Callback=function(v) pimpleHUB.Colors.Highlight=v pimpleHUB:RefreshCurrentColor() end})
-UISection:AddColorPicker({Name="Toggle Color",Default=pimpleHUB.Colors.Toggle,Callback=function(v) pimpleHUB.Colors.Toggle=v pimpleHUB:RefreshCurrentColor() end})
-UISection:AddColorPicker({Name="Mouse Enter",Default=pimpleHUB.Colors.MouseEnter,Callback=function(v) pimpleHUB.Colors.MouseEnter=v pimpleHUB:RefreshCurrentColor() end})
-UISection:AddColorPicker({Name="Block Color",Default=pimpleHUB.Colors.BlockColor,Callback=function(v) pimpleHUB.Colors.BlockColor=v pimpleHUB:RefreshCurrentColor() end})
-UISection:AddColorPicker({Name="Stroke Color",Default=pimpleHUB.Colors.StrokeColor,Callback=function(v) pimpleHUB.Colors.StrokeColor=v pimpleHUB:RefreshCurrentColor() end})
-
-UISection:AddButton({Name="Get Theme Code",Callback=function()
-    local theme = pimpleHUB:GetTheme()
-    pcall(function() setclipboard(theme) end)
-    Notifier.new({Title="Theme Copied",Content="Theme code copied to clipboard!",Duration=3,Icon=AVATAR_ICON})
+UISec:AddSlider({Name="Shimmer Intensity",Min=0,Max=100,Default=100,Callback=function(v) _applyWhiteIntensity(v/100) end})
+UISec:AddColorPicker({Name="Glow Color",Default=Color3.fromRGB(220,60,60),Callback=function(v) for _,s in ipairs(_rgStrokes) do s.Color=v end end})
+UISec:AddSlider({Name="Bloom Intensity",Min=0,Max=100,Default=100,Callback=function(v) _applyGlowIntensity(v/100) end})
+UISec:AddButton({Name="Copy Discord",Callback=function() pcall(function() setclipboard(DISCORD_INVITE) end) Notifier.new({Title="Copied",Content="Discord link copied!",Duration=2,Icon=AVATAR_ICON}) end})
+UISec:AddButton({Name="Destroy GUI",Callback=function()
+	Flags.Enabled=false Flags.AutoSwing=false Flags.AutoAbilities=false Flags.AutoMeteor=false
+	Flags.AutoBiomeLock=false Flags.AutoSkipCutscene=false Flags.AutoGodSelf=false Flags.NameSpoofEnabled=false
+	if NameSpoofEnabled then StopNameSpoof() end
+	pcall(function()
+		local c=LocalPlayer.Character
+		if c then
+			local hm=c:FindFirstChildOfClass("Humanoid")
+			if hm then hm.PlatformStand=false end
+		end
+	end)
+	task.delay(0.1,function()
+		pcall(function() Window:Destroy() end)
+		pcall(function() pimpleHUB:Destroy() end)
+		local function nukeGuis(parent)
+			pcall(function()
+				for _,gui in ipairs(parent:GetChildren()) do
+					if gui:IsA("ScreenGui") then
+						local n=gui.Name:lower()
+						if n:find("pimple") or n:find("pymple") or n:find("notify") or n:find("loader") or n:find("watermark") then
+							gui:Destroy()
+						end
+					end
+				end
+			end)
+		end
+		nukeGuis(LocalPlayer.PlayerGui)
+		pcall(function() nukeGuis(game:GetService("CoreGui")) end)
+		pcall(function() if gethui then nukeGuis(gethui()) end end)
+	end)
 end})
-
-local InfoSection = SettingsTab:DrawSection({Name="Info",Position="right"})
-InfoSection:AddParagraph({Title="pimpleHUB v6.0",Content="Craftwars Redux Script\n\nKeybinds:\nLeft Alt - Toggle UI\nX - Toggle Auto Swing\nT - Toggle Auto Abilities"})
-InfoSection:AddButton({Name="Copy Discord",Callback=function() pcall(function() setclipboard(DISCORD_INVITE) end) Notifier.new({Title="Copied!",Content="Discord link copied!",Duration=3,Icon=AVATAR_ICON}) end})
+local InfoSec = SetTab:DrawSection({Name="Info",Position="right"})
+InfoSec:AddParagraph({Title="pimpleHUB v6.0",Content="Craftwars Redux Script\n\nKeybinds:\nLeft Alt - Toggle UI\nX - Toggle Auto Swing\nT - Toggle Auto Abilities"})
+local ThSec = ThTab:DrawSection({Name="UI Themes",Position="left"})
+ThSec:AddDropdown({Name="Select Theme",Default="Default",Values={"Default","Dark Green","Dark Blue","Purple Rose","Skeet"},Callback=function(v) pimpleHUB:SetTheme(v) end})
+local CfgUI = Window:DrawConfig({Name="Config",Icon="folder",Config=ConfigManager})
+CfgUI:Init()
 
 -- ==================== INPUT HANDLER ====================
 UserInputService.InputBegan:Connect(function(i,gp)
