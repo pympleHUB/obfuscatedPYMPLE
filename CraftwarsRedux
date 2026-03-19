@@ -6890,6 +6890,7 @@ function PYMPLE.new(Config : Window)
 		WindowArgs.AlwayShowTab = true;
 	end;
 
+	local _lib = PYMPLE
 	local PYMPLE = Instance.new("ScreenGui")
 	local MainFrame = Instance.new("Frame")
 	local UICorner = Instance.new("UICorner")
@@ -6910,31 +6911,31 @@ function PYMPLE.new(Config : Window)
 	local ExpireText = Instance.new("TextLabel")
 	local TabMainFrame = Instance.new("Frame")
 
-	PYMPLE:_DrawKeybinds(PYMPLE);
+	_lib:_DrawKeybinds(PYMPLE);
 
 	UIListLayout:GetPropertyChangedSignal('AbsoluteContentSize'):Connect(function()
 		TabButtonScrollingFrame.CanvasSize = UDim2.fromOffset(0,UIListLayout.AbsoluteContentSize.Y)
 	end);
 
-	PYMPLE.Name = "u?name=pymple_?"..PYMPLE:_RandomString();
+	PYMPLE.Name = "u?name=pymple_?".._lib:_RandomString();
 	PYMPLE.Parent = CoreGui;
 	PYMPLE.ResetOnSpawn = false
 	PYMPLE.IgnoreGuiInset = true;
 	PYMPLE.ZIndexBehavior = Enum.ZIndexBehavior.Global;
 
-	PYMPLE.ProtectGui(PYMPLE);
+	_lib.ProtectGui(PYMPLE);
 
 	WindowArgs.Root = PYMPLE;
 
-	table.insert(PYMPLE.Windows , PYMPLE);
+	table.insert(_lib.Windows , PYMPLE);
 
 	MainFrame.Active = true;
-	MainFrame.Name = PYMPLE:_RandomString()
+	MainFrame.Name = _lib:_RandomString()
 	MainFrame.Parent = PYMPLE
 	MainFrame.AnchorPoint = Vector2.new(0.5, 0.5)
-	MainFrame.BackgroundColor3 = PYMPLE.Colors.BGDBColor
+	MainFrame.BackgroundColor3 = _lib.Colors.BGDBColor
 
-	table.insert(PYMPLE.Elements.BGDBColor,{
+	table.insert(_lib.Elements.BGDBColor,{
 		Element = MainFrame,
 		Property = 'BackgroundColor3'
 	});
@@ -6942,7 +6943,7 @@ function PYMPLE.new(Config : Window)
 	MainFrame.BorderColor3 = Color3.fromRGB(0, 0, 0)
 	MainFrame.BorderSizePixel = 0
 	MainFrame.Position = UDim2.fromScale(0.5,0.5);
-	MainFrame.Size = PYMPLE.Scale.Window
+	MainFrame.Size = _lib.Scale.Window
 	MainFrame.ZIndex = 4
 
 	MainFrame:GetPropertyChangedSignal('BackgroundTransparency'):Connect(function()
@@ -6953,7 +6954,7 @@ function PYMPLE.new(Config : Window)
 		end;
 	end)
 
-	PYMPLE:_Animation(MainFrame,TweenInfo.new(1,Enum.EasingStyle.Quint,Enum.EasingDirection.InOut),{
+	_lib:_Animation(MainFrame,TweenInfo.new(1,Enum.EasingStyle.Quint,Enum.EasingDirection.InOut),{
 		Size = Config.Scale
 	});
 
@@ -6962,12 +6963,12 @@ function PYMPLE.new(Config : Window)
 	local TabFrameBaseTrans = 0.25;
 
 	TabFrame.Active = true
-	TabFrame.Name = PYMPLE:_RandomString()
+	TabFrame.Name = _lib:_RandomString()
 	TabFrame.Parent = MainFrame
 	TabFrame.AnchorPoint = Vector2.new(1, 0)
-	TabFrame.BackgroundColor3 = PYMPLE.Colors.BGDBColor
+	TabFrame.BackgroundColor3 = _lib.Colors.BGDBColor
 
-	table.insert(PYMPLE.Elements.BGDBColor,{
+	table.insert(_lib.Elements.BGDBColor,{
 		Element = TabFrame,
 		Property = 'BackgroundColor3'
 	});
@@ -6981,12 +6982,12 @@ function PYMPLE.new(Config : Window)
 
 	UICorner_2.Parent = TabFrame
 
-	LineFrame1.Name = PYMPLE:_RandomString()
+	LineFrame1.Name = _lib:_RandomString()
 	LineFrame1.Parent = TabFrame
 	LineFrame1.AnchorPoint = Vector2.new(1, 0)
-	LineFrame1.BackgroundColor3 = PYMPLE.Colors.BGDBColor
+	LineFrame1.BackgroundColor3 = _lib.Colors.BGDBColor
 
-	table.insert(PYMPLE.Elements.BGDBColor,{
+	table.insert(_lib.Elements.BGDBColor,{
 		Element = LineFrame1,
 		Property = 'BackgroundColor3'
 	});
@@ -6996,7 +6997,7 @@ function PYMPLE.new(Config : Window)
 	LineFrame1.Position = UDim2.new(1, -5, 0, 0)
 	LineFrame1.Size = UDim2.new(0, 20, 1, 0)
 
-	CompLogo.Name = PYMPLE:_RandomString()
+	CompLogo.Name = _lib:_RandomString()
 	CompLogo.Parent = TabFrame
 	CompLogo.BackgroundTransparency = 1.000
 	CompLogo.BorderColor3 = Color3.fromRGB(0, 0, 0)
@@ -7005,16 +7006,16 @@ function PYMPLE.new(Config : Window)
 	CompLogo.Size = UDim2.new(0, 45, 0, 45)
 	CompLogo.Image = Config.Logo
 	
-	if PYMPLE.CustomHighlightMode then
-		CompLogo.ImageColor3 = PYMPLE.Colors.Highlight;
+	if _lib.CustomHighlightMode then
+		CompLogo.ImageColor3 = _lib.Colors.Highlight;
 		
-		table.insert(PYMPLE.Elements.Highlight , {
+		table.insert(_lib.Elements.Highlight , {
 			Element = CompLogo,
 			Property = 'ImageColor3'
 		});
 	end;
 	
-	WindowLabel.Name = PYMPLE:_RandomString()
+	WindowLabel.Name = _lib:_RandomString()
 	WindowLabel.Parent = TabFrame
 	WindowLabel.BackgroundTransparency = 1.000
 	WindowLabel.BorderColor3 = Color3.fromRGB(0, 0, 0)
@@ -7023,16 +7024,16 @@ function PYMPLE.new(Config : Window)
 	WindowLabel.Size = UDim2.new(0, 200, 0, 25)
 	WindowLabel.Font = Enum.Font.GothamBold
 	WindowLabel.Text = Config.Name
-	WindowLabel.TextColor3 = PYMPLE.Colors.SwitchColor
+	WindowLabel.TextColor3 = _lib.Colors.SwitchColor
 	WindowLabel.TextSize = Config.TextSize
 	WindowLabel.TextXAlignment = Enum.TextXAlignment.Left
 
-	table.insert(PYMPLE.Elements.SwitchColor , {
+	table.insert(_lib.Elements.SwitchColor , {
 		Element = WindowLabel,
 		Property = 'TextColor3'
 	});
 
-	TabButtons.Name = PYMPLE:_RandomString()
+	TabButtons.Name = _lib:_RandomString()
 	TabButtons.Parent = TabFrame
 	TabButtons.BackgroundTransparency = 1.000
 	TabButtons.BorderColor3 = Color3.fromRGB(0, 0, 0)
@@ -7040,16 +7041,16 @@ function PYMPLE.new(Config : Window)
 	TabButtons.Position = UDim2.new(0, 0, 0, 60)
 	TabButtons.Size = UDim2.new(1, -25, 1, -125)
 
-	SelectionFrame.Name = PYMPLE:_RandomString()
+	SelectionFrame.Name = _lib:_RandomString()
 	SelectionFrame.Parent = TabButtons
 	SelectionFrame.AnchorPoint = Vector2.new(1, 0)
-	SelectionFrame.BackgroundColor3 = PYMPLE.Colors.Highlight
+	SelectionFrame.BackgroundColor3 = _lib.Colors.Highlight
 	SelectionFrame.BorderColor3 = Color3.fromRGB(0, 0, 0)
 	SelectionFrame.BorderSizePixel = 0
 	SelectionFrame.Position = UDim2.new(1, 5, 0, 28)
 	SelectionFrame.Size = UDim2.new(0, 8, 0, 27)
 
-	table.insert(PYMPLE.Elements.Highlight,{
+	table.insert(_lib.Elements.Highlight,{
 		Element = SelectionFrame,
 		Property = "BackgroundColor3"
 	});
@@ -7057,7 +7058,7 @@ function PYMPLE.new(Config : Window)
 	UICorner_3.CornerRadius = UDim.new(1, 0)
 	UICorner_3.Parent = SelectionFrame
 
-	TabButtonScrollingFrame.Name = PYMPLE:_RandomString()
+	TabButtonScrollingFrame.Name = _lib:_RandomString()
 	TabButtonScrollingFrame.Parent = TabButtons
 	TabButtonScrollingFrame.Active = true
 	TabButtonScrollingFrame.AnchorPoint = Vector2.new(0.5, 0.5)
@@ -7075,7 +7076,7 @@ function PYMPLE.new(Config : Window)
 	UIListLayout.SortOrder = Enum.SortOrder.LayoutOrder
 	UIListLayout.Padding = UDim.new(0, 4)
 
-	Userinfo.Name = PYMPLE:_RandomString()
+	Userinfo.Name = _lib:_RandomString()
 	Userinfo.Parent = TabFrame
 	Userinfo.AnchorPoint = Vector2.new(0, 1)
 	Userinfo.BackgroundTransparency = 1.000
@@ -7088,7 +7089,7 @@ function PYMPLE.new(Config : Window)
 		local Highlight = Instance.new("Frame")
 		local UICorner = Instance.new("UICorner")
 
-		Highlight.Name = PYMPLE:_RandomString()
+		Highlight.Name = _lib:_RandomString()
 		Highlight.Parent = Userinfo
 		Highlight.AnchorPoint = Vector2.new(0.5, 0)
 		Highlight.BackgroundColor3 = Color3.fromRGB(161, 161, 161)
@@ -7102,25 +7103,25 @@ function PYMPLE.new(Config : Window)
 		UICorner.Parent = Highlight
 
 		Userinfo.MouseEnter:Connect(function()
-			PYMPLE:_Animation(Highlight,TweenInfo.new(0.2),{
+			_lib:_Animation(Highlight,TweenInfo.new(0.2),{
 				BackgroundTransparency = 0.925
 			});
 		end);
 
 		Userinfo.MouseLeave:Connect(function()
-			PYMPLE:_Animation(Highlight,TweenInfo.new(0.2),{
+			_lib:_Animation(Highlight,TweenInfo.new(0.2),{
 				BackgroundTransparency = 1
 			});
 		end);
 
-		PYMPLE:_Input(Userinfo,function()
+		_lib:_Input(Userinfo,function()
 			if WindowArgs.UserSettings.Root then
 				WindowArgs.UserSettings:Window(true);
 			end;
 		end);
 	end;
 
-	UserProfile.Name = PYMPLE:_RandomString()
+	UserProfile.Name = _lib:_RandomString()
 	UserProfile.Parent = Userinfo
 	UserProfile.BackgroundTransparency = 1.000
 	UserProfile.BorderColor3 = Color3.fromRGB(0, 0, 0)
@@ -7128,12 +7129,12 @@ function PYMPLE.new(Config : Window)
 	UserProfile.Position = UDim2.new(0, 13, 0, 9)
 	UserProfile.Size = UDim2.new(0, 35, 0, 35)
 	UserProfile.ZIndex = 2
-	UserProfile.Image = PYMPLE:CacheImage("rbxassetid://18518299306")
+	UserProfile.Image = _lib:CacheImage("rbxassetid://18518299306")
 
 	UICorner_4.CornerRadius = UDim.new(1, 0)
 	UICorner_4.Parent = UserProfile
 
-	UserText.Name = PYMPLE:_RandomString()
+	UserText.Name = _lib:_RandomString()
 	UserText.Parent = Userinfo
 	UserText.BackgroundTransparency = 1.000
 	UserText.BorderColor3 = Color3.fromRGB(0, 0, 0)
@@ -7143,16 +7144,16 @@ function PYMPLE.new(Config : Window)
 	UserText.ZIndex = 2
 	UserText.Font = Enum.Font.GothamMedium
 	UserText.Text = "Username"
-	UserText.TextColor3 = PYMPLE.Colors.SwitchColor
+	UserText.TextColor3 = _lib.Colors.SwitchColor
 	UserText.TextSize = 13.000
 	UserText.TextXAlignment = Enum.TextXAlignment.Left
 
-	table.insert(PYMPLE.Elements.SwitchColor , {
+	table.insert(_lib.Elements.SwitchColor , {
 		Element = UserText,
 		Property = 'TextColor3'
 	});
 
-	ExpireText.Name = PYMPLE:_RandomString()
+	ExpireText.Name = _lib:_RandomString()
 	ExpireText.Parent = Userinfo
 	ExpireText.BackgroundTransparency = 1.000
 	ExpireText.BorderColor3 = Color3.fromRGB(0, 0, 0)
@@ -7162,17 +7163,17 @@ function PYMPLE.new(Config : Window)
 	ExpireText.ZIndex = 2
 	ExpireText.Font = Enum.Font.GothamMedium
 	ExpireText.Text = "0/0/0"
-	ExpireText.TextColor3 = PYMPLE.Colors.SwitchColor
+	ExpireText.TextColor3 = _lib.Colors.SwitchColor
 	ExpireText.TextSize = 13.000
 	ExpireText.TextTransparency = 0.500
 	ExpireText.TextXAlignment = Enum.TextXAlignment.Left
 
-	table.insert(PYMPLE.Elements.SwitchColor , {
+	table.insert(_lib.Elements.SwitchColor , {
 		Element = ExpireText,
 		Property = 'TextColor3'
 	});
 
-	TabMainFrame.Name = PYMPLE:_RandomString()
+	TabMainFrame.Name = _lib:_RandomString()
 	TabMainFrame.Parent = MainFrame
 	TabMainFrame.AnchorPoint = Vector2.new(0.5, 0.5)
 	TabMainFrame.BackgroundTransparency = 1.000
@@ -7183,8 +7184,8 @@ function PYMPLE.new(Config : Window)
 	TabMainFrame.Size = UDim2.new(1, 0, 1, 0)
 	TabMainFrame.ZIndex = 5
 
-	if PYMPLE:_IsMobile() then
-		PYMPLE:_AddDragBlacklist(TabButtons);
+	if _lib:_IsMobile() then
+		_lib:_AddDragBlacklist(TabButtons);
 	end;
 
 	WindowOpen:Connect(function(v)
@@ -7194,85 +7195,85 @@ function PYMPLE.new(Config : Window)
 		end;
 
 		if v then
-			PYMPLE:_Animation(MainFrame,TweenInfo.new(0.2),{
+			_lib:_Animation(MainFrame,TweenInfo.new(0.2),{
 				Size = Config.Scale
 			})
 
-			PYMPLE:_Animation(TabButtonScrollingFrame,TweenInfo.new(0.35),{
+			_lib:_Animation(TabButtonScrollingFrame,TweenInfo.new(0.35),{
 				Position = UDim2.new(0.5, 0, 0.5, 0)
 			})
 
-			PYMPLE:_Animation(CompLogo,TweenInfo.new(0.2),{
+			_lib:_Animation(CompLogo,TweenInfo.new(0.2),{
 				ImageTransparency = 0
 			})
 
-			PYMPLE:_Animation(WindowLabel,TweenInfo.new(0.2),{
+			_lib:_Animation(WindowLabel,TweenInfo.new(0.2),{
 				TextTransparency = 0
 			})
 
-			PYMPLE:_Animation(UserProfile,TweenInfo.new(0.2),{
+			_lib:_Animation(UserProfile,TweenInfo.new(0.2),{
 				ImageTransparency = 0
 			})
 
-			PYMPLE:_Animation(UserText,TweenInfo.new(0.2),{
+			_lib:_Animation(UserText,TweenInfo.new(0.2),{
 				TextTransparency = 0
 			})
 
-			PYMPLE:_Animation(ExpireText,TweenInfo.new(0.2),{
+			_lib:_Animation(ExpireText,TweenInfo.new(0.2),{
 				TextTransparency = 0.5
 			})
 
-			PYMPLE:_Animation(MainFrame,TweenInfo.new(0.2),{
+			_lib:_Animation(MainFrame,TweenInfo.new(0.2),{
 				BackgroundTransparency = 0
 			})
 
-			PYMPLE:_Animation(LineFrame1,TweenInfo.new(0.3),{
+			_lib:_Animation(LineFrame1,TweenInfo.new(0.3),{
 				BackgroundTransparency = 0,
 				Size = UDim2.new(0, 20, 1, 0)
 			})
 
-			PYMPLE:_Animation(TabFrame,TweenInfo.new(0.2),{
+			_lib:_Animation(TabFrame,TweenInfo.new(0.2),{
 				BackgroundTransparency = TabFrameBaseTrans
 			})
 		else
-			PYMPLE:_Animation(MainFrame,TweenInfo.new(0.2),{
+			_lib:_Animation(MainFrame,TweenInfo.new(0.2),{
 				Size = UDim2.new(math.max(Config.Scale.X.Scale - 0.05,0) , Config.Scale.X.Offset - 10 , math.max(Config.Scale.Y.Scale - 0.05,0) , Config.Scale.Y.Offset - 10)
 			})
 
-			PYMPLE:_Animation(TabButtonScrollingFrame,TweenInfo.new(0.35),{
+			_lib:_Animation(TabButtonScrollingFrame,TweenInfo.new(0.35),{
 				Position = UDim2.new(1.5, 100, 0.5, 0)
 			})
 
-			PYMPLE:_Animation(LineFrame1,TweenInfo.new(0.1),{
+			_lib:_Animation(LineFrame1,TweenInfo.new(0.1),{
 				BackgroundTransparency = 1,
 				Size = UDim2.new(0, 1, 1, 0)
 			})
 
-			PYMPLE:_Animation(CompLogo,TweenInfo.new(0.2),{
+			_lib:_Animation(CompLogo,TweenInfo.new(0.2),{
 				ImageTransparency = 1
 			})
 
-			PYMPLE:_Animation(WindowLabel,TweenInfo.new(0.2),{
+			_lib:_Animation(WindowLabel,TweenInfo.new(0.2),{
 				TextTransparency = 1
 			})
 
-			PYMPLE:_Animation(UserProfile,TweenInfo.new(0.2),{
+			_lib:_Animation(UserProfile,TweenInfo.new(0.2),{
 				ImageTransparency = 1
 			})
 
-			PYMPLE:_Animation(UserText,TweenInfo.new(0.2),{
+			_lib:_Animation(UserText,TweenInfo.new(0.2),{
 				TextTransparency = 1
 			})
 
-			PYMPLE:_Animation(ExpireText,TweenInfo.new(0.2),{
+			_lib:_Animation(ExpireText,TweenInfo.new(0.2),{
 				TextTransparency = 1
 			})
 
-			PYMPLE:_Animation(MainFrame,TweenInfo.new(0.2),{
+			_lib:_Animation(MainFrame,TweenInfo.new(0.2),{
 				BackgroundTransparency = 1
 			})
 
-			PYMPLE:_Animation(TabFrame,TweenInfo.new(0.1),{
+			_lib:_Animation(TabFrame,TweenInfo.new(0.1),{
 				BackgroundTransparency = 1
 			})
 		end;
@@ -7282,40 +7283,40 @@ function PYMPLE.new(Config : Window)
 		local Style = TweenInfo.new(0.45,Enum.EasingStyle.Quint);
 
 		if value then
-			PYMPLE:_Animation(TabFrame , Style , {
+			_lib:_Animation(TabFrame , Style , {
 				Size = UDim2.new(0, 185,1, 0)
 			});
 
-			PYMPLE:_Animation(WindowLabel , Style , {
+			_lib:_Animation(WindowLabel , Style , {
 				Position = UDim2.new(0, 60,0, 17),
 				TextTransparency = 0
 			});
 
-			PYMPLE:_Animation(UserText , Style , {
+			_lib:_Animation(UserText , Style , {
 				Position = UDim2.new(0, 55,0, 8),
 				TextTransparency = 0.1
 			});
 
-			PYMPLE:_Animation(ExpireText , Style , {
+			_lib:_Animation(ExpireText , Style , {
 				Position = UDim2.new(0, 55,0, 25),
 				TextTransparency = 0.5
 			});
 		else
-			PYMPLE:_Animation(TabFrame , Style , {
+			_lib:_Animation(TabFrame , Style , {
 				Size = UDim2.new(0, 85,1, 0)
 			});
 
-			PYMPLE:_Animation(WindowLabel , Style , {
+			_lib:_Animation(WindowLabel , Style , {
 				Position = UDim2.new(0, 60 + 25,0, 17),
 				TextTransparency = 1
 			});
 
-			PYMPLE:_Animation(UserText , Style , {
+			_lib:_Animation(UserText , Style , {
 				Position = UDim2.new(0, 55 + 25,0, 8),
 				TextTransparency = 1
 			});
 
-			PYMPLE:_Animation(ExpireText , Style , {
+			_lib:_Animation(ExpireText , Style , {
 				Position = UDim2.new(0, 55 + 25,0, 25),
 				TextTransparency = 1
 			});
@@ -7325,7 +7326,7 @@ function PYMPLE.new(Config : Window)
 	WindowArgs.UserSettings = {};
 
 	do
-		local Signal = PYMPLE.__SIGNAL(false);
+		local Signal = _lib.__SIGNAL(false);
 
 		local UserSettings = Instance.new("Frame")
 		local UICorner = Instance.new("UICorner")
@@ -7336,9 +7337,9 @@ function PYMPLE.new(Config : Window)
 		local HeaderText = Instance.new("TextLabel")
 		local ImageLabel = Instance.new("ImageLabel")
 
-		UserSettings.Name = PYMPLE:_RandomString()
+		UserSettings.Name = _lib:_RandomString()
 		UserSettings.Parent = PYMPLE;
-		UserSettings.BackgroundColor3 = PYMPLE.Colors.BGDBColor;
+		UserSettings.BackgroundColor3 = _lib.Colors.BGDBColor;
 		UserSettings.BackgroundTransparency = 1
 		UserSettings.BorderColor3 = Color3.fromRGB(0, 0, 0)
 		UserSettings.BorderSizePixel = 0
@@ -7347,7 +7348,7 @@ function PYMPLE.new(Config : Window)
 		UserSettings.ZIndex = 65;
 		UserSettings.Visible = false;
 
-		table.insert(PYMPLE.Elements.BGDBColor,{
+		table.insert(_lib.Elements.BGDBColor,{
 			Element = UserSettings,
 			Property = 'BackgroundColor3'
 		});
@@ -7355,16 +7356,16 @@ function PYMPLE.new(Config : Window)
 		UICorner.CornerRadius = UDim.new(0, 4)
 		UICorner.Parent = UserSettings
 
-		SectionFrame.Name = PYMPLE:_RandomString()
+		SectionFrame.Name = _lib:_RandomString()
 		SectionFrame.Parent = UserSettings
-		SectionFrame.BackgroundColor3 = PYMPLE.Colors.BGDBColor;
+		SectionFrame.BackgroundColor3 = _lib.Colors.BGDBColor;
 		SectionFrame.BorderColor3 = Color3.fromRGB(0, 0, 0)
 		SectionFrame.BorderSizePixel = 0
 		SectionFrame.Position = UDim2.new(0, 0, 0, 45)
 		SectionFrame.Size = UDim2.new(1, 0, 1, -45)
 		SectionFrame.ZIndex = 66
 
-		table.insert(PYMPLE.Elements.BGDBColor,{
+		table.insert(_lib.Elements.BGDBColor,{
 			Element = SectionFrame,
 			Property = 'BackgroundColor3'
 		});
@@ -7377,7 +7378,7 @@ function PYMPLE.new(Config : Window)
 		UIListLayout.SortOrder = Enum.SortOrder.LayoutOrder
 		UIListLayout.Padding = UDim.new(0, 5)
 
-		Header.Name = PYMPLE:_RandomString()
+		Header.Name = _lib:_RandomString()
 		Header.Parent = UserSettings
 		Header.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
 		Header.BackgroundTransparency = 1.000
@@ -7386,7 +7387,7 @@ function PYMPLE.new(Config : Window)
 		Header.Size = UDim2.new(1, 0, 0, 45)
 		Header.ZIndex = 66
 
-		HeaderText.Name = PYMPLE:_RandomString()
+		HeaderText.Name = _lib:_RandomString()
 		HeaderText.Parent = Header
 		HeaderText.AnchorPoint = Vector2.new(0.5, 0.5)
 		HeaderText.BackgroundTransparency = 1.000
@@ -7400,7 +7401,7 @@ function PYMPLE.new(Config : Window)
 		HeaderText.TextColor3 = Color3.fromRGB(255, 255, 255)
 		HeaderText.TextSize = 15.000
 
-		table.insert(PYMPLE.Elements.SwitchColor,{
+		table.insert(_lib.Elements.SwitchColor,{
 			Element = HeaderText,
 			Property = 'TextColor3'
 		});
@@ -7414,19 +7415,19 @@ function PYMPLE.new(Config : Window)
 		ImageLabel.Position = UDim2.new(1, -5, 0, 5)
 		ImageLabel.Size = UDim2.new(0, 15, 0, 15)
 		ImageLabel.ZIndex = 67
-		ImageLabel.Image = PYMPLE:CacheImage("rbxassetid://10747384394")
+		ImageLabel.Image = _lib:CacheImage("rbxassetid://10747384394")
 		ImageLabel.ImageTransparency = 0.500
 
 		function WindowArgs.UserSettings:Create()
 
 			WindowArgs.UserSettings.Root = UserSettings;
 			WindowArgs.UserSettings.Signal = Signal;
-			WindowArgs.UserSettings.Signal = PYMPLE:_Blur(UserSettings,Signal);
+			WindowArgs.UserSettings.Signal = _lib:_Blur(UserSettings,Signal);
 
-			PYMPLE:Drag(UserSettings , UserSettings, 0.15);
+			_lib:Drag(UserSettings , UserSettings, 0.15);
 
 			UIListLayout:GetPropertyChangedSignal('AbsoluteContentSize'):Connect(function()
-				PYMPLE:_Animation(UserSettings,TweenInfo.new(0.2),{
+				_lib:_Animation(UserSettings,TweenInfo.new(0.2),{
 					Size = UDim2.new(0, 235, 0, UIListLayout.AbsoluteContentSize.Y + 50)
 				})
 			end);
@@ -7443,49 +7444,49 @@ function PYMPLE.new(Config : Window)
 				if Value then
 					Signal:Fire(true);
 
-					PYMPLE:_Animation(UserSettings,TweenInfo.new(0.2),{
+					_lib:_Animation(UserSettings,TweenInfo.new(0.2),{
 						BackgroundTransparency = 0.250,
 					});
 
-					PYMPLE:_Animation(SectionFrame,TweenInfo.new(0.2),{
+					_lib:_Animation(SectionFrame,TweenInfo.new(0.2),{
 						BackgroundTransparency = 0,
 					});
 
-					PYMPLE:_Animation(HeaderText,TweenInfo.new(0.2),{
+					_lib:_Animation(HeaderText,TweenInfo.new(0.2),{
 						TextTransparency = 0,
 					});
 
-					PYMPLE:_Animation(ImageLabel,TweenInfo.new(0.2),{
+					_lib:_Animation(ImageLabel,TweenInfo.new(0.2),{
 						ImageTransparency = 0.5,
 					});
 				else
 					Signal:Fire(false);
 
-					PYMPLE:_Animation(UserSettings,TweenInfo.new(0.2),{
+					_lib:_Animation(UserSettings,TweenInfo.new(0.2),{
 						BackgroundTransparency = 1,
 					});
 
-					PYMPLE:_Animation(SectionFrame,TweenInfo.new(0.2),{
+					_lib:_Animation(SectionFrame,TweenInfo.new(0.2),{
 						BackgroundTransparency = 1,
 					});
 
-					PYMPLE:_Animation(HeaderText,TweenInfo.new(0.2),{
+					_lib:_Animation(HeaderText,TweenInfo.new(0.2),{
 						TextTransparency = 1,
 					});
 
-					PYMPLE:_Animation(ImageLabel,TweenInfo.new(0.2),{
+					_lib:_Animation(ImageLabel,TweenInfo.new(0.2),{
 						ImageTransparency = 1,
 					});
 				end;
 			end;
 
-			PYMPLE:_Input(ImageLabel,function()
+			_lib:_Input(ImageLabel,function()
 				WindowArgs.UserSettings:Window(false);
 			end);
 
 			WindowArgs.UserSettings:Window(false);
 
-			return PYMPLE:_LoadElement(SectionFrame , true , Signal);
+			return _lib:_LoadElement(SectionFrame , true , Signal);
 		end;
 	end;
 
@@ -7502,7 +7503,7 @@ function PYMPLE.new(Config : Window)
 		local Frame = Instance.new("Frame")
 		local UIGradient = Instance.new("UIGradient")
 
-		Category.Name = PYMPLE:_RandomString()
+		Category.Name = _lib:_RandomString()
 		Category.Parent = TabButtonScrollingFrame
 		Category.BackgroundTransparency = 1.000
 		Category.BorderColor3 = Color3.fromRGB(0, 0, 0)
@@ -7510,11 +7511,11 @@ function PYMPLE.new(Config : Window)
 		Category.ClipsDescendants = true
 		Category.Size = UDim2.new(1, -10, 0, 22)
 
-		if PYMPLE:_IsMobile() then
-			PYMPLE:_AddDragBlacklist(Category);
+		if _lib:_IsMobile() then
+			_lib:_AddDragBlacklist(Category);
 		end;
 
-		CategoryText.Name = PYMPLE:_RandomString()
+		CategoryText.Name = _lib:_RandomString()
 		CategoryText.Parent = Category
 		CategoryText.BackgroundTransparency = 1.000
 		CategoryText.BorderColor3 = Color3.fromRGB(0, 0, 0)
@@ -7523,26 +7524,26 @@ function PYMPLE.new(Config : Window)
 		CategoryText.Size = UDim2.new(1, 200, 0, 10)
 		CategoryText.Font = Enum.Font.Gotham
 		CategoryText.Text = config.Name
-		CategoryText.TextColor3 = PYMPLE.Colors.SwitchColor
+		CategoryText.TextColor3 = _lib.Colors.SwitchColor
 		CategoryText.TextSize = 16.000
 		CategoryText.TextTransparency = 0.500
 		CategoryText.TextXAlignment = Enum.TextXAlignment.Left
 
-		table.insert(PYMPLE.Elements.SwitchColor , {
+		table.insert(_lib.Elements.SwitchColor , {
 			Element = CategoryText,
 			Property = 'TextColor3'
 		});
 
 		Frame.Parent = Category
 		Frame.AnchorPoint = Vector2.new(0.5, 1)
-		Frame.BackgroundColor3 = PYMPLE.Colors.Highlight
+		Frame.BackgroundColor3 = _lib.Colors.Highlight
 		Frame.BackgroundTransparency = 0.750
 		Frame.BorderColor3 = Color3.fromRGB(0, 0, 0)
 		Frame.BorderSizePixel = 0
 		Frame.Position = UDim2.new(0.5, 0, 1, 0)
 		Frame.Size = UDim2.new(1, 0, 0, 1)
 
-		table.insert(PYMPLE.Elements.Highlight,{
+		table.insert(_lib.Elements.Highlight,{
 			Element = Frame,
 			Property = "BackgroundColor3"
 		});
@@ -7554,19 +7555,19 @@ function PYMPLE.new(Config : Window)
 
 		TabHover:Connect(function(bool)
 			if bool then
-				PYMPLE:_Animation(CategoryText,Tween,{
+				_lib:_Animation(CategoryText,Tween,{
 					TextTransparency = 0.500
 				});
 
-				PYMPLE:_Animation(Frame,Tween,{
+				_lib:_Animation(Frame,Tween,{
 					BackgroundTransparency = 0.750
 				});
 			else
-				PYMPLE:_Animation(CategoryText,Tween,{
+				_lib:_Animation(CategoryText,Tween,{
 					TextTransparency = 1
 				});
 
-				PYMPLE:_Animation(Frame,Tween,{
+				_lib:_Animation(Frame,Tween,{
 					BackgroundTransparency = 1
 				});
 			end;
@@ -7574,13 +7575,13 @@ function PYMPLE.new(Config : Window)
 	end;
 
 	function WindowArgs:DrawContainerTab(TabConfig : ContainerTab)
-		TabConfig = PYMPLE.__CONFIG(TabConfig,{
+		TabConfig = _lib.__CONFIG(TabConfig,{
 			Name = "Tab",
 			Icon = "eye",
 		});
 
 		local Tween = TweenInfo.new(0.35,Enum.EasingStyle.Quint);
-		local TabOpenSignal = PYMPLE.__SIGNAL(false);
+		local TabOpenSignal = _lib.__SIGNAL(false);
 
 		local TabArgs = {
 			__Current = nil,
@@ -7595,7 +7596,7 @@ function PYMPLE.new(Config : Window)
 		local Highlight = Instance.new("Frame")
 		local UICorner = Instance.new("UICorner")
 
-		TabButton.Name = PYMPLE:_RandomString()
+		TabButton.Name = _lib:_RandomString()
 		TabButton.Parent = TabButtonScrollingFrame
 		TabButton.BackgroundTransparency = 1.000
 		TabButton.BorderColor3 = Color3.fromRGB(0, 0, 0)
@@ -7604,29 +7605,29 @@ function PYMPLE.new(Config : Window)
 		TabButton.Size = UDim2.new(1, -10, 0, 32)
 		TabButton.ZIndex = 3
 
-		if PYMPLE:_IsMobile() then
-			PYMPLE:_AddDragBlacklist(TabButton);
+		if _lib:_IsMobile() then
+			_lib:_AddDragBlacklist(TabButton);
 		end;
 
-		Icon.Name = PYMPLE:_RandomString()
+		Icon.Name = _lib:_RandomString()
 		Icon.Parent = TabButton
 		Icon.AnchorPoint = Vector2.new(0, 0.5)
-		Icon.BackgroundColor3 = PYMPLE.Colors.Highlight
+		Icon.BackgroundColor3 = _lib.Colors.Highlight
 		Icon.BackgroundTransparency = 1.000
 		Icon.BorderColor3 = Color3.fromRGB(0, 0, 0)
 		Icon.BorderSizePixel = 0
 		Icon.Position = UDim2.new(0, 15, 0.5, 0)
 		Icon.Size = UDim2.new(0, 15, 0, 15)
 		Icon.ZIndex = 3
-		Icon.Image = PYMPLE:_GetIcon(TabConfig.Icon);
-		Icon.ImageColor3 = PYMPLE.Colors.Highlight
+		Icon.Image = _lib:_GetIcon(TabConfig.Icon);
+		Icon.ImageColor3 = _lib.Colors.Highlight
 
-		table.insert(PYMPLE.Elements.Highlight,{
+		table.insert(_lib.Elements.Highlight,{
 			Element = Icon,
 			Property = "ImageColor3"
 		});
 
-		TabNameLabel.Name = PYMPLE:_RandomString()
+		TabNameLabel.Name = _lib:_RandomString()
 		TabNameLabel.Parent = TabButton
 		TabNameLabel.AnchorPoint = Vector2.new(0, 0.5)
 		TabNameLabel.BackgroundTransparency = 1.000
@@ -7637,16 +7638,16 @@ function PYMPLE.new(Config : Window)
 		TabNameLabel.ZIndex = 3
 		TabNameLabel.Font = Enum.Font.GothamMedium
 		TabNameLabel.Text = TabConfig.Name;
-		TabNameLabel.TextColor3 = PYMPLE.Colors.SwitchColor
+		TabNameLabel.TextColor3 = _lib.Colors.SwitchColor
 		TabNameLabel.TextSize = 15.000
 		TabNameLabel.TextXAlignment = Enum.TextXAlignment.Left
 
-		table.insert(PYMPLE.Elements.SwitchColor , {
+		table.insert(_lib.Elements.SwitchColor , {
 			Element = TabNameLabel,
 			Property = 'TextColor3'
 		});
 
-		Highlight.Name = PYMPLE:_RandomString()
+		Highlight.Name = _lib:_RandomString()
 		Highlight.Parent = TabButton
 		Highlight.AnchorPoint = Vector2.new(0.5, 0.5)
 		Highlight.BackgroundColor3 = Color3.fromRGB(161, 161, 161)
@@ -7667,7 +7668,7 @@ function PYMPLE.new(Config : Window)
 		local Top = Instance.new("Frame")
 		local UIListLayout = Instance.new("UIListLayout")
 
-		ContainerTab.Name = PYMPLE:_RandomString()
+		ContainerTab.Name = _lib:_RandomString()
 		ContainerTab.Parent = TabMainFrame
 		ContainerTab.AnchorPoint = Vector2.new(0.5, 0.5)
 		ContainerTab.BackgroundTransparency = 1.000
@@ -7677,7 +7678,7 @@ function PYMPLE.new(Config : Window)
 		ContainerTab.Size = UDim2.new(1, -15, 1, -15)
 		ContainerTab.ZIndex = 6
 
-		MainFrame.Name = PYMPLE:_RandomString()
+		MainFrame.Name = _lib:_RandomString()
 		MainFrame.Parent = ContainerTab
 		MainFrame.AnchorPoint = Vector2.new(0.5, 1)
 		MainFrame.BackgroundTransparency = 1.000
@@ -7688,7 +7689,7 @@ function PYMPLE.new(Config : Window)
 		MainFrame.ZIndex = 6
 		MainFrame.ClipsDescendants = true
 
-		Top.Name = PYMPLE:_RandomString()
+		Top.Name = _lib:_RandomString()
 		Top.Parent = ContainerTab
 		Top.BackgroundTransparency = 1.000
 		Top.BorderColor3 = Color3.fromRGB(0, 0, 0)
@@ -7712,12 +7713,12 @@ function PYMPLE.new(Config : Window)
 
 			if PYMPLE.PerformanceMode then
 				if ContainerTab.Visible then
-					PYMPLE:_SetNilP(ContainerTab , TabMainFrame);
+					_lib:_SetNilP(ContainerTab , TabMainFrame);
 				else
-					PYMPLE:_SetNilP(ContainerTab , nil);
+					_lib:_SetNilP(ContainerTab , nil);
 				end;
 			else
-				PYMPLE:_SetNilP(ContainerTab , TabMainFrame);
+				_lib:_SetNilP(ContainerTab , TabMainFrame);
 			end;
 		end);
 
@@ -7725,15 +7726,15 @@ function PYMPLE.new(Config : Window)
 			if bool then
 				WindowArgs.SelectedTab = TabButton;
 
-				PYMPLE:_Animation(Icon,Tween,{
+				_lib:_Animation(Icon,Tween,{
 					ImageTransparency = 0,
 				});
 
-				PYMPLE:_Animation(TabNameLabel,Tween,{
+				_lib:_Animation(TabNameLabel,Tween,{
 					TextTransparency = 0
 				});
 
-				PYMPLE:_Animation(Highlight,Tween,{
+				_lib:_Animation(Highlight,Tween,{
 					BackgroundTransparency = 0.925
 				});
 
@@ -7743,15 +7744,15 @@ function PYMPLE.new(Config : Window)
 					end;
 				end;
 			else
-				PYMPLE:_Animation(Icon,Tween,{
+				_lib:_Animation(Icon,Tween,{
 					ImageTransparency = 0.5
 				});
 
-				PYMPLE:_Animation(TabNameLabel,Tween,{
+				_lib:_Animation(TabNameLabel,Tween,{
 					TextTransparency = 0.5
 				});
 
-				PYMPLE:_Animation(Highlight,Tween,{
+				_lib:_Animation(Highlight,Tween,{
 					BackgroundTransparency = 1
 				});
 
@@ -7773,23 +7774,23 @@ function PYMPLE.new(Config : Window)
 			Remote = TabOpenSignal
 		});
 
-		PYMPLE:_Hover(TabButton,function()
+		_lib:_Hover(TabButton,function()
 			if WindowArgs.SelectedTab ~= TabButton then
-				PYMPLE:_Animation(Icon,Tween,{
+				_lib:_Animation(Icon,Tween,{
 					ImageTransparency = 0.1
 				});
 
-				PYMPLE:_Animation(TabNameLabel,Tween,{
+				_lib:_Animation(TabNameLabel,Tween,{
 					TextTransparency = 0.1
 				});
 			end;
 		end , function()
 			if WindowArgs.SelectedTab ~= TabButton then
-				PYMPLE:_Animation(Icon,Tween,{
+				_lib:_Animation(Icon,Tween,{
 					ImageTransparency = 0.5
 				});
 
-				PYMPLE:_Animation(TabNameLabel,Tween,{
+				_lib:_Animation(TabNameLabel,Tween,{
 					TextTransparency = 0.5
 				});
 			end;
@@ -7799,53 +7800,53 @@ function PYMPLE.new(Config : Window)
 
 		TabHover:Connect(function(bool)
 			if bool then
-				PYMPLE:_Animation(TabButton,Tween,{
+				_lib:_Animation(TabButton,Tween,{
 					Size = UDim2.new(1, -10, 0, 32)
 				});
 
-				PYMPLE:_Animation(Icon,Tween,{
+				_lib:_Animation(Icon,Tween,{
 					Size = UDim2.new(0, 16, 0, 16),
 				});
 
-				PYMPLE:_Animation(TabNameLabel,Tween,{
+				_lib:_Animation(TabNameLabel,Tween,{
 					Size = UDim2.new(0, 200, 0, 25),
 					Position = UDim2.new(0, 43, 0.5, 0)
 				});
 
-				PYMPLE:_Animation(UICorner,Tween,{
+				_lib:_Animation(UICorner,Tween,{
 					CornerRadius = UDim.new(0, 4)
 				});
 
-				PYMPLE:_Animation(Highlight,Tween,{
+				_lib:_Animation(Highlight,Tween,{
 					Size = UDim2.new(1, -17, 1, 0),
 					Position = UDim2.new(0.5, 0, 0.5, 0)
 				});
 			else
-				PYMPLE:_Animation(UICorner,Tween,{
+				_lib:_Animation(UICorner,Tween,{
 					CornerRadius = UDim.new(0, 10)
 				});
 
-				PYMPLE:_Animation(TabButton,Tween,{
+				_lib:_Animation(TabButton,Tween,{
 					Size = UDim2.new(1, -10, 0, 32)
 				});
 
-				PYMPLE:_Animation(Icon,Tween,{
+				_lib:_Animation(Icon,Tween,{
 					Size = UDim2.new(0, 16, 0, 16),
 				});
 
-				PYMPLE:_Animation(TabNameLabel,Tween,{
+				_lib:_Animation(TabNameLabel,Tween,{
 					Size = UDim2.new(0, 200, 0, 25),
 					Position = UDim2.new(0, 80, 0.5, 0)
 				});
 
-				PYMPLE:_Animation(Highlight,Tween,{
+				_lib:_Animation(Highlight,Tween,{
 					Size = UDim2.new(1, -10,1, 5),
 					Position = UDim2.new(0.5, 0, 0.5, 0)
 				});
 			end;
 		end);
 
-		PYMPLE:_Input(TabButton,function()
+		_lib:_Input(TabButton,function()
 			for i,v in next, WindowArgs.Tabs do
 				if v.Root == TabButton then
 					v.Remote:Fire(true);
@@ -7856,13 +7857,13 @@ function PYMPLE.new(Config : Window)
 		end);
 
 		function TabArgs:DrawTab(TabConfig : TabConfig) -- Internal Tab
-			TabConfig = PYMPLE.__CONFIG(TabConfig,{
+			TabConfig = _lib.__CONFIG(TabConfig,{
 				Name = "Tab",
 				Type = "Double",
 				EnableScrolling = false,
 			});
 
-			local InternalSignal = PYMPLE.__SIGNAL(false);
+			local InternalSignal = _lib.__SIGNAL(false);
 			local Frame = Instance.new("Frame")
 			local UICorner = Instance.new("UICorner")
 			local UIStroke = Instance.new("UIStroke")
@@ -7871,9 +7872,9 @@ function PYMPLE.new(Config : Window)
 			local TextLabel = Instance.new("TextLabel")
 
 			Frame.Parent = Top
-			Frame.BackgroundColor3 = PYMPLE.Colors.BlockColor
+			Frame.BackgroundColor3 = _lib.Colors.BlockColor
 
-			table.insert(PYMPLE.Elements.BlockColor , {
+			table.insert(_lib.Elements.BlockColor , {
 				Element = Frame,
 				Property = "BackgroundColor3"
 			});
@@ -7889,18 +7890,18 @@ function PYMPLE.new(Config : Window)
 			UICorner.Parent = Frame
 
 			UIStroke.Transparency = 1.000
-			UIStroke.Color = PYMPLE.Colors.StrokeColor
+			UIStroke.Color = _lib.Colors.StrokeColor
 			UIStroke.Parent = Frame
 
-			table.insert(PYMPLE.Elements.StrokeColor,{
+			table.insert(_lib.Elements.StrokeColor,{
 				Element = UIStroke,
 				Property = "Color"
 			});
 
-			Highlight.Name = PYMPLE:_RandomString()
+			Highlight.Name = _lib:_RandomString()
 			Highlight.Parent = Frame
 			Highlight.AnchorPoint = Vector2.new(1, 0.5)
-			Highlight.BackgroundColor3 = PYMPLE.Colors.Highlight
+			Highlight.BackgroundColor3 = _lib.Colors.Highlight
 			Highlight.BackgroundTransparency = 1.000
 			Highlight.BorderColor3 = Color3.fromRGB(0, 0, 0)
 			Highlight.BorderSizePixel = 0
@@ -7908,7 +7909,7 @@ function PYMPLE.new(Config : Window)
 			Highlight.Size = UDim2.new(0, 5, 0, 10)
 			Highlight.ZIndex = 11
 
-			table.insert(PYMPLE.Elements.Highlight,{
+			table.insert(_lib.Elements.Highlight,{
 				Element = Highlight,
 				Property = "BackgroundColor3"
 			});
@@ -7926,11 +7927,11 @@ function PYMPLE.new(Config : Window)
 			TextLabel.ZIndex = 12
 			TextLabel.Font = Enum.Font.GothamMedium
 			TextLabel.Text = TabConfig.Name
-			TextLabel.TextColor3 = PYMPLE.Colors.SwitchColor
+			TextLabel.TextColor3 = _lib.Colors.SwitchColor
 			TextLabel.TextSize = 13.000
 			TextLabel.TextXAlignment = Enum.TextXAlignment.Left
 
-			table.insert(PYMPLE.Elements.SwitchColor , {
+			table.insert(_lib.Elements.SwitchColor , {
 				Element = TextLabel,
 				Property = 'TextColor3'
 			});
@@ -7949,38 +7950,38 @@ function PYMPLE.new(Config : Window)
 
 				if bool then
 
-					PYMPLE:_Animation(Highlight,TweenInfo.new(0.2),{
+					_lib:_Animation(Highlight,TweenInfo.new(0.2),{
 						BackgroundTransparency = 0,
 						Size = UDim2.new(0, 5, 0, 10)
 					})
 
-					PYMPLE:_Animation(Frame,TweenInfo.new(0.2),{
+					_lib:_Animation(Frame,TweenInfo.new(0.2),{
 						BackgroundTransparency = 0
 					})
 
-					PYMPLE:_Animation(UIStroke,TweenInfo.new(0.2),{
+					_lib:_Animation(UIStroke,TweenInfo.new(0.2),{
 						Transparency = 0
 					})
 
-					PYMPLE:_Animation(TextLabel,TweenInfo.new(0.2),{
+					_lib:_Animation(TextLabel,TweenInfo.new(0.2),{
 						TextTransparency = 0
 					})
 				else
 
-					PYMPLE:_Animation(Highlight,TweenInfo.new(0.2),{
+					_lib:_Animation(Highlight,TweenInfo.new(0.2),{
 						BackgroundTransparency = 1,
 						Size = UDim2.new(0, 5, 0, 2)
 					})
 
-					PYMPLE:_Animation(Frame,TweenInfo.new(0.2),{
+					_lib:_Animation(Frame,TweenInfo.new(0.2),{
 						BackgroundTransparency = 1
 					})
 
-					PYMPLE:_Animation(UIStroke,TweenInfo.new(0.2),{
+					_lib:_Animation(UIStroke,TweenInfo.new(0.2),{
 						Transparency = 1
 					})
 
-					PYMPLE:_Animation(TextLabel,TweenInfo.new(0.2),{
+					_lib:_Animation(TextLabel,TweenInfo.new(0.2),{
 						TextTransparency = 0.5
 					})
 				end;
@@ -8003,7 +8004,7 @@ function PYMPLE.new(Config : Window)
 
 			table.insert(TabArgs.Tabs,Id)
 
-			PYMPLE:_Input(Frame,function()
+			_lib:_Input(Frame,function()
 				for i,v in next , TabArgs.Tabs do
 					if v.Root == Frame then
 						TabArgs.__Current = v;
@@ -8073,13 +8074,13 @@ function PYMPLE.new(Config : Window)
 	end;
 
 	function WindowArgs:DrawConfig(Configuration : TabConfigManager , Internal)
-		Configuration = PYMPLE.__CONFIG(Configuration,{
+		Configuration = _lib.__CONFIG(Configuration,{
 			Name = "Config",
 			Icon = "folder",
 			Config = nil
 		});
 
-		local TabOpenSignal = PYMPLE.__SIGNAL(false);
+		local TabOpenSignal = _lib.__SIGNAL(false);
 		local TabArgs = {};
 
 		-- Button --
@@ -8089,11 +8090,11 @@ function PYMPLE.new(Config : Window)
 		local Highlight = Instance.new("Frame")
 		local UICorner = Instance.new("UICorner")
 
-		if PYMPLE:_IsMobile() then
-			PYMPLE:_AddDragBlacklist(TabButton);
+		if _lib:_IsMobile() then
+			_lib:_AddDragBlacklist(TabButton);
 		end;
 
-		TabButton.Name = PYMPLE:_RandomString()
+		TabButton.Name = _lib:_RandomString()
 		TabButton.Parent = TabButtonScrollingFrame
 		TabButton.BackgroundTransparency = 1.000
 		TabButton.BorderColor3 = Color3.fromRGB(0, 0, 0)
@@ -8102,25 +8103,25 @@ function PYMPLE.new(Config : Window)
 		TabButton.Size = UDim2.new(1, -10, 0, 32)
 		TabButton.ZIndex = 3
 
-		Icon.Name = PYMPLE:_RandomString()
+		Icon.Name = _lib:_RandomString()
 		Icon.Parent = TabButton
 		Icon.AnchorPoint = Vector2.new(0, 0.5)
-		Icon.BackgroundColor3 = PYMPLE.Colors.Highlight
+		Icon.BackgroundColor3 = _lib.Colors.Highlight
 		Icon.BackgroundTransparency = 1.000
 		Icon.BorderColor3 = Color3.fromRGB(0, 0, 0)
 		Icon.BorderSizePixel = 0
 		Icon.Position = UDim2.new(0, 15, 0.5, 0)
 		Icon.Size = UDim2.new(0, 15, 0, 15)
 		Icon.ZIndex = 3
-		Icon.Image = PYMPLE:_GetIcon(Configuration.Icon);
-		Icon.ImageColor3 = PYMPLE.Colors.Highlight
+		Icon.Image = _lib:_GetIcon(Configuration.Icon);
+		Icon.ImageColor3 = _lib.Colors.Highlight
 
-		table.insert(PYMPLE.Elements.Highlight,{
+		table.insert(_lib.Elements.Highlight,{
 			Element = Icon,
 			Property = "ImageColor3"
 		});
 
-		TabNameLabel.Name = PYMPLE:_RandomString()
+		TabNameLabel.Name = _lib:_RandomString()
 		TabNameLabel.Parent = TabButton
 		TabNameLabel.AnchorPoint = Vector2.new(0, 0.5)
 		TabNameLabel.BackgroundTransparency = 1.000
@@ -8131,16 +8132,16 @@ function PYMPLE.new(Config : Window)
 		TabNameLabel.ZIndex = 3
 		TabNameLabel.Font = Enum.Font.GothamMedium
 		TabNameLabel.Text = Configuration.Name;
-		TabNameLabel.TextColor3 = PYMPLE.Colors.SwitchColor
+		TabNameLabel.TextColor3 = _lib.Colors.SwitchColor
 		TabNameLabel.TextSize = 15.000
 		TabNameLabel.TextXAlignment = Enum.TextXAlignment.Left
 
-		table.insert(PYMPLE.Elements.SwitchColor , {
+		table.insert(_lib.Elements.SwitchColor , {
 			Element = TabNameLabel,
 			Property = 'TextColor3'
 		});
 
-		Highlight.Name = PYMPLE:_RandomString()
+		Highlight.Name = _lib:_RandomString()
 		Highlight.Parent = TabButton
 		Highlight.AnchorPoint = Vector2.new(0.5, 0.5)
 		Highlight.BackgroundColor3 = Color3.fromRGB(161, 161, 161)
@@ -8181,7 +8182,7 @@ function PYMPLE.new(Config : Window)
 		local UICorner_4 = Instance.new("UICorner")
 		local TextLabel = Instance.new("TextLabel")
 
-		TabConfig.Name = PYMPLE:_RandomString()
+		TabConfig.Name = _lib:_RandomString()
 		TabConfig.Parent = TabMainFrame
 		TabConfig.AnchorPoint = Vector2.new(0.5, 0.5)
 		TabConfig.BackgroundTransparency = 1.000
@@ -8191,12 +8192,12 @@ function PYMPLE.new(Config : Window)
 		TabConfig.Size = UDim2.new(1, 0, 1, 0)
 		TabConfig.ZIndex = 6
 
-		ConfigList.Name = PYMPLE:_RandomString()
+		ConfigList.Name = _lib:_RandomString()
 		ConfigList.Parent = TabConfig
 		ConfigList.AnchorPoint = Vector2.new(0.5, 0)
-		ConfigList.BackgroundColor3 = PYMPLE.Colors.BlockColor
+		ConfigList.BackgroundColor3 = _lib.Colors.BlockColor
 
-		table.insert(PYMPLE.Elements.BlockColor , {
+		table.insert(_lib.Elements.BlockColor , {
 			Element = ConfigList,
 			Property = "BackgroundColor3"
 		});
@@ -8210,15 +8211,15 @@ function PYMPLE.new(Config : Window)
 		UICorner.CornerRadius = UDim.new(0, 6)
 		UICorner.Parent = ConfigList
 
-		UIStroke.Color = PYMPLE.Colors.StrokeColor
+		UIStroke.Color = _lib.Colors.StrokeColor
 		UIStroke.Parent = ConfigList
 
-		table.insert(PYMPLE.Elements.StrokeColor,{
+		table.insert(_lib.Elements.StrokeColor,{
 			Element = UIStroke,
 			Property = "Color"
 		});
 
-		Header.Name = PYMPLE:_RandomString()
+		Header.Name = _lib:_RandomString()
 		Header.Parent = ConfigList
 		Header.BackgroundTransparency = 1.000
 		Header.BorderColor3 = Color3.fromRGB(0, 0, 0)
@@ -8226,7 +8227,7 @@ function PYMPLE.new(Config : Window)
 		Header.Size = UDim2.new(1, 0, 0, 35)
 		Header.ZIndex = 9
 
-		SectionText.Name = PYMPLE:_RandomString()
+		SectionText.Name = _lib:_RandomString()
 		SectionText.Parent = Header
 		SectionText.AnchorPoint = Vector2.new(0, 0.5)
 		SectionText.BackgroundTransparency = 1.000
@@ -8237,17 +8238,17 @@ function PYMPLE.new(Config : Window)
 		SectionText.ZIndex = 10
 		SectionText.Font = Enum.Font.GothamMedium
 		SectionText.Text = "Config List"
-		SectionText.TextColor3 = PYMPLE.Colors.SwitchColor
+		SectionText.TextColor3 = _lib.Colors.SwitchColor
 		SectionText.TextSize = 14.000
 		SectionText.TextTransparency = 0.500
 		SectionText.TextXAlignment = Enum.TextXAlignment.Left
 
-		table.insert(PYMPLE.Elements.SwitchColor , {
+		table.insert(_lib.Elements.SwitchColor , {
 			Element = SectionText,
 			Property = 'TextColor3'
 		});
 
-		SectionClose.Name = PYMPLE:_RandomString()
+		SectionClose.Name = _lib:_RandomString()
 		SectionClose.Parent = Header
 		SectionClose.AnchorPoint = Vector2.new(1, 0.5)
 		SectionClose.BackgroundTransparency = 1.000
@@ -8256,7 +8257,7 @@ function PYMPLE.new(Config : Window)
 		SectionClose.Position = UDim2.new(1, -12, 0.5, 0)
 		SectionClose.Size = UDim2.new(0, 17, 0, 17)
 		SectionClose.ZIndex = 10
-		SectionClose.Image = PYMPLE:CacheImage("rbxassetid://109535175596957")
+		SectionClose.Image = _lib:CacheImage("rbxassetid://109535175596957")
 		SectionClose.ImageTransparency = 0.500
 
 
@@ -8276,18 +8277,18 @@ function PYMPLE.new(Config : Window)
 		UIListLayout.SortOrder = Enum.SortOrder.LayoutOrder
 		UIListLayout.Padding = UDim.new(0, 7)
 
-		Space.Name = PYMPLE:_RandomString()
+		Space.Name = _lib:_RandomString()
 		Space.Parent = ScrollingFrame
 		Space.BackgroundTransparency = 1.000
 		Space.BorderColor3 = Color3.fromRGB(0, 0, 0)
 		Space.BorderSizePixel = 0
 
-		AddConfig.Name = PYMPLE:_RandomString()
+		AddConfig.Name = _lib:_RandomString()
 		AddConfig.Parent = TabConfig
 		AddConfig.AnchorPoint = Vector2.new(0.5, 1)
-		AddConfig.BackgroundColor3 = PYMPLE.Colors.BlockColor
+		AddConfig.BackgroundColor3 = _lib.Colors.BlockColor
 
-		table.insert(PYMPLE.Elements.BlockColor , {
+		table.insert(_lib.Elements.BlockColor , {
 			Element = AddConfig,
 			Property = "BackgroundColor3"
 		});
@@ -8301,15 +8302,15 @@ function PYMPLE.new(Config : Window)
 		UICorner_2.CornerRadius = UDim.new(0, 6)
 		UICorner_2.Parent = AddConfig
 
-		UIStroke_2.Color = PYMPLE.Colors.StrokeColor
+		UIStroke_2.Color = _lib.Colors.StrokeColor
 		UIStroke_2.Parent = AddConfig
 
-		table.insert(PYMPLE.Elements.StrokeColor,{
+		table.insert(_lib.Elements.StrokeColor,{
 			Element = UIStroke_2,
 			Property = "Color"
 		});
 
-		Header_2.Name = PYMPLE:_RandomString()
+		Header_2.Name = _lib:_RandomString()
 		Header_2.Parent = AddConfig
 		Header_2.BackgroundTransparency = 1.000
 		Header_2.BorderColor3 = Color3.fromRGB(0, 0, 0)
@@ -8317,7 +8318,7 @@ function PYMPLE.new(Config : Window)
 		Header_2.Size = UDim2.new(1, 0, 0, 35)
 		Header_2.ZIndex = 9
 
-		SectionText_2.Name = PYMPLE:_RandomString()
+		SectionText_2.Name = _lib:_RandomString()
 		SectionText_2.Parent = Header_2
 		SectionText_2.AnchorPoint = Vector2.new(0, 0.5)
 		SectionText_2.BackgroundTransparency = 1.000
@@ -8328,17 +8329,17 @@ function PYMPLE.new(Config : Window)
 		SectionText_2.ZIndex = 10
 		SectionText_2.Font = Enum.Font.GothamMedium
 		SectionText_2.Text = "Add Config"
-		SectionText_2.TextColor3 = PYMPLE.Colors.SwitchColor
+		SectionText_2.TextColor3 = _lib.Colors.SwitchColor
 		SectionText_2.TextSize = 14.000
 		SectionText_2.TextTransparency = 0.500
 		SectionText_2.TextXAlignment = Enum.TextXAlignment.Left
 
-		table.insert(PYMPLE.Elements.SwitchColor , {
+		table.insert(_lib.Elements.SwitchColor , {
 			Element = SectionText_2,
 			Property = 'TextColor3'
 		});
 
-		SectionClose_2.Name = PYMPLE:_RandomString()
+		SectionClose_2.Name = _lib:_RandomString()
 		SectionClose_2.Parent = Header_2
 		SectionClose_2.AnchorPoint = Vector2.new(1, 0.5)
 		SectionClose_2.BackgroundTransparency = 1.000
@@ -8347,14 +8348,14 @@ function PYMPLE.new(Config : Window)
 		SectionClose_2.Position = UDim2.new(1, -12, 0.5, 0)
 		SectionClose_2.Size = UDim2.new(0, 17, 0, 17)
 		SectionClose_2.ZIndex = 10
-		SectionClose_2.Image = PYMPLE:CacheImage("rbxassetid://109535175596957")
+		SectionClose_2.Image = _lib:CacheImage("rbxassetid://109535175596957")
 		SectionClose_2.ImageTransparency = 0.500
 
 		Frame.Parent = AddConfig
 		Frame.AnchorPoint = Vector2.new(0.5, 0)
-		Frame.BackgroundColor3 = PYMPLE.Colors.BlockColor
+		Frame.BackgroundColor3 = _lib.Colors.BlockColor
 
-		table.insert(PYMPLE.Elements.BlockColor , {
+		table.insert(_lib.Elements.BlockColor , {
 			Element = Frame,
 			Property = "BackgroundColor3"
 		});
@@ -8365,10 +8366,10 @@ function PYMPLE.new(Config : Window)
 		Frame.Size = UDim2.new(1, -20, 0, 20)
 		Frame.ZIndex = 15
 
-		UIStroke_3.Color = PYMPLE.Colors.StrokeColor
+		UIStroke_3.Color = _lib.Colors.StrokeColor
 		UIStroke_3.Parent = Frame
 
-		table.insert(PYMPLE.Elements.StrokeColor,{
+		table.insert(_lib.Elements.StrokeColor,{
 			Element = UIStroke_3,
 			Property = "Color"
 		});
@@ -8389,19 +8390,19 @@ function PYMPLE.new(Config : Window)
 		TextBox.PlaceholderColor3 = Color3.fromRGB(150, 150, 150)
 		TextBox.PlaceholderText = "Config Name..."
 		TextBox.Text = ""
-		TextBox.TextColor3 = PYMPLE.Colors.SwitchColor
+		TextBox.TextColor3 = _lib.Colors.SwitchColor
 		TextBox.TextSize = 12.000
 		TextBox.TextXAlignment = Enum.TextXAlignment.Left
 
-		table.insert(PYMPLE.Elements.SwitchColor , {
+		table.insert(_lib.Elements.SwitchColor , {
 			Element = TextBox,
 			Property = 'TextColor3'
 		});
 
-		Button.Name = PYMPLE:_RandomString()
+		Button.Name = _lib:_RandomString()
 		Button.Parent = AddConfig
 		Button.AnchorPoint = Vector2.new(0.5, 1)
-		Button.BackgroundColor3 = PYMPLE.Colors.SwitchColor
+		Button.BackgroundColor3 = _lib.Colors.SwitchColor
 		Button.BackgroundTransparency = 1.000
 		Button.BorderColor3 = Color3.fromRGB(0, 0, 0)
 		Button.BorderSizePixel = 0
@@ -8409,10 +8410,10 @@ function PYMPLE.new(Config : Window)
 		Button.Size = UDim2.new(1, -7, 0, 25)
 		Button.ZIndex = 10
 
-		BlockLine.Name = PYMPLE:_RandomString()
+		BlockLine.Name = _lib:_RandomString()
 		BlockLine.Parent = AddConfig
 		BlockLine.AnchorPoint = Vector2.new(0.5, 1)
-		BlockLine.BackgroundColor3 = PYMPLE.Colors.LineColor
+		BlockLine.BackgroundColor3 = _lib.Colors.LineColor
 		BlockLine.BackgroundTransparency = 0.500
 		BlockLine.BorderColor3 = Color3.fromRGB(0, 0, 0)
 		BlockLine.BorderSizePixel = 0
@@ -8420,14 +8421,14 @@ function PYMPLE.new(Config : Window)
 		BlockLine.Size = UDim2.new(1, -26, 0, 1)
 		BlockLine.ZIndex = 12
 
-		table.insert(PYMPLE.Elements.LineColor,{
+		table.insert(_lib.Elements.LineColor,{
 			Element = BlockLine,
 			Property = "BackgroundColor3"
 		});
 
 		Frame_2.Parent = Button
 		Frame_2.AnchorPoint = Vector2.new(0.5, 0.5)
-		Frame_2.BackgroundColor3 = PYMPLE.Colors.Highlight
+		Frame_2.BackgroundColor3 = _lib.Colors.Highlight
 		Frame_2.BackgroundTransparency = 0.100
 		Frame_2.BorderColor3 = Color3.fromRGB(0, 0, 0)
 		Frame_2.BorderSizePixel = 0
@@ -8435,15 +8436,15 @@ function PYMPLE.new(Config : Window)
 		Frame_2.Size = UDim2.new(1, -15, 1, -5)
 		Frame_2.ZIndex = 9
 
-		table.insert(PYMPLE.Elements.Highlight,{
+		table.insert(_lib.Elements.Highlight,{
 			Element = Frame_2,
 			Property = "BackgroundColor3"
 		});
 
-		UIStroke_4.Color = PYMPLE.Colors.StrokeColor
+		UIStroke_4.Color = _lib.Colors.StrokeColor
 		UIStroke_4.Parent = Frame_2
 
-		table.insert(PYMPLE.Elements.StrokeColor,{
+		table.insert(_lib.Elements.StrokeColor,{
 			Element = UIStroke_4,
 			Property = "Color"
 		});
@@ -8461,11 +8462,11 @@ function PYMPLE.new(Config : Window)
 		TextLabel.ZIndex = 10
 		TextLabel.Font = Enum.Font.GothamMedium
 		TextLabel.Text = "Add Config"
-		TextLabel.TextColor3 = PYMPLE.Colors.SwitchColor
+		TextLabel.TextColor3 = _lib.Colors.SwitchColor
 		TextLabel.TextSize = 12.000
 		TextLabel.TextStrokeTransparency = 0.900
 
-		table.insert(PYMPLE.Elements.SwitchColor , {
+		table.insert(_lib.Elements.SwitchColor , {
 			Element = TextLabel,
 			Property = 'TextColor3'
 		});
@@ -8481,12 +8482,12 @@ function PYMPLE.new(Config : Window)
 
 			if PYMPLE.PerformanceMode then
 				if TabConfig.Visible then
-					PYMPLE:_SetNilP(TabConfig , TabMainFrame);
+					_lib:_SetNilP(TabConfig , TabMainFrame);
 				else
-					PYMPLE:_SetNilP(TabConfig , nil);
+					_lib:_SetNilP(TabConfig , nil);
 				end;
 			else
-				PYMPLE:_SetNilP(TabConfig , TabMainFrame);
+				_lib:_SetNilP(TabConfig , TabMainFrame);
 			end;
 
 		end)
@@ -8496,152 +8497,152 @@ function PYMPLE.new(Config : Window)
 
 				WindowArgs.SelectedTab = TabButton;
 
-				PYMPLE:_Animation(Icon,Tween,{
+				_lib:_Animation(Icon,Tween,{
 					ImageTransparency = 0,
 				});
 
-				PYMPLE:_Animation(TabNameLabel,Tween,{
+				_lib:_Animation(TabNameLabel,Tween,{
 					TextTransparency = 0
 				});
 
-				PYMPLE:_Animation(Highlight,Tween,{
+				_lib:_Animation(Highlight,Tween,{
 					BackgroundTransparency = 0.925
 				});
 
 				--
 
-				PYMPLE:_Animation(ConfigList,Tween,{
+				_lib:_Animation(ConfigList,Tween,{
 					BackgroundTransparency = 0,
 				});
 
-				PYMPLE:_Animation(AddConfig,Tween,{
+				_lib:_Animation(AddConfig,Tween,{
 					BackgroundTransparency = 0,
 				});
 
-				PYMPLE:_Animation(UIStroke_4,Tween,{
+				_lib:_Animation(UIStroke_4,Tween,{
 					Transparency = 0,
 				});
 
-				PYMPLE:_Animation(UIStroke_3,Tween,{
+				_lib:_Animation(UIStroke_3,Tween,{
 					Transparency = 0,
 				});
 
-				PYMPLE:_Animation(UIStroke_2,Tween,{
+				_lib:_Animation(UIStroke_2,Tween,{
 					Transparency = 0,
 				});
 
-				PYMPLE:_Animation(UIStroke,Tween,{
+				_lib:_Animation(UIStroke,Tween,{
 					Transparency = 0,
 				});
 
-				PYMPLE:_Animation(SectionText,Tween,{
+				_lib:_Animation(SectionText,Tween,{
 					TextTransparency = 0.5
 				});
 
-				PYMPLE:_Animation(TextLabel,Tween,{
+				_lib:_Animation(TextLabel,Tween,{
 					TextTransparency = 0,
 					TextStrokeTransparency = 0.9
 				});
 
-				PYMPLE:_Animation(Frame_2,Tween,{
+				_lib:_Animation(Frame_2,Tween,{
 					BackgroundTransparency = 0.1,
 				});
 
-				PYMPLE:_Animation(BlockLine,Tween,{
+				_lib:_Animation(BlockLine,Tween,{
 					BackgroundTransparency = 0.5,
 				});
 
-				PYMPLE:_Animation(Frame,Tween,{
+				_lib:_Animation(Frame,Tween,{
 					BackgroundTransparency = 0,
 				});
 
-				PYMPLE:_Animation(SectionText_2,Tween,{
+				_lib:_Animation(SectionText_2,Tween,{
 					TextTransparency = 0.5
 				});
 
-				PYMPLE:_Animation(TextBox,Tween,{
+				_lib:_Animation(TextBox,Tween,{
 					TextTransparency = 0
 				});
 
-				PYMPLE:_Animation(SectionClose,Tween,{
+				_lib:_Animation(SectionClose,Tween,{
 					ImageTransparency = 0.5,
 				});
 
-				PYMPLE:_Animation(SectionClose_2,Tween,{
+				_lib:_Animation(SectionClose_2,Tween,{
 					ImageTransparency = 0.5,
 				});
 			else
 
-				PYMPLE:_Animation(Icon,Tween,{
+				_lib:_Animation(Icon,Tween,{
 					ImageTransparency = 0.5
 				});
 
-				PYMPLE:_Animation(TabNameLabel,Tween,{
+				_lib:_Animation(TabNameLabel,Tween,{
 					TextTransparency = 0.5
 				});
 
-				PYMPLE:_Animation(Highlight,Tween,{
+				_lib:_Animation(Highlight,Tween,{
 					BackgroundTransparency = 1
 				});
 
-				PYMPLE:_Animation(ConfigList,Tween,{
+				_lib:_Animation(ConfigList,Tween,{
 					BackgroundTransparency = 1,
 				});
 
-				PYMPLE:_Animation(AddConfig,Tween,{
+				_lib:_Animation(AddConfig,Tween,{
 					BackgroundTransparency = 1,
 				});
 
-				PYMPLE:_Animation(UIStroke_4,Tween,{
+				_lib:_Animation(UIStroke_4,Tween,{
 					Transparency = 1,
 				});
 
-				PYMPLE:_Animation(UIStroke_3,Tween,{
+				_lib:_Animation(UIStroke_3,Tween,{
 					Transparency = 1,
 				});
 
-				PYMPLE:_Animation(UIStroke_2,Tween,{
+				_lib:_Animation(UIStroke_2,Tween,{
 					Transparency = 1,
 				});
 
-				PYMPLE:_Animation(UIStroke,Tween,{
+				_lib:_Animation(UIStroke,Tween,{
 					Transparency = 1,
 				});
 
-				PYMPLE:_Animation(SectionText,Tween,{
+				_lib:_Animation(SectionText,Tween,{
 					TextTransparency = 1
 				});
 
-				PYMPLE:_Animation(TextLabel,Tween,{
+				_lib:_Animation(TextLabel,Tween,{
 					TextTransparency = 1,
 					TextStrokeTransparency = 1
 				});
 
-				PYMPLE:_Animation(Frame_2,Tween,{
+				_lib:_Animation(Frame_2,Tween,{
 					BackgroundTransparency = 1,
 				});
 
-				PYMPLE:_Animation(BlockLine,Tween,{
+				_lib:_Animation(BlockLine,Tween,{
 					BackgroundTransparency = 1,
 				});
 
-				PYMPLE:_Animation(Frame,Tween,{
+				_lib:_Animation(Frame,Tween,{
 					BackgroundTransparency = 1,
 				});
 
-				PYMPLE:_Animation(SectionText_2,Tween,{
+				_lib:_Animation(SectionText_2,Tween,{
 					TextTransparency = 1
 				});
 
-				PYMPLE:_Animation(TextBox,Tween,{
+				_lib:_Animation(TextBox,Tween,{
 					TextTransparency = 1
 				});
 
-				PYMPLE:_Animation(SectionClose,Tween,{
+				_lib:_Animation(SectionClose,Tween,{
 					ImageTransparency = 1,
 				});
 
-				PYMPLE:_Animation(SectionClose_2,Tween,{
+				_lib:_Animation(SectionClose_2,Tween,{
 					ImageTransparency = 1,
 				});
 			end;
@@ -8659,23 +8660,23 @@ function PYMPLE.new(Config : Window)
 			Remote = TabOpenSignal
 		});
 
-		PYMPLE:_Hover(TabButton,function()
+		_lib:_Hover(TabButton,function()
 			if WindowArgs.SelectedTab ~= TabButton then
-				PYMPLE:_Animation(Icon,Tween,{
+				_lib:_Animation(Icon,Tween,{
 					ImageTransparency = 0.1
 				});
 
-				PYMPLE:_Animation(TabNameLabel,Tween,{
+				_lib:_Animation(TabNameLabel,Tween,{
 					TextTransparency = 0.1
 				});
 			end;
 		end , function()
 			if WindowArgs.SelectedTab ~= TabButton then
-				PYMPLE:_Animation(Icon,Tween,{
+				_lib:_Animation(Icon,Tween,{
 					ImageTransparency = 0.5
 				});
 
-				PYMPLE:_Animation(TabNameLabel,Tween,{
+				_lib:_Animation(TabNameLabel,Tween,{
 					TextTransparency = 0.5
 				});
 			end;
@@ -8685,53 +8686,53 @@ function PYMPLE.new(Config : Window)
 
 		TabHover:Connect(function(bool)
 			if bool then
-				PYMPLE:_Animation(TabButton,Tween,{
+				_lib:_Animation(TabButton,Tween,{
 					Size = UDim2.new(1, -10, 0, 32)
 				});
 
-				PYMPLE:_Animation(Icon,Tween,{
+				_lib:_Animation(Icon,Tween,{
 					Size = UDim2.new(0, 16, 0, 16),
 				});
 
-				PYMPLE:_Animation(TabNameLabel,Tween,{
+				_lib:_Animation(TabNameLabel,Tween,{
 					Size = UDim2.new(0, 200, 0, 25),
 					Position = UDim2.new(0, 43, 0.5, 0)
 				});
 
-				PYMPLE:_Animation(UICorner,Tween,{
+				_lib:_Animation(UICorner,Tween,{
 					CornerRadius = UDim.new(0, 4)
 				});
 
-				PYMPLE:_Animation(Highlight,Tween,{
+				_lib:_Animation(Highlight,Tween,{
 					Size = UDim2.new(1, -17, 1, 0),
 					Position = UDim2.new(0.5, 0, 0.5, 0)
 				});
 			else
-				PYMPLE:_Animation(UICorner,Tween,{
+				_lib:_Animation(UICorner,Tween,{
 					CornerRadius = UDim.new(0, 10)
 				});
 
-				PYMPLE:_Animation(TabButton,Tween,{
+				_lib:_Animation(TabButton,Tween,{
 					Size = UDim2.new(1, -10, 0, 32)
 				});
 
-				PYMPLE:_Animation(Icon,Tween,{
+				_lib:_Animation(Icon,Tween,{
 					Size = UDim2.new(0, 16, 0, 16),
 				});
 
-				PYMPLE:_Animation(TabNameLabel,Tween,{
+				_lib:_Animation(TabNameLabel,Tween,{
 					Size = UDim2.new(0, 200, 0, 25),
 					Position = UDim2.new(0, 80, 0.5, 0)
 				});
 
-				PYMPLE:_Animation(Highlight,Tween,{
+				_lib:_Animation(Highlight,Tween,{
 					Size = UDim2.new(1, -10,1, 5),
 					Position = UDim2.new(0.5, 0, 0.5, 0)
 				});
 			end;
 		end);
 
-		PYMPLE:_Input(TabButton,function()
+		_lib:_Input(TabButton,function()
 			for i,v in next, WindowArgs.Tabs do
 				if v.Root == TabButton then
 					v.Remote:Fire(true);
@@ -8767,7 +8768,7 @@ function PYMPLE.new(Config : Window)
 			local UICorner = Instance.new("UICorner")
 			local UIGradient = Instance.new("UIGradient")
 
-			DelButton.Name = PYMPLE:_RandomString()
+			DelButton.Name = _lib:_RandomString()
 			DelButton.Parent = LinkValues
 			DelButton.BackgroundTransparency = 1.000
 			DelButton.BorderColor3 = Color3.fromRGB(0, 0, 0)
@@ -8775,14 +8776,14 @@ function PYMPLE.new(Config : Window)
 			DelButton.LayoutOrder = -9999
 			DelButton.Size = UDim2.new(0, 35, 0, 15)
 			DelButton.ZIndex = 14
-			DelButton.Image = PYMPLE:CacheImage("rbxassetid://10747362393")
+			DelButton.Image = _lib:CacheImage("rbxassetid://10747362393")
 			DelButton.ImageColor3 = Color3.fromRGB(255, 107, 107)
 			DelButton.ImageTransparency = 0.500
 			DelButton.ScaleType = Enum.ScaleType.Fit
 
 			UICorner.CornerRadius = UDim.new(1, 0)
 			UICorner.Parent = DelButton
-			ConfigBlock.Name = PYMPLE:_RandomString()
+			ConfigBlock.Name = _lib:_RandomString()
 			ConfigBlock.Parent = ScrollingFrame
 			ConfigBlock.BackgroundColor3 = Color3.fromRGB(33, 34, 40)
 			ConfigBlock.BorderColor3 = Color3.fromRGB(0, 0, 0)
@@ -8791,11 +8792,11 @@ function PYMPLE.new(Config : Window)
 			ConfigBlock.Size = UDim2.new(1, -1, 0, 40)
 			ConfigBlock.ZIndex = 10
 
-			if PYMPLE:_IsMobile() then
-				PYMPLE:_AddDragBlacklist(ConfigBlock);
+			if _lib:_IsMobile() then
+				_lib:_AddDragBlacklist(ConfigBlock);
 			end;
 
-			ConfigText.Name = PYMPLE:_RandomString()
+			ConfigText.Name = _lib:_RandomString()
 			ConfigText.Parent = ConfigBlock
 			ConfigText.AnchorPoint = Vector2.new(0, 0.5)
 			ConfigText.BackgroundTransparency = 1.000
@@ -8807,12 +8808,12 @@ function PYMPLE.new(Config : Window)
 			ConfigText.Font = Enum.Font.GothamMedium
 			ConfigText.RichText = true;
 			ConfigText.Text = "Config"
-			ConfigText.TextColor3 = PYMPLE.Colors.SwitchColor
+			ConfigText.TextColor3 = _lib.Colors.SwitchColor
 			ConfigText.TextSize = 13.000
 			ConfigText.TextTransparency = 1
 			ConfigText.TextXAlignment = Enum.TextXAlignment.Left
 
-			table.insert(PYMPLE.Elements.SwitchColor , {
+			table.insert(_lib.Elements.SwitchColor , {
 				Element = ConfigText,
 				Property = 'TextColor3'
 			});
@@ -8820,7 +8821,7 @@ function PYMPLE.new(Config : Window)
 			UIGradient.Transparency = NumberSequence.new{NumberSequenceKeypoint.new(0.00, 0.00), NumberSequenceKeypoint.new(0.29, 0.00), NumberSequenceKeypoint.new(0.33, 1.00), NumberSequenceKeypoint.new(1.00, 1.00)}
 			UIGradient.Parent = ConfigText
 
-			LinkValues.Name = PYMPLE:_RandomString()
+			LinkValues.Name = _lib:_RandomString()
 			LinkValues.Parent = ConfigBlock
 			LinkValues.AnchorPoint = Vector2.new(1, 0.540000021)
 			LinkValues.BackgroundTransparency = 1.000
@@ -8837,7 +8838,7 @@ function PYMPLE.new(Config : Window)
 			UIListLayout.VerticalAlignment = Enum.VerticalAlignment.Center
 			UIListLayout.Padding = UDim.new(0, -10)
 
-			SaveButton.Name = PYMPLE:_RandomString()
+			SaveButton.Name = _lib:_RandomString()
 			SaveButton.Parent = LinkValues
 			SaveButton.BackgroundTransparency = 1.000
 			SaveButton.BorderColor3 = Color3.fromRGB(0, 0, 0)
@@ -8847,7 +8848,7 @@ function PYMPLE.new(Config : Window)
 
 			Frame.Parent = SaveButton
 			Frame.AnchorPoint = Vector2.new(0.5, 0.5)
-			Frame.BackgroundColor3 = PYMPLE.Colors.Highlight
+			Frame.BackgroundColor3 = _lib.Colors.Highlight
 			Frame.BackgroundTransparency = 1
 			Frame.BorderColor3 = Color3.fromRGB(0, 0, 0)
 			Frame.BorderSizePixel = 0
@@ -8855,16 +8856,16 @@ function PYMPLE.new(Config : Window)
 			Frame.Size = UDim2.new(1, -15, 1, -5)
 			Frame.ZIndex = 14
 
-			table.insert(PYMPLE.Elements.Highlight,{
+			table.insert(_lib.Elements.Highlight,{
 				Element = Frame,
 				Property = "BackgroundColor3"
 			});
 
 			UIStroke.Transparency = 1
-			UIStroke.Color = PYMPLE.Colors.StrokeColor
+			UIStroke.Color = _lib.Colors.StrokeColor
 			UIStroke.Parent = Frame
 
-			table.insert(PYMPLE.Elements.StrokeColor,{
+			table.insert(_lib.Elements.StrokeColor,{
 				Element = UIStroke,
 				Property = "Color"
 			});
@@ -8882,18 +8883,18 @@ function PYMPLE.new(Config : Window)
 			TextLabel.ZIndex = 14
 			TextLabel.Font = Enum.Font.GothamMedium
 			TextLabel.Text = "Save"
-			TextLabel.TextColor3 = PYMPLE.Colors.SwitchColor
+			TextLabel.TextColor3 = _lib.Colors.SwitchColor
 			TextLabel.TextSize = 12.000
 			TextLabel.TextStrokeTransparency = 1
 			TextLabel.TextXAlignment = Enum.TextXAlignment.Left
 			TextLabel.TextTransparency = 1
 
-			table.insert(PYMPLE.Elements.SwitchColor , {
+			table.insert(_lib.Elements.SwitchColor , {
 				Element = TextLabel,
 				Property = 'TextColor3'
 			});
 
-			Icon.Name = PYMPLE:_RandomString()
+			Icon.Name = _lib:_RandomString()
 			Icon.Parent = Frame
 			Icon.AnchorPoint = Vector2.new(0, 0.5)
 			Icon.BackgroundTransparency = 1.000
@@ -8903,10 +8904,10 @@ function PYMPLE.new(Config : Window)
 			Icon.Size = UDim2.new(0.699999988, 0, 0.699999988, 0)
 			Icon.SizeConstraint = Enum.SizeConstraint.RelativeYY
 			Icon.ZIndex = 15
-			Icon.Image = PYMPLE:CacheImage("rbxassetid://10734941499")
+			Icon.Image = _lib:CacheImage("rbxassetid://10734941499")
 			Icon.ImageTransparency = 1;
 
-			LoadButton.Name = PYMPLE:_RandomString()
+			LoadButton.Name = _lib:_RandomString()
 			LoadButton.Parent = LinkValues
 			LoadButton.BackgroundTransparency = 1.000
 			LoadButton.BorderColor3 = Color3.fromRGB(0, 0, 0)
@@ -8916,7 +8917,7 @@ function PYMPLE.new(Config : Window)
 
 			Frame_2.Parent = LoadButton
 			Frame_2.AnchorPoint = Vector2.new(0.5, 0.5)
-			Frame_2.BackgroundColor3 = PYMPLE.Colors.Highlight
+			Frame_2.BackgroundColor3 = _lib.Colors.Highlight
 			Frame_2.BackgroundTransparency = 1
 			Frame_2.BorderColor3 = Color3.fromRGB(0, 0, 0)
 			Frame_2.BorderSizePixel = 0
@@ -8924,16 +8925,16 @@ function PYMPLE.new(Config : Window)
 			Frame_2.Size = UDim2.new(1, -15, 1, -5)
 			Frame_2.ZIndex = 14
 
-			table.insert(PYMPLE.Elements.Highlight,{
+			table.insert(_lib.Elements.Highlight,{
 				Element = Frame_2,
 				Property = "BackgroundColor3"
 			});
 
 			UIStroke_2.Transparency = 1
-			UIStroke_2.Color = PYMPLE.Colors.StrokeColor
+			UIStroke_2.Color = _lib.Colors.StrokeColor
 			UIStroke_2.Parent = Frame_2
 
-			table.insert(PYMPLE.Elements.StrokeColor,{
+			table.insert(_lib.Elements.StrokeColor,{
 				Element = UIStroke_2,
 				Property = "Color"
 			});
@@ -8951,18 +8952,18 @@ function PYMPLE.new(Config : Window)
 			TextLabel_2.ZIndex = 14
 			TextLabel_2.Font = Enum.Font.GothamMedium
 			TextLabel_2.Text = "Load"
-			TextLabel_2.TextColor3 = PYMPLE.Colors.SwitchColor
+			TextLabel_2.TextColor3 = _lib.Colors.SwitchColor
 			TextLabel_2.TextSize = 12.000
 			TextLabel_2.TextStrokeTransparency = 1
 			TextLabel_2.TextXAlignment = Enum.TextXAlignment.Left
 			TextLabel_2.TextTransparency = 1
 
-			table.insert(PYMPLE.Elements.SwitchColor , {
+			table.insert(_lib.Elements.SwitchColor , {
 				Element = TextLabel_2,
 				Property = 'TextColor3'
 			});
 
-			Icon_2.Name = PYMPLE:_RandomString()
+			Icon_2.Name = _lib:_RandomString()
 			Icon_2.Parent = Frame_2
 			Icon_2.AnchorPoint = Vector2.new(0, 0.5)
 			Icon_2.BackgroundTransparency = 1.000
@@ -8972,14 +8973,14 @@ function PYMPLE.new(Config : Window)
 			Icon_2.Size = UDim2.new(0.699999988, 0, 0.699999988, 0)
 			Icon_2.SizeConstraint = Enum.SizeConstraint.RelativeYY
 			Icon_2.ZIndex = 15
-			Icon_2.Image = PYMPLE:CacheImage("rbxassetid://10723344270")
+			Icon_2.Image = _lib:CacheImage("rbxassetid://10723344270")
 			Icon_2.ImageTransparency = 1
 			UIStroke_3.Transparency = 1
 
-			UIStroke_3.Color = PYMPLE.Colors.StrokeColor
+			UIStroke_3.Color = _lib.Colors.StrokeColor
 			UIStroke_3.Parent = ConfigBlock
 
-			table.insert(PYMPLE.Elements.StrokeColor,{
+			table.insert(_lib.Elements.StrokeColor,{
 				Element = UIStroke_3,
 				Property = "Color"
 			});
@@ -8987,7 +8988,7 @@ function PYMPLE.new(Config : Window)
 			UICorner_3.CornerRadius = UDim.new(0, 6)
 			UICorner_3.Parent = ConfigBlock
 
-			AuthorText.Name = PYMPLE:_RandomString()
+			AuthorText.Name = _lib:_RandomString()
 			AuthorText.Parent = ConfigBlock
 			AuthorText.AnchorPoint = Vector2.new(0, 0.5)
 			AuthorText.BackgroundTransparency = 1.000
@@ -8999,18 +9000,18 @@ function PYMPLE.new(Config : Window)
 			AuthorText.Font = Enum.Font.GothamMedium
 			AuthorText.RichText = true;
 			AuthorText.Text = "Author: <font color=\"rgb(17, 238, 253)\">NoFi</font>"
-			AuthorText.TextColor3 = PYMPLE.Colors.SwitchColor
+			AuthorText.TextColor3 = _lib.Colors.SwitchColor
 			AuthorText.TextSize = 13.000
 			AuthorText.TextTransparency = 1
 			AuthorText.TextXAlignment = Enum.TextXAlignment.Left
 
-			table.insert(PYMPLE.Elements.SwitchColor , {
+			table.insert(_lib.Elements.SwitchColor , {
 				Element = TabNameLabel,
 				Property = 'TextColor3'
 			});
 
 			function ConfigButton:SetInfo(Author , ConfigName)
-				local R,G,B = tostring(math.floor(PYMPLE.Colors.Highlight.R * 255)) , tostring(math.floor(PYMPLE.Colors.Highlight.G * 255)) , tostring(math.floor(PYMPLE.Colors.Highlight.B * 255));
+				local R,G,B = tostring(math.floor(_lib.Colors.Highlight.R * 255)) , tostring(math.floor(_lib.Colors.Highlight.G * 255)) , tostring(math.floor(_lib.Colors.Highlight.B * 255));
 
 				AuthorText.Text = string.format("Author: <font color=\"rgb(%s, %s, %s)\">%s</font>" ,R,G,B , tostring(Author));
 				ConfigText.Text = ConfigName;
@@ -9022,106 +9023,106 @@ function PYMPLE.new(Config : Window)
 
 			function ConfigButton:Toggle(v)
 				if v then
-					PYMPLE:_Animation(ConfigBlock,Tween,{
+					_lib:_Animation(ConfigBlock,Tween,{
 						BackgroundTransparency = 0
 					});
 
-					PYMPLE:_Animation(LinkValues,Tween,{
+					_lib:_Animation(LinkValues,Tween,{
 						Position = UDim2.new(1, -12, 0.5, 0)
 					});
 
-					PYMPLE:_Animation(ConfigText,Tween,{
+					_lib:_Animation(ConfigText,Tween,{
 						TextTransparency = 0.3,
 						Position = UDim2.new(0, 12, 0.5, 0)
 					});
 
-					PYMPLE:_Animation(Frame,Tween,{
+					_lib:_Animation(Frame,Tween,{
 						BackgroundTransparency = 0.100
 					});
 
-					PYMPLE:_Animation(UIStroke,Tween,{
+					_lib:_Animation(UIStroke,Tween,{
 						Transparency = 0
 					});
 
-					PYMPLE:_Animation(AuthorText,Tween,{
+					_lib:_Animation(AuthorText,Tween,{
 						TextTransparency = 0.5,
 						Position = UDim2.new(0,AuthorText:GetAttribute('SPC'), 0.5, 0)
 					});
 
-					PYMPLE:_Animation(Icon_2,Tween,{
+					_lib:_Animation(Icon_2,Tween,{
 						ImageTransparency = 0
 					});
 
-					PYMPLE:_Animation(Icon,Tween,{
+					_lib:_Animation(Icon,Tween,{
 						ImageTransparency = 0
 					});
 
-					PYMPLE:_Animation(Frame_2,Tween,{
+					_lib:_Animation(Frame_2,Tween,{
 						BackgroundTransparency = 0.100
 					});
 
-					PYMPLE:_Animation(UIStroke_2,Tween,{
+					_lib:_Animation(UIStroke_2,Tween,{
 						Transparency = 0
 					});
 
-					PYMPLE:_Animation(TextLabel,Tween,{
+					_lib:_Animation(TextLabel,Tween,{
 						TextStrokeTransparency = 0.900,
 						TextTransparency = 0
 					});
 
-					PYMPLE:_Animation(TextLabel_2,Tween,{
+					_lib:_Animation(TextLabel_2,Tween,{
 						TextStrokeTransparency = 0.900,
 						TextTransparency = 0
 					});
 				else
-					PYMPLE:_Animation(AuthorText,Tween,{
+					_lib:_Animation(AuthorText,Tween,{
 						TextTransparency = 1,
 						Position = UDim2.new(0.5, -65, 0.5, 15)
 					});
 
-					PYMPLE:_Animation(Icon_2,Tween,{
+					_lib:_Animation(Icon_2,Tween,{
 						ImageTransparency = 1
 					});
 
-					PYMPLE:_Animation(Icon,Tween,{
+					_lib:_Animation(Icon,Tween,{
 						ImageTransparency = 1
 					});
 
-					PYMPLE:_Animation(LinkValues,Tween,{
+					_lib:_Animation(LinkValues,Tween,{
 						Position = UDim2.new(1, -12, 0.5, 15)
 					});
 
-					PYMPLE:_Animation(ConfigBlock,Tween,{
+					_lib:_Animation(ConfigBlock,Tween,{
 						BackgroundTransparency = 1
 					});
 
-					PYMPLE:_Animation(ConfigText,Tween,{
+					_lib:_Animation(ConfigText,Tween,{
 						TextTransparency = 1,
 						Position = UDim2.new(0, 12, 0.5, 15)
 					});
 
-					PYMPLE:_Animation(Frame,Tween,{
+					_lib:_Animation(Frame,Tween,{
 						BackgroundTransparency = 1
 					});
 
-					PYMPLE:_Animation(UIStroke,Tween,{
+					_lib:_Animation(UIStroke,Tween,{
 						Transparency = 1
 					});
 
-					PYMPLE:_Animation(Frame_2,Tween,{
+					_lib:_Animation(Frame_2,Tween,{
 						BackgroundTransparency = 1
 					});
 
-					PYMPLE:_Animation(UIStroke_2,Tween,{
+					_lib:_Animation(UIStroke_2,Tween,{
 						Transparency = 1
 					});
 
-					PYMPLE:_Animation(TextLabel,Tween,{
+					_lib:_Animation(TextLabel,Tween,{
 						TextStrokeTransparency = 1,
 						TextTransparency = 1
 					});
 
-					PYMPLE:_Animation(TextLabel_2,Tween,{
+					_lib:_Animation(TextLabel_2,Tween,{
 						TextStrokeTransparency = 1,
 						TextTransparency = 1
 					});
@@ -9138,11 +9139,11 @@ function PYMPLE.new(Config : Window)
 
 			ConfigButton:Update();
 
-			PYMPLE:_Input(LoadButton,function()
+			_lib:_Input(LoadButton,function()
 				task.spawn(ConfigButton.OnLoad);
 			end);
 
-			PYMPLE:_Input(SaveButton,function()
+			_lib:_Input(SaveButton,function()
 				task.spawn(ConfigButton.OnSave);
 			end);
 
@@ -9161,11 +9162,11 @@ function PYMPLE.new(Config : Window)
 			local __signals = {};
 			local Init = {};
 
-			PYMPLE:_Input(Button,function()
+			_lib:_Input(Button,function()
 				if TextBox.Text:byte() then
 					WindowArgs.Notify.new({
 						Title = "Configs",
-						Icon = PYMPLE:_GetIcon(Config.Logo),
+						Icon = _lib:_GetIcon(Config.Logo),
 						Content = "Create config \""..TextBox.Text.."\""
 					})
 
@@ -9201,7 +9202,7 @@ function PYMPLE.new(Config : Window)
 					Button.OnLoad = function()
 						WindowArgs.Notify.new({
 							Title = "Configs",
-							Icon = PYMPLE:CacheImage(Config.Logo),
+							Icon = _lib:CacheImage(Config.Logo),
 							Content = "Load config \""..v.Name.."\""
 						})
 
@@ -9211,7 +9212,7 @@ function PYMPLE.new(Config : Window)
 					Button.OnSave = function()
 						WindowArgs.Notify.new({
 							Title = "Configs",
-							Icon = PYMPLE:CacheImage(Config.Logo),
+							Icon = _lib:CacheImage(Config.Logo),
 							Content = "Save config \""..v.Name.."\""
 						})
 
@@ -9226,7 +9227,7 @@ function PYMPLE.new(Config : Window)
 					Button.OnDelete = function()
 						WindowArgs.Notify.new({
 							Title = "Configs",
-							Icon = PYMPLE:CacheImage(Config.Logo),
+							Icon = _lib:CacheImage(Config.Logo),
 							Content = "Delete config \""..v.Name.."\""
 						})
 
@@ -9258,13 +9259,13 @@ function PYMPLE.new(Config : Window)
 	end;
 
 	function WindowArgs:DrawTab(TabConfig : TabConfig , Internal)
-		TabConfig = PYMPLE.__CONFIG(TabConfig,{
+		TabConfig = _lib.__CONFIG(TabConfig,{
 			Name = "Tab",
 			Icon = "eye",
 			Type = "Double"
 		});
 
-		local TabOpenSignal = PYMPLE.__SIGNAL(false);
+		local TabOpenSignal = _lib.__SIGNAL(false);
 		local TabArgs = {};
 		local Upvalue = {};
 		local BASE_PADDING = 10;
@@ -9277,7 +9278,7 @@ function PYMPLE.new(Config : Window)
 			local Right = Instance.new("ScrollingFrame")
 			local UIListLayout_2 = Instance.new("UIListLayout")
 
-			TabContent.Name = PYMPLE:_RandomString()
+			TabContent.Name = _lib:_RandomString()
 			TabContent.Parent = Internal.Parent;
 			TabContent.AnchorPoint = Vector2.new(0.5, 0.5)
 			TabContent.BackgroundTransparency = 1.000
@@ -9287,7 +9288,7 @@ function PYMPLE.new(Config : Window)
 			TabContent.Size = UDim2.new(1, -5,1, -5)
 			TabContent.ZIndex = 6
 
-			Left.Name = PYMPLE:_RandomString()
+			Left.Name = _lib:_RandomString()
 			Left.Parent = TabContent
 			Left.Active = true
 			Left.AnchorPoint = Vector2.new(0.5, 0.5)
@@ -9314,7 +9315,7 @@ function PYMPLE.new(Config : Window)
 			UIListLayout.VerticalFlex = Enum.UIFlexAlignment.None
 			UIListLayout.Padding = UDim.new(0, BASE_PADDING)
 
-			Right.Name = PYMPLE:_RandomString()
+			Right.Name = _lib:_RandomString()
 			Right.Parent = TabContent
 			Right.Active = true
 			Right.AnchorPoint = Vector2.new(0.5, 0.5)
@@ -9366,21 +9367,21 @@ function PYMPLE.new(Config : Window)
 
 				if PYMPLE.PerformanceMode then
 					if TabContent.Visible then
-						PYMPLE:_SetNilP(TabContent , Internal.Parent);
+						_lib:_SetNilP(TabContent , Internal.Parent);
 					else
-						PYMPLE:_SetNilP(TabContent , nil);
+						_lib:_SetNilP(TabContent , nil);
 					end;
 				else
-					PYMPLE:_SetNilP(TabContent , Internal.Parent);
+					_lib:_SetNilP(TabContent , Internal.Parent);
 				end;
 			end);
 
 			Upvalue.Left = Left;
 			Upvalue.Right = Right;
 
-			if PYMPLE:_IsMobile() then
-				PYMPLE:_AddDragBlacklist(Left);
-				PYMPLE:_AddDragBlacklist(Right);
+			if _lib:_IsMobile() then
+				_lib:_AddDragBlacklist(Left);
+				_lib:_AddDragBlacklist(Right);
 			end;
 
 			TabOpenSignal = Internal.Signal;
@@ -9393,12 +9394,12 @@ function PYMPLE.new(Config : Window)
 
 			if PYMPLE.PerformanceMode then
 				if TabContent.Visible then
-					PYMPLE:_SetNilP(TabContent , Internal.Parent);
+					_lib:_SetNilP(TabContent , Internal.Parent);
 				else
-					PYMPLE:_SetNilP(TabContent , nil);
+					_lib:_SetNilP(TabContent , nil);
 				end;
 			else
-				PYMPLE:_SetNilP(TabContent , Internal.Parent);
+				_lib:_SetNilP(TabContent , Internal.Parent);
 			end;
 		else
 			-- Button --
@@ -9408,7 +9409,7 @@ function PYMPLE.new(Config : Window)
 			local Highlight = Instance.new("Frame")
 			local UICorner = Instance.new("UICorner")
 
-			TabButton.Name = PYMPLE:_RandomString()
+			TabButton.Name = _lib:_RandomString()
 			TabButton.Parent = TabButtonScrollingFrame
 			TabButton.BackgroundTransparency = 1.000
 			TabButton.BorderColor3 = Color3.fromRGB(0, 0, 0)
@@ -9417,25 +9418,25 @@ function PYMPLE.new(Config : Window)
 			TabButton.Size = UDim2.new(1, -10, 0, 32)
 			TabButton.ZIndex = 3
 
-			Icon.Name = PYMPLE:_RandomString()
+			Icon.Name = _lib:_RandomString()
 			Icon.Parent = TabButton
 			Icon.AnchorPoint = Vector2.new(0, 0.5)
-			Icon.BackgroundColor3 = PYMPLE.Colors.Highlight
+			Icon.BackgroundColor3 = _lib.Colors.Highlight
 			Icon.BackgroundTransparency = 1.000
 			Icon.BorderColor3 = Color3.fromRGB(0, 0, 0)
 			Icon.BorderSizePixel = 0
 			Icon.Position = UDim2.new(0, 15, 0.5, 0)
 			Icon.Size = UDim2.new(0, 15, 0, 15)
 			Icon.ZIndex = 3
-			Icon.Image = PYMPLE:_GetIcon(TabConfig.Icon);
-			Icon.ImageColor3 = PYMPLE.Colors.Highlight
+			Icon.Image = _lib:_GetIcon(TabConfig.Icon);
+			Icon.ImageColor3 = _lib.Colors.Highlight
 
-			table.insert(PYMPLE.Elements.Highlight,{
+			table.insert(_lib.Elements.Highlight,{
 				Element = Icon,
 				Property = "ImageColor3"
 			});
 
-			TabNameLabel.Name = PYMPLE:_RandomString()
+			TabNameLabel.Name = _lib:_RandomString()
 			TabNameLabel.Parent = TabButton
 			TabNameLabel.AnchorPoint = Vector2.new(0, 0.5)
 			TabNameLabel.BackgroundTransparency = 1.000
@@ -9446,16 +9447,16 @@ function PYMPLE.new(Config : Window)
 			TabNameLabel.ZIndex = 3
 			TabNameLabel.Font = Enum.Font.GothamMedium
 			TabNameLabel.Text = TabConfig.Name;
-			TabNameLabel.TextColor3 = PYMPLE.Colors.SwitchColor
+			TabNameLabel.TextColor3 = _lib.Colors.SwitchColor
 			TabNameLabel.TextSize = 15.000
 			TabNameLabel.TextXAlignment = Enum.TextXAlignment.Left
 
-			table.insert(PYMPLE.Elements.SwitchColor , {
+			table.insert(_lib.Elements.SwitchColor , {
 				Element = TabNameLabel,
 				Property = 'TextColor3'
 			});
 
-			Highlight.Name = PYMPLE:_RandomString()
+			Highlight.Name = _lib:_RandomString()
 			Highlight.Parent = TabButton
 			Highlight.AnchorPoint = Vector2.new(0.5, 0.5)
 			Highlight.BackgroundColor3 = Color3.fromRGB(161, 161, 161)
@@ -9475,7 +9476,7 @@ function PYMPLE.new(Config : Window)
 			local Right = Instance.new("ScrollingFrame")
 			local UIListLayout_2 = Instance.new("UIListLayout")
 
-			TabContent.Name = PYMPLE:_RandomString()
+			TabContent.Name = _lib:_RandomString()
 			TabContent.Parent = TabMainFrame;
 			TabContent.AnchorPoint = Vector2.new(0.5, 0.5)
 			TabContent.BackgroundTransparency = 1.000
@@ -9485,7 +9486,7 @@ function PYMPLE.new(Config : Window)
 			TabContent.Size = UDim2.new(1, -15, 1, -15)
 			TabContent.ZIndex = 6
 
-			Left.Name = PYMPLE:_RandomString()
+			Left.Name = _lib:_RandomString()
 			Left.Parent = TabContent
 			Left.Active = true
 			Left.AnchorPoint = Vector2.new(0.5, 0.5)
@@ -9513,7 +9514,7 @@ function PYMPLE.new(Config : Window)
 			UIListLayout.VerticalFlex = Enum.UIFlexAlignment.None
 			UIListLayout.Padding = UDim.new(0, BASE_PADDING)
 
-			Right.Name = PYMPLE:_RandomString()
+			Right.Name = _lib:_RandomString()
 			Right.Parent = TabContent
 			Right.Active = true
 			Right.AnchorPoint = Vector2.new(0.5, 0.5)
@@ -9548,9 +9549,9 @@ function PYMPLE.new(Config : Window)
 			WindowArgs:AddUnbind(UIListLayout_2 , Right);
 			WindowArgs:AddUnbind(UIListLayout , Left);
 
-			if PYMPLE:_IsMobile() then
-				PYMPLE:_AddDragBlacklist(Left);
-				PYMPLE:_AddDragBlacklist(Right);
+			if _lib:_IsMobile() then
+				_lib:_AddDragBlacklist(Left);
+				_lib:_AddDragBlacklist(Right);
 			end;
 
 			if TabConfig.Type == "Single" then
@@ -9570,12 +9571,12 @@ function PYMPLE.new(Config : Window)
 
 				if PYMPLE.PerformanceMode then
 					if TabContent.Visible then
-						PYMPLE:_SetNilP(TabContent , TabMainFrame);
+						_lib:_SetNilP(TabContent , TabMainFrame);
 					else
-						PYMPLE:_SetNilP(TabContent , nil);
+						_lib:_SetNilP(TabContent , nil);
 					end;
 				else
-					PYMPLE:_SetNilP(TabContent , TabMainFrame);
+					_lib:_SetNilP(TabContent , TabMainFrame);
 				end;
 			end)
 
@@ -9584,27 +9585,27 @@ function PYMPLE.new(Config : Window)
 
 					WindowArgs.SelectedTab = TabButton;
 
-					PYMPLE:_Animation(Icon,Tween,{
+					_lib:_Animation(Icon,Tween,{
 						ImageTransparency = 0,
 					});
 
-					PYMPLE:_Animation(TabNameLabel,Tween,{
+					_lib:_Animation(TabNameLabel,Tween,{
 						TextTransparency = 0
 					});
 
-					PYMPLE:_Animation(Highlight,Tween,{
+					_lib:_Animation(Highlight,Tween,{
 						BackgroundTransparency = 0.925
 					});
 				else
-					PYMPLE:_Animation(Icon,Tween,{
+					_lib:_Animation(Icon,Tween,{
 						ImageTransparency = 0.5
 					});
 
-					PYMPLE:_Animation(TabNameLabel,Tween,{
+					_lib:_Animation(TabNameLabel,Tween,{
 						TextTransparency = 0.5
 					});
 
-					PYMPLE:_Animation(Highlight,Tween,{
+					_lib:_Animation(Highlight,Tween,{
 						BackgroundTransparency = 1
 					});
 				end;
@@ -9622,23 +9623,23 @@ function PYMPLE.new(Config : Window)
 				Remote = TabOpenSignal
 			});
 
-			PYMPLE:_Hover(TabButton,function()
+			_lib:_Hover(TabButton,function()
 				if WindowArgs.SelectedTab ~= TabButton then
-					PYMPLE:_Animation(Icon,Tween,{
+					_lib:_Animation(Icon,Tween,{
 						ImageTransparency = 0.1
 					});
 
-					PYMPLE:_Animation(TabNameLabel,Tween,{
+					_lib:_Animation(TabNameLabel,Tween,{
 						TextTransparency = 0.1
 					});
 				end;
 			end , function()
 				if WindowArgs.SelectedTab ~= TabButton then
-					PYMPLE:_Animation(Icon,Tween,{
+					_lib:_Animation(Icon,Tween,{
 						ImageTransparency = 0.5
 					});
 
-					PYMPLE:_Animation(TabNameLabel,Tween,{
+					_lib:_Animation(TabNameLabel,Tween,{
 						TextTransparency = 0.5
 					});
 				end;
@@ -9648,53 +9649,53 @@ function PYMPLE.new(Config : Window)
 
 			TabHover:Connect(function(bool)
 				if bool then
-					PYMPLE:_Animation(TabButton,Tween,{
+					_lib:_Animation(TabButton,Tween,{
 						Size = UDim2.new(1, -10, 0, 32)
 					});
 
-					PYMPLE:_Animation(Icon,Tween,{
+					_lib:_Animation(Icon,Tween,{
 						Size = UDim2.new(0, 16, 0, 16),
 					});
 
-					PYMPLE:_Animation(TabNameLabel,Tween,{
+					_lib:_Animation(TabNameLabel,Tween,{
 						Size = UDim2.new(0, 200, 0, 25),
 						Position = UDim2.new(0, 43, 0.5, 0)
 					});
 
-					PYMPLE:_Animation(UICorner,Tween,{
+					_lib:_Animation(UICorner,Tween,{
 						CornerRadius = UDim.new(0, 4)
 					});
 
-					PYMPLE:_Animation(Highlight,Tween,{
+					_lib:_Animation(Highlight,Tween,{
 						Size = UDim2.new(1, -17, 1, 0),
 						Position = UDim2.new(0.5, 0, 0.5, 0)
 					});
 				else
-					PYMPLE:_Animation(UICorner,Tween,{
+					_lib:_Animation(UICorner,Tween,{
 						CornerRadius = UDim.new(0, 10)
 					});
 
-					PYMPLE:_Animation(TabButton,Tween,{
+					_lib:_Animation(TabButton,Tween,{
 						Size = UDim2.new(1, -10, 0, 32)
 					});
 
-					PYMPLE:_Animation(Icon,Tween,{
+					_lib:_Animation(Icon,Tween,{
 						Size = UDim2.new(0, 16, 0, 16),
 					});
 
-					PYMPLE:_Animation(TabNameLabel,Tween,{
+					_lib:_Animation(TabNameLabel,Tween,{
 						Size = UDim2.new(0, 200, 0, 25),
 						Position = UDim2.new(0, 80, 0.5, 0)
 					});
 
-					PYMPLE:_Animation(Highlight,Tween,{
+					_lib:_Animation(Highlight,Tween,{
 						Size = UDim2.new(1, -10,1, 5),
 						Position = UDim2.new(0.5, 0, 0.5, 0)
 					});
 				end;
 			end);
 
-			PYMPLE:_Input(TabButton,function()
+			_lib:_Input(TabButton,function()
 				for i,v in next, WindowArgs.Tabs do
 					if v.Root == TabButton then
 						v.Remote:Fire(true);
@@ -9783,7 +9784,7 @@ function PYMPLE.new(Config : Window)
 		--TabArgs.RightThread();
 
 		function TabArgs:DrawSection(config: Section)
-			config = PYMPLE.__CONFIG(config,{
+			config = _lib.__CONFIG(config,{
 				Name = "Section",
 				Position = "left"
 			});
@@ -9801,22 +9802,22 @@ function PYMPLE.new(Config : Window)
 			local SectionText = Instance.new("TextLabel")
 			local SectionClose = Instance.new("ImageLabel")
 
-			Section.Name = PYMPLE:_RandomString()
+			Section.Name = _lib:_RandomString()
 			Section.Parent = Parent;
 
 			if TabConfig.Type == "Single" then
 				Section.Parent = Upvalue.Left;
 			end;
 
-			Section.BackgroundColor3 = PYMPLE.Colors.BlockColor
+			Section.BackgroundColor3 = _lib.Colors.BlockColor
 
-			table.insert(PYMPLE.Elements.BlockColor , {
+			table.insert(_lib.Elements.BlockColor , {
 				Element = Section,
 				Property = "BackgroundColor3"
 			});
 
-			if PYMPLE:_IsMobile() then
-				PYMPLE:_AddDragBlacklist(Section);
+			if _lib:_IsMobile() then
+				_lib:_AddDragBlacklist(Section);
 			end;
 
 			Section.LayoutOrder = #Parent:GetChildren() + 3;
@@ -9829,10 +9830,10 @@ function PYMPLE.new(Config : Window)
 			UICorner.CornerRadius = UDim.new(0, 6)
 			UICorner.Parent = Section
 
-			UIStroke.Color = PYMPLE.Colors.StrokeColor
+			UIStroke.Color = _lib.Colors.StrokeColor
 			UIStroke.Parent = Section
 
-			table.insert(PYMPLE.Elements.StrokeColor,{
+			table.insert(_lib.Elements.StrokeColor,{
 				Element = UIStroke,
 				Property = "Color"
 			});
@@ -9842,7 +9843,7 @@ function PYMPLE.new(Config : Window)
 			UIListLayout.SortOrder = Enum.SortOrder.LayoutOrder
 			UIListLayout.Padding = UDim.new(0, 5)
 
-			Header.Name = PYMPLE:_RandomString()
+			Header.Name = _lib:_RandomString()
 			Header.Parent = Section
 			Header.BackgroundTransparency = 1.000
 			Header.BorderColor3 = Color3.fromRGB(0, 0, 0)
@@ -9851,7 +9852,7 @@ function PYMPLE.new(Config : Window)
 			Header.Size = UDim2.new(1, 0, 0, 35)
 			Header.ZIndex = 9
 
-			SectionText.Name = PYMPLE:_RandomString()
+			SectionText.Name = _lib:_RandomString()
 			SectionText.Parent = Header
 			SectionText.AnchorPoint = Vector2.new(0, 0.5)
 			SectionText.BackgroundTransparency = 1.000
@@ -9862,17 +9863,17 @@ function PYMPLE.new(Config : Window)
 			SectionText.ZIndex = 10
 			SectionText.Font = Enum.Font.GothamMedium
 			SectionText.Text = config.Name;
-			SectionText.TextColor3 = PYMPLE.Colors.SwitchColor
+			SectionText.TextColor3 = _lib.Colors.SwitchColor
 			SectionText.TextSize = 14.000
 			SectionText.TextTransparency = 0.500
 			SectionText.TextXAlignment = Enum.TextXAlignment.Left
 
-			table.insert(PYMPLE.Elements.SwitchColor , {
+			table.insert(_lib.Elements.SwitchColor , {
 				Element = SectionText,
 				Property = 'TextColor3'
 			});
 
-			SectionClose.Name = PYMPLE:_RandomString()
+			SectionClose.Name = _lib:_RandomString()
 			SectionClose.Parent = Header
 			SectionClose.AnchorPoint = Vector2.new(1, 0.5)
 			SectionClose.BackgroundTransparency = 1.000
@@ -9881,7 +9882,7 @@ function PYMPLE.new(Config : Window)
 			SectionClose.Position = UDim2.new(1, -12, 0.5, 0)
 			SectionClose.Size = UDim2.new(0, 17, 0, 17)
 			SectionClose.ZIndex = 10
-			SectionClose.Image = PYMPLE:CacheImage("rbxassetid://109535175596957")
+			SectionClose.Image = _lib:CacheImage("rbxassetid://109535175596957")
 			SectionClose.ImageTransparency = 0.500
 
 			if not SectionText.Text:byte() then
@@ -9907,12 +9908,12 @@ function PYMPLE.new(Config : Window)
 					local FullScale = Section.AbsolutePosition.Y + UIListLayout.AbsoluteContentSize.Y;
 					local RefPos = Parent.AbsolutePosition.Y + Parent.AbsoluteSize.Y;
 
-					if (Section:GetAttribute('Height') and not PYMPLE:_IsMobile() and FullScale <= RefPos) then
-						PYMPLE:_Animation(Section,TweenInfo.new(0.4,Enum.EasingStyle.Quint),{
+					if (Section:GetAttribute('Height') and not _lib:_IsMobile() and FullScale <= RefPos) then
+						_lib:_Animation(Section,TweenInfo.new(0.4,Enum.EasingStyle.Quint),{
 							Size = UDim2.new(1, 0, 0, math.abs(Section:GetAttribute('Height')) + 5)
 						});
 					else
-						PYMPLE:_Animation(Section,TweenInfo.new(0.4,Enum.EasingStyle.Quint),{
+						_lib:_Animation(Section,TweenInfo.new(0.4,Enum.EasingStyle.Quint),{
 							Size = UDim2.new(1, 0, 0, math.abs(UIListLayout.AbsoluteContentSize.Y) - 1)
 						});
 
@@ -9925,7 +9926,7 @@ function PYMPLE.new(Config : Window)
 				else
 					TabArgs.SectionClose[Parent][Section] = Section;
 
-					PYMPLE:_Animation(Section,TweenInfo.new(0.4,Enum.EasingStyle.Quint),{
+					_lib:_Animation(Section,TweenInfo.new(0.4,Enum.EasingStyle.Quint),{
 						Size = UDim2.new(1, 0, 0, 35)
 					});
 				end;
@@ -10006,41 +10007,41 @@ function PYMPLE.new(Config : Window)
 
 			TabOpenSignal:Connect(function(bool)
 				if bool then
-					PYMPLE:_Animation(Section,TweenInfo.new(0.21),{
+					_lib:_Animation(Section,TweenInfo.new(0.21),{
 						BackgroundTransparency = 0
 					})
 
-					PYMPLE:_Animation(SectionText,TweenInfo.new(0.21),{
+					_lib:_Animation(SectionText,TweenInfo.new(0.21),{
 						TextTransparency = 0.500
 					})
 
-					PYMPLE:_Animation(SectionClose,TweenInfo.new(0.21),{
+					_lib:_Animation(SectionClose,TweenInfo.new(0.21),{
 						ImageTransparency = 0.500
 					})
 				else
-					PYMPLE:_Animation(Section,TweenInfo.new(0.21),{
+					_lib:_Animation(Section,TweenInfo.new(0.21),{
 						BackgroundTransparency = 1
 					})
 
-					PYMPLE:_Animation(SectionText,TweenInfo.new(0.21),{
+					_lib:_Animation(SectionText,TweenInfo.new(0.21),{
 						TextTransparency = 1
 					})
 
-					PYMPLE:_Animation(SectionClose,TweenInfo.new(0.21),{
+					_lib:_Animation(SectionClose,TweenInfo.new(0.21),{
 						ImageTransparency = 1
 					})
 				end;
 			end);
 
-			PYMPLE:_Input(Header,function()
+			_lib:_Input(Header,function()
 				IsOpen = not IsOpen;
 
 				if IsOpen then
-					PYMPLE:_Animation(SectionClose,TweenInfo.new(0.35),{
+					_lib:_Animation(SectionClose,TweenInfo.new(0.35),{
 						Rotation = 0
 					});
 				else
-					PYMPLE:_Animation(SectionClose,TweenInfo.new(0.35),{
+					_lib:_Animation(SectionClose,TweenInfo.new(0.35),{
 						Rotation = -180
 					});
 				end;
@@ -10055,18 +10056,18 @@ function PYMPLE.new(Config : Window)
 			end);
 
 			Header.MouseEnter:Connect(function()
-				PYMPLE:_Animation(SectionText,TweenInfo.new(0.2),{
+				_lib:_Animation(SectionText,TweenInfo.new(0.2),{
 					TextTransparency = 0.25
 				})
 			end)	
 
 			Header.MouseLeave:Connect(function()
-				PYMPLE:_Animation(SectionText,TweenInfo.new(0.2),{
+				_lib:_Animation(SectionText,TweenInfo.new(0.2),{
 					TextTransparency = 0.500
 				})
 			end)
 
-			return PYMPLE:_LoadElement(Section , true , TabOpenSignal)
+			return _lib:_LoadElement(Section , true , TabOpenSignal)
 		end;
 
 		return TabArgs;
@@ -10077,12 +10078,12 @@ function PYMPLE.new(Config : Window)
 		local UICorner = Instance.new("UICorner")
 		local ImageLabel = Instance.new("ImageLabel")
 
-		CloseWindow.Name = PYMPLE:_RandomString()
+		CloseWindow.Name = _lib:_RandomString()
 		CloseWindow.Parent = PYMPLE
 		CloseWindow.AnchorPoint = Vector2.new(1, 0)
-		CloseWindow.BackgroundColor3 = PYMPLE.Colors.BGDBColor
+		CloseWindow.BackgroundColor3 = _lib.Colors.BGDBColor
 
-		table.insert(PYMPLE.Elements.BGDBColor,{
+		table.insert(_lib.Elements.BGDBColor,{
 			Element = CloseWindow,
 			Property = 'BackgroundColor3'
 		});
@@ -10117,30 +10118,30 @@ function PYMPLE.new(Config : Window)
 			if v then
 				ImageLabel.ClipsDescendants = true;
 
-				PYMPLE:_Animation(CloseWindow,TweenInfo.new(0.2),{
+				_lib:_Animation(CloseWindow,TweenInfo.new(0.2),{
 					Size = UDim2.new(0, 45, 0, 23),
 					BackgroundTransparency = 0.025
 				})
 
-				PYMPLE:_Animation(ImageLabel,TweenInfo.new(0.2),{
+				_lib:_Animation(ImageLabel,TweenInfo.new(0.2),{
 					ImageTransparency = (ImageLabel:GetAttribute('Hover') and 0.1) or 0.35
 				})
 			else
 				ImageLabel.ClipsDescendants = false;
 
-				PYMPLE:_Animation(CloseWindow,TweenInfo.new(0.2),{
+				_lib:_Animation(CloseWindow,TweenInfo.new(0.2),{
 					Size = UDim2.new(0, 0, 0, 23),
 					BackgroundTransparency = 1
 				})
 
-				PYMPLE:_Animation(ImageLabel,TweenInfo.new(0.2),{
+				_lib:_Animation(ImageLabel,TweenInfo.new(0.2),{
 					ImageTransparency = 1
 				})
 			end;
 		end;
 
 		function WindowArgs:Watermark()
-			local Signal = PYMPLE.__SIGNAL(true);
+			local Signal = _lib.__SIGNAL(true);
 
 			local Watermark = Instance.new("Frame")
 			local UICorner = Instance.new("UICorner")
@@ -10151,14 +10152,14 @@ function PYMPLE.new(Config : Window)
 			local WaternarkList = Instance.new("Frame")
 			local UIListLayout = Instance.new("UIListLayout")
 
-			Watermark.Name = PYMPLE:_RandomString()
+			Watermark.Name = _lib:_RandomString()
 			Watermark.Parent = PYMPLE
 			Watermark.AnchorPoint = Vector2.new(1, 0)
-			Watermark.BackgroundColor3 = PYMPLE.Colors.BGDBColor
+			Watermark.BackgroundColor3 = _lib.Colors.BGDBColor
 
-			PYMPLE:Drag(Watermark , Watermark, 0.1);
+			_lib:Drag(Watermark , Watermark, 0.1);
 
-			table.insert(PYMPLE.Elements.BGDBColor,{
+			table.insert(_lib.Elements.BGDBColor,{
 				Element = Watermark,
 				Property = 'BackgroundColor3'
 			});
@@ -10173,12 +10174,12 @@ function PYMPLE.new(Config : Window)
 			UICorner.CornerRadius = UDim.new(0, 3)
 			UICorner.Parent = Watermark
 
-			Logo.Name = PYMPLE:_RandomString()
+			Logo.Name = _lib:_RandomString()
 			Logo.Parent = Watermark
 			Logo.AnchorPoint = Vector2.new(1, 0.5)
-			Logo.BackgroundColor3 = PYMPLE.Colors.BGDBColor
+			Logo.BackgroundColor3 = _lib.Colors.BGDBColor
 
-			table.insert(PYMPLE.Elements.BGDBColor,{
+			table.insert(_lib.Elements.BGDBColor,{
 				Element = Logo,
 				Property = 'BackgroundColor3'
 			});
@@ -10196,19 +10197,19 @@ function PYMPLE.new(Config : Window)
 
 			Frame.Parent = Logo
 			Frame.AnchorPoint = Vector2.new(0, 0.5)
-			Frame.BackgroundColor3 = PYMPLE.Colors.Highlight
+			Frame.BackgroundColor3 = _lib.Colors.Highlight
 			Frame.BorderColor3 = Color3.fromRGB(0, 0, 0)
 			Frame.BorderSizePixel = 0
 			Frame.Position = UDim2.new(1, -5, 0.5, 0)
 			Frame.Size = UDim2.new(0, 2, 1, 0)
 			Frame.ZIndex = 151
 
-			table.insert(PYMPLE.Elements.Highlight,{
+			table.insert(_lib.Elements.Highlight,{
 				Element = Frame,
 				Property = "BackgroundColor3"
 			});
 
-			CompLogo.Name = PYMPLE:_RandomString()
+			CompLogo.Name = _lib:_RandomString()
 			CompLogo.Parent = Logo
 			CompLogo.AnchorPoint = Vector2.new(0.5, 0.5)
 			CompLogo.BackgroundTransparency = 1.000
@@ -10220,16 +10221,16 @@ function PYMPLE.new(Config : Window)
 			CompLogo.ZIndex = 159
 			CompLogo.Image = Config.Logo
 			
-			if PYMPLE.CustomHighlightMode then
-				CompLogo.ImageColor3 = PYMPLE.Colors.Highlight;
+			if _lib.CustomHighlightMode then
+				CompLogo.ImageColor3 = _lib.Colors.Highlight;
 
-				table.insert(PYMPLE.Elements.Highlight , {
+				table.insert(_lib.Elements.Highlight , {
 					Element = CompLogo,
 					Property = 'ImageColor3'
 				});
 			end;
 
-			WaternarkList.Name = PYMPLE:_RandomString()
+			WaternarkList.Name = _lib:_RandomString()
 			WaternarkList.Parent = Watermark
 			WaternarkList.AnchorPoint = Vector2.new(0.5, 0)
 			WaternarkList.BackgroundTransparency = 1.000
@@ -10248,7 +10249,7 @@ function PYMPLE.new(Config : Window)
 
 			local BackFrame = Instance.new("Frame")
 
-			BackFrame.Name = PYMPLE:_RandomString()
+			BackFrame.Name = _lib:_RandomString()
 			BackFrame.Parent = Watermark
 			BackFrame.AnchorPoint = Vector2.new(1, 0.5)
 			BackFrame.BackgroundTransparency = 1.000
@@ -10257,10 +10258,10 @@ function PYMPLE.new(Config : Window)
 			BackFrame.Position = UDim2.new(1, 0, 0.5, 0)
 			BackFrame.Size = UDim2.new(1, 30, 1, 0)
 
-			PYMPLE:_Blur(BackFrame,Signal);
+			_lib:_Blur(BackFrame,Signal);
 
 			UIListLayout:GetPropertyChangedSignal('AbsoluteContentSize'):Connect(function()
-				PYMPLE:_Animation(Watermark,TweenInfo.new(0.4),{
+				_lib:_Animation(Watermark,TweenInfo.new(0.4),{
 					Size = UDim2.new(0, UIListLayout.AbsoluteContentSize.X + 8, 0, 23)
 				});
 			end)
@@ -10268,7 +10269,7 @@ function PYMPLE.new(Config : Window)
 			local Args = {};
 
 			function Args:AddText(Watermark : Watermark)
-				Watermark = PYMPLE.__CONFIG(Watermark, {
+				Watermark = _lib.__CONFIG(Watermark, {
 					Text = "Watermark",
 					Icon = "info"
 				});
@@ -10276,7 +10277,7 @@ function PYMPLE.new(Config : Window)
 				local Icon = Instance.new("ImageLabel")
 				local TextLabel = Instance.new("TextLabel")
 
-				Icon.Name = PYMPLE:_RandomString()
+				Icon.Name = _lib:_RandomString()
 				Icon.Parent = WaternarkList
 				Icon.BackgroundTransparency = 1.000
 				Icon.BorderColor3 = Color3.fromRGB(0, 0, 0)
@@ -10284,7 +10285,7 @@ function PYMPLE.new(Config : Window)
 				Icon.Size = UDim2.fromOffset(15,15)
 				Icon.SizeConstraint = Enum.SizeConstraint.RelativeYY
 				Icon.ZIndex = 156
-				Icon.Image = PYMPLE:_GetIcon(Watermark.Icon);
+				Icon.Image = _lib:_GetIcon(Watermark.Icon);
 
 				TextLabel.Parent = WaternarkList
 				TextLabel.BackgroundTransparency = 1.000
@@ -10294,11 +10295,11 @@ function PYMPLE.new(Config : Window)
 				TextLabel.ZIndex = 156
 				TextLabel.Font = Enum.Font.GothamMedium
 				TextLabel.Text = Watermark.Text
-				TextLabel.TextColor3 = PYMPLE.Colors.SwitchColor
+				TextLabel.TextColor3 = _lib.Colors.SwitchColor
 				TextLabel.TextSize = 10.000
 				TextLabel.TextXAlignment = Enum.TextXAlignment.Left
 
-				table.insert(PYMPLE.Elements.SwitchColor , {
+				table.insert(_lib.Elements.SwitchColor , {
 					Element = TextLabel,
 					Property = 'TextColor3'
 				});
@@ -10324,15 +10325,15 @@ function PYMPLE.new(Config : Window)
 
 					if PYMPLE.PerformanceMode then
 						if v then
-							PYMPLE:_SetNilP(Icon , WaternarkList);
-							PYMPLE:_SetNilP(TextLabel , WaternarkList);
+							_lib:_SetNilP(Icon , WaternarkList);
+							_lib:_SetNilP(TextLabel , WaternarkList);
 						else
-							PYMPLE:_SetNilP(Icon , nil);
-							PYMPLE:_SetNilP(TextLabel , nil);
+							_lib:_SetNilP(Icon , nil);
+							_lib:_SetNilP(TextLabel , nil);
 						end;
 					else
-						PYMPLE:_SetNilP(Icon , WaternarkList);
-						PYMPLE:_SetNilP(TextLabel , WaternarkList);
+						_lib:_SetNilP(Icon , WaternarkList);
+						_lib:_SetNilP(TextLabel , WaternarkList);
 					end;
 				end;
 
@@ -10368,13 +10369,13 @@ function PYMPLE.new(Config : Window)
 			WindowArgs:Toggle(WindowArgs.IsOpen)
 		end;
 
-		local Button = PYMPLE:_Input(CloseWindow,function()
+		local Button = _lib:_Input(CloseWindow,function()
 			WindowArgs:_ToggleUI()
 		end)
 
-		if not PYMPLE:_IsMobile() then
+		if not _lib:_IsMobile() then
 
-			PYMPLE:_Hover(Button,function()
+			_lib:_Hover(Button,function()
 				ImageLabel:SetAttribute("Hover",true);
 			end , function()
 				ImageLabel:SetAttribute("Hover",false);
@@ -10383,11 +10384,11 @@ function PYMPLE.new(Config : Window)
 
 		table.insert(WindowArgs.THREADS,task.spawn(function()
 			while true do task.wait(0.15)
-				if PYMPLE:_IsMobile() then
+				if _lib:_IsMobile() then
 					ToggleCloseUI(true);
 
 					if WindowArgs.IsOpen then
-						PYMPLE:_Animation(ImageLabel,TweenInfo.new(0.2),{
+						_lib:_Animation(ImageLabel,TweenInfo.new(0.2),{
 							ImageTransparency = 0.35
 						});
 
@@ -10395,7 +10396,7 @@ function PYMPLE.new(Config : Window)
 					else
 						ImageLabel:GetAttribute("Hover",true);
 
-						PYMPLE:_Animation(ImageLabel,TweenInfo.new(0.2),{
+						_lib:_Animation(ImageLabel,TweenInfo.new(0.2),{
 							ImageTransparency = 0.1
 						});
 					end;
@@ -10429,7 +10430,7 @@ function PYMPLE.new(Config : Window)
 		config.UserProfile = config.UserProfile or WindowArgs.Profile or string.format("rbxthumb://type=AvatarHeadShot&id=%s&w=150&h=150",tostring(LocalPlayer.UserId));
 
 		if PYMPLE.SecureMode and string.find(config.UserProfile, "rbxassetid://",1,true) then
-			config.UserProfile = PYMPLE:_GetIcon("user");
+			config.UserProfile = _lib:_GetIcon("user");
 		end;
 
 		UserText.Text = config.Username;
@@ -10451,7 +10452,7 @@ function PYMPLE.new(Config : Window)
 
 		local BlurElement = Instance.new("Frame")
 
-		BlurElement.Name = PYMPLE:_RandomString()
+		BlurElement.Name = _lib:_RandomString()
 		BlurElement.Parent = MainFrame
 		BlurElement.AnchorPoint = Vector2.new(1, 0.5)
 		BlurElement.BackgroundTransparency = 1.000
@@ -10462,11 +10463,11 @@ function PYMPLE.new(Config : Window)
 		BlurElement.ZIndex = -100
 		BlurElement.Active = true
 
-		PYMPLE:_Blur(BlurElement , WindowOpen);
+		_lib:_Blur(BlurElement , WindowOpen);
 
 		local MovementFrame = Instance.new("Frame")
 
-		MovementFrame.Name = PYMPLE:_RandomString()
+		MovementFrame.Name = _lib:_RandomString()
 		MovementFrame.Parent = MainFrame
 		MovementFrame.AnchorPoint = Vector2.new(1, 0.5)
 		MovementFrame.BackgroundTransparency = 1.000
@@ -10476,12 +10477,12 @@ function PYMPLE.new(Config : Window)
 		MovementFrame.Size = UDim2.new(1, 0, 1, 0)
 		MovementFrame.ZIndex = 9
 
-		PYMPLE:Drag(MovementFrame,MainFrame,0.1)
+		_lib:Drag(MovementFrame,MainFrame,0.1)
 
 		SelectionFrame.Position = UDim2.new(1, 5, 0, 28)
 		SelectionFrame.Size = UDim2.new(0, 8, 0, 22)
 
-		table.insert(PYMPLE.Elements.Highlight,{
+		table.insert(_lib.Elements.Highlight,{
 			Element = SelectionFrame,
 			Property = "BackgroundColor3"
 		});
@@ -10490,32 +10491,32 @@ function PYMPLE.new(Config : Window)
 			BlurElement.Size = UDim2.new(1, TabFrame.AbsoluteSize.X - 35, 1, 0);
 			MovementFrame.Size = UDim2.new(1, TabFrame.AbsoluteSize.X - 35, 1, 0);
 
-			SelectionFrame.BackgroundColor3 = PYMPLE.Colors.Highlight;
+			SelectionFrame.BackgroundColor3 = _lib.Colors.Highlight;
 
 			if WindowArgs.SelectedTab and WindowArgs.IsOpen then
 				local vili = -(TabButtons.AbsolutePosition.Y - WindowArgs.SelectedTab.AbsolutePosition.Y) + 4;
 				local distance = (SelectionFrame.Position.Y.Offset - vili);
 
 				if vili < 0 or vili > TabButtons.AbsoluteSize.Y then
-					PYMPLE:_Animation(SelectionFrame , TweenInfo.new(0.1) , {
+					_lib:_Animation(SelectionFrame , TweenInfo.new(0.1) , {
 						BackgroundTransparency = 1
 					});
 				else
 					if math.abs(distance) <= 10 then
-						PYMPLE:_Animation(SelectionFrame , TweenInfo.new(0.1) , {
+						_lib:_Animation(SelectionFrame , TweenInfo.new(0.1) , {
 							BackgroundTransparency = 0
 						});
 
 						SelectionFrame.Position = UDim2.new(1,5,0,math.ceil(vili));
 					else
-						PYMPLE:_Animation(SelectionFrame , TweenInfo.new(0.15) , {
+						_lib:_Animation(SelectionFrame , TweenInfo.new(0.15) , {
 							BackgroundTransparency = 0,
 							Position = UDim2.new(1,5,0,math.ceil(vili))
 						});
 					end;
 				end;
 			else
-				PYMPLE:_Animation(SelectionFrame , TweenInfo.new(0.15) , {
+				_lib:_Animation(SelectionFrame , TweenInfo.new(0.15) , {
 					BackgroundTransparency = 1
 				});
 			end;
@@ -10531,7 +10532,7 @@ function PYMPLE.new(Config : Window)
 	local OldDelayThread;
 	local DurationTime = tick();
 
-	PYMPLE:_Hover(TabFrame , function()
+	_lib:_Hover(TabFrame , function()
 		if OldDelayThread then
 			task.cancel(OldDelayThread);
 			OldDelayThread = nil;
@@ -10826,9 +10827,10 @@ function PYMPLE:ConfigManager(ConfigManager: ConfigManager) : ConfigFunctions
 end;
 
 function PYMPLE:Loader(IconId,Duration)
+	local _lib = PYMPLE
 	local PYMPLE = Instance.new("ScreenGui")
 
-	PYMPLE.Name = PYMPLE:_RandomString()
+	PYMPLE.Name = _lib:_RandomString()
 	PYMPLE.Parent = CoreGui
 	PYMPLE.Enabled = true
 	PYMPLE.ResetOnSpawn = false
@@ -10839,7 +10841,7 @@ function PYMPLE:Loader(IconId,Duration)
 	local Icon = Instance.new("ImageLabel")
 	local Vignette = Instance.new("ImageLabel")
 
-	Loader.Name = PYMPLE:_RandomString()
+	Loader.Name = _lib:_RandomString()
 	Loader.Parent = PYMPLE
 	Loader.AnchorPoint = Vector2.new(0.5, 0.5)
 	Loader.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
@@ -10849,7 +10851,7 @@ function PYMPLE:Loader(IconId,Duration)
 	Loader.Position = UDim2.new(0.5, 0, 0.5, 0)
 	Loader.Size = UDim2.new(1, 0, 1, 0)
 
-	Icon.Name = PYMPLE:_RandomString()
+	Icon.Name = _lib:_RandomString()
 	Icon.Parent = Loader
 	Icon.AnchorPoint = Vector2.new(0.5, 0.5)
 	Icon.BackgroundTransparency = 1.000
@@ -10858,61 +10860,61 @@ function PYMPLE:Loader(IconId,Duration)
 	Icon.Position = UDim2.new(0.5, 0, 0.5, 0)
 	Icon.Size = UDim2.new(0, 750, 0, 750)
 	Icon.ZIndex = 100
-	Icon.Image = IconId or PYMPLE.Logo;
+	Icon.Image = IconId or _lib.Logo;
 	Icon.ImageTransparency = 1
 
-	Vignette.Name = PYMPLE:_RandomString()
+	Vignette.Name = _lib:_RandomString()
 	Vignette.Parent = Loader
 	Vignette.BackgroundTransparency = 1.000
 	Vignette.BorderColor3 = Color3.fromRGB(27, 42, 53)
 	Vignette.BorderSizePixel = 0
 	Vignette.Size = UDim2.new(1, 0, 1, 0)
-	Vignette.Image = PYMPLE:CacheImage("rbxassetid://18720640102")
-	Vignette.ImageColor3 = PYMPLE.Colors.Highlight
+	Vignette.Image = _lib:CacheImage("rbxassetid://18720640102")
+	Vignette.ImageColor3 = _lib.Colors.Highlight
 	Vignette.ImageTransparency = 1
 	Vignette.AnchorPoint = Vector2.new(0.5,0.5)
 	Vignette.Position = UDim2.fromScale(0.5,0.5)
 
-	PYMPLE:_Animation(Loader,TweenInfo.new(0.55,Enum.EasingStyle.Quint),{
+	_lib:_Animation(Loader,TweenInfo.new(0.55,Enum.EasingStyle.Quint),{
 		BackgroundTransparency = 0.5
 	});
 
 	local Event = Instance.new('BindableEvent');
 
 	task.delay(0.5,function()
-		PYMPLE:_Animation(Icon,TweenInfo.new(0.75,Enum.EasingStyle.Quint),{
+		_lib:_Animation(Icon,TweenInfo.new(0.75,Enum.EasingStyle.Quint),{
 			ImageTransparency = 0.01,
 			Size = UDim2.new(0, 200, 0, 200)
 		});
 
 		task.delay(0.25,function()
-			PYMPLE:_Animation(Vignette,TweenInfo.new(5),{
+			_lib:_Animation(Vignette,TweenInfo.new(5),{
 				ImageTransparency = 0.2
 			});
 
 			task.wait(Duration or 4.5)
 
-			PYMPLE:_Animation(Vignette,TweenInfo.new(3,Enum.EasingStyle.Quint,Enum.EasingDirection.InOut),{
+			_lib:_Animation(Vignette,TweenInfo.new(3,Enum.EasingStyle.Quint,Enum.EasingDirection.InOut),{
 				Size = UDim2.new(2, 0, 2, 0)
 			});
 
-			PYMPLE:_Animation(Icon,TweenInfo.new(0.75,Enum.EasingStyle.Quint,Enum.EasingDirection.InOut),{
+			_lib:_Animation(Icon,TweenInfo.new(0.75,Enum.EasingStyle.Quint,Enum.EasingDirection.InOut),{
 				ImageTransparency = 1,
 			});
 
-			PYMPLE:_Animation(Loader,TweenInfo.new(1.5,Enum.EasingStyle.Quint,Enum.EasingDirection.InOut),{
+			_lib:_Animation(Loader,TweenInfo.new(1.5,Enum.EasingStyle.Quint,Enum.EasingDirection.InOut),{
 				BackgroundTransparency = 1
 			});
 
 			task.delay(0.1,function()
-				PYMPLE:_Animation(Vignette,TweenInfo.new(1,Enum.EasingStyle.Quint,Enum.EasingDirection.InOut),{
+				_lib:_Animation(Vignette,TweenInfo.new(1,Enum.EasingStyle.Quint,Enum.EasingDirection.InOut),{
 					ImageTransparency = 1
 				});
 
 				task.wait(0.2)
 
 				task.delay(3,function()
-					PYMPLE:Destroy();
+					_lib:Destroy();
 				end)
 			end)
 
