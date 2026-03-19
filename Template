@@ -4965,7 +4965,6 @@ function PYMPLE:_LoadElement(Parent: Frame , EnabledLine: boolean , Signal , Dis
 		Button.BorderSizePixel = 0
 		Button.Size = UDim2.new(1, -1, 0, 30)
 		Button.ZIndex = Zindex + 5
-		Button.ClipsDescendants = true
 
 		BlockLine.Name = PYMPLE:_RandomString()
 		BlockLine.Parent = Button
@@ -5009,10 +5008,6 @@ function PYMPLE:_LoadElement(Parent: Frame , EnabledLine: boolean , Signal , Dis
 		UICorner.CornerRadius = UDim.new(0, 3)
 		UICorner.Parent = Frame
 
-		local BtnScale = Instance.new("UIScale")
-		BtnScale.Scale = 1
-		BtnScale.Parent = Frame
-
 		TextLabel.Parent = Frame
 		TextLabel.AnchorPoint = Vector2.new(0.5, 0.5)
 		TextLabel.BackgroundTransparency = 1.000
@@ -5037,17 +5032,11 @@ function PYMPLE:_LoadElement(Parent: Frame , EnabledLine: boolean , Signal , Dis
 				PYMPLE:_Animation(Frame,TweenInfo.new(0.2),{
 					BackgroundTransparency = 0
 				})
-				PYMPLE:_Animation(BtnScale,TweenInfo.new(0.18,Enum.EasingStyle.Quint),{
-					Scale = 1.04
-				})
 			end;
 		end,function()
 			if Signal:GetValue() then
 				PYMPLE:_Animation(Frame,TweenInfo.new(0.2),{
 					BackgroundTransparency = 0.1
-				})
-				PYMPLE:_Animation(BtnScale,TweenInfo.new(0.18,Enum.EasingStyle.Quint),{
-					Scale = 1.0
 				})
 			end;
 		end);
@@ -10997,10 +10986,6 @@ local function _glowButton(parentOrSection, labelText, callback)
 		end
 	end)
 
-	local Scale = Instance.new("UIScale")
-	Scale.Scale = 1
-	Scale.Parent = Btn
-
 	local Label = Instance.new("TextLabel")
 	Label.AnchorPoint = Vector2.new(0.5, 0.5)
 	Label.BackgroundTransparency = 1
@@ -11017,11 +11002,9 @@ local function _glowButton(parentOrSection, labelText, callback)
 	pimpleHUB:_Input(Btn, callback)
 
 	pimpleHUB:_Hover(Btn, function()
-		pimpleHUB:_Animation(Scale, TweenInfo.new(0.18, Enum.EasingStyle.Quint), { Scale = 1.04 })
 		pimpleHUB:_Animation(BtnStroke, TweenInfo.new(0.18), { Transparency = 0.0 })
 		pimpleHUB:_Animation(Btn, TweenInfo.new(0.18), { BackgroundTransparency = 0 })
 	end, function()
-		pimpleHUB:_Animation(Scale, TweenInfo.new(0.18, Enum.EasingStyle.Quint), { Scale = 1.0 })
 		pimpleHUB:_Animation(BtnStroke, TweenInfo.new(0.18), { Transparency = 0.1 })
 		pimpleHUB:_Animation(Btn, TweenInfo.new(0.18), { BackgroundTransparency = 0.1 })
 	end)
