@@ -6450,11 +6450,26 @@ function PYMPLE.new(Config : Window)
 
 	UICorner_2.Parent = TabFrame
 
+	local TabBorderFrame = Instance.new("Frame")
+	TabBorderFrame.Name = _lib:_RandomString()
+	TabBorderFrame.Parent = TabFrame
+	TabBorderFrame.AnchorPoint = Vector2.new(0.5, 0.5)
+	TabBorderFrame.BackgroundTransparency = 1
+	TabBorderFrame.BorderSizePixel = 0
+	TabBorderFrame.Position = UDim2.new(0.5, 0, 0.5, 0)
+	TabBorderFrame.Size = UDim2.new(1, -1, 1, -1)
+	TabBorderFrame.ZIndex = TabFrame.ZIndex
+
+	local TabBorderCorner = Instance.new("UICorner")
+	TabBorderCorner.CornerRadius = UDim.new(0, 6)
+	TabBorderCorner.Parent = TabBorderFrame
+
 	local TabStroke = Instance.new("UIStroke")
 	TabStroke.Color = _lib.Colors.HighStrokeColor
 	TabStroke.Thickness = 1
-	TabStroke.Transparency = 0.35
-	TabStroke.Parent = TabFrame
+	TabStroke.Transparency = 0.3
+	TabStroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
+	TabStroke.Parent = TabBorderFrame
 	table.insert(_lib.Elements.HighStrokeColor, {
 		Element = TabStroke,
 		Property = "Color"
