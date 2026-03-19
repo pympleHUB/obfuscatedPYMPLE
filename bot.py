@@ -47,6 +47,8 @@ async def announce_key(new_key):
 
 @tasks.loop(hours=24)
 async def auto_rotate_key():
+    if auto_rotate_key.current_loop == 0:
+        return  # skip the immediate first run on startup
     new_key = generate_key()
     if update_key(new_key):
         await announce_key(new_key)
