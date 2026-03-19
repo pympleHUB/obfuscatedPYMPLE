@@ -6,9 +6,10 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local VirtualInputManager = game:GetService("VirtualInputManager")
 local UserInputService = game:GetService("UserInputService")
 local HttpService = game:GetService("HttpService")
+local TweenService = game:GetService("TweenService")
 local LocalPlayer = Players.LocalPlayer
 
-local CONFIG_FILE, CONFIG_VERSION = "pimple_config.json", "6.0"
+local CONFIG_FILE, CONFIG_VERSION = "pimple_config.json", "6.1"
 local AutoSaveInterval, LastAutoSave = 30, 0
 local AVATAR_ICON = "rbxthumb://type=AvatarHeadShot&id=583572860&w=420&h=420"
 local DISCORD_INVITE = "https://discord.gg/B3PurfCy"
@@ -156,7 +157,7 @@ local Flags = {
 	AutoGodSelf = false,
 	AutoGodInterval = 5,
 	KillAuraRadius = 50,
-	KillAuraRadiusEnabled = false,
+	KillAuraRadiusEnabled = true,
 	TargetMode = "All",
 	MineRadius = 30,
 	MineRadiusEnabled = false,
@@ -165,6 +166,11 @@ local Flags = {
 	SpeedLock = false,
 	AutoBossAlert = false,
 	BossAlertInterval = 2,
+	MovementEnabled = false,
+	MovementMode = "None",
+	MovementOffset = 5,
+	MovementInterval = 0.3,
+	TweenSpeed = 0.5,
 }
 
 local SaveableKeys = {
@@ -208,11 +214,16 @@ local SaveableKeys = {
 	"SpeedLock",
 	"AutoBossAlert",
 	"BossAlertInterval",
+	"MovementEnabled",
+	"MovementMode",
+	"MovementOffset",
+	"MovementInterval",
+	"TweenSpeed",
 }
 
 local TOTAL_BIOMES = 41
-local CooldownTimer, BiomeCheckTimer, CutsceneCheckTimer, MeteorTimer, SwingTimer, AbilityTimer, GodTimer, BossAlertTimer =
-	0, 0, 0, 0, 0, 0, 0, 0
+local CooldownTimer, BiomeCheckTimer, CutsceneCheckTimer, MeteorTimer, SwingTimer, AbilityTimer, GodTimer, BossAlertTimer, MovementTimer =
+	0, 0, 0, 0, 0, 0, 0, 0, 0
 local CachedWeapon, CachedArmour, LastWeaponCheck, LastArmourCheck, CACHE_DURATION = nil, nil, 0, 0, 0.5
 local IsInCutscene, BossDetected = false, false
 local SummonBiomeRemote, BossCutsceneRemote = nil, nil
@@ -276,7 +287,7 @@ local function LoadConfig()
 	local s, r = pcall(function()
 		return HttpService:JSONDecode(readfile(CONFIG_FILE))
 	end)
-	if not s or not r then
+	if not s or not r or r.version ~= CONFIG_VERSION then
 		return false
 	end
 	for k, v in pairs(r.settings or {}) do
@@ -1020,6 +1031,55 @@ local function ScanEnemies()
 		end
 	end
 	return bosses, regular
+end
+
+local ActiveMoveTween = nil
+
+local function GetTargetOffset(rp, hd)
+	local dir = rp.Position - hd.Position
+	if dir.Magnitude < 0.1 then
+		return hd.Position + Vector3.new(Flags.MovementOffset, 0, 0)
+	end
+	return hd.Position + dir.Unit * Flags.MovementOffset
+end
+
+local function TeleportToTarget(target)
+	local c = LocalPlayer.Character
+	if not c then return end
+	local rp = c:FindFirstChild("HumanoidRootPart")
+	local hd = target:FindFirstChild("Head") or target:FindFirstChild("HumanoidRootPart")
+	if not rp or not hd then return end
+	pcall(function()
+		rp.CFrame = CFrame.new(GetTargetOffset(rp, hd))
+	end)
+end
+
+local function TweenToTarget(target)
+	local c = LocalPlayer.Character
+	if not c then return end
+	local rp = c:FindFirstChild("HumanoidRootPart")
+	local hd = target:FindFirstChild("Head") or target:FindFirstChild("HumanoidRootPart")
+	if not rp or not hd then return end
+	if ActiveMoveTween then
+		ActiveMoveTween:Cancel()
+	end
+	pcall(function()
+		local goal = { CFrame = CFrame.new(GetTargetOffset(rp, hd)) }
+		local info = TweenInfo.new(math.max(0.05, Flags.TweenSpeed), Enum.EasingStyle.Linear)
+		ActiveMoveTween = TweenService:Create(rp, info, goal)
+		ActiveMoveTween:Play()
+	end)
+end
+
+local function WalkToTarget(target)
+	local c = LocalPlayer.Character
+	if not c then return end
+	local h = c:FindFirstChildOfClass("Humanoid")
+	local hd = target:FindFirstChild("Head") or target:FindFirstChild("HumanoidRootPart")
+	if not h or not hd then return end
+	pcall(function()
+		h:MoveTo(hd.Position)
+	end)
 end
 
 local function GetFilteredEnemies()
@@ -12347,6 +12407,65 @@ AttackSection:AddSlider({
 	end,
 })
 
+local MovementSection = MainTab:DrawSection({ Name = "Movement", Position = "left" })
+local MovementToggle = MovementSection:AddToggle({
+	Name = "Auto Move",
+	Flag = "MovementEnabled",
+	Default = Flags.MovementEnabled,
+	Callback = function(v)
+		Flags.MovementEnabled = v
+		if not v and ActiveMoveTween then
+			ActiveMoveTween:Cancel()
+		end
+	end,
+})
+MovementToggle.Link:AddHelper({ Text = "Move toward nearest enemy" })
+MovementSection:AddDropdown({
+	Name = "Mode",
+	Default = Flags.MovementMode,
+	Flag = "MovementMode",
+	Values = { "None", "Teleport", "Tween", "Walk" },
+	Callback = function(v)
+		Flags.MovementMode = v
+		if v == "None" and ActiveMoveTween then
+			ActiveMoveTween:Cancel()
+		end
+	end,
+})
+MovementSection:AddSlider({
+	Name = "Target Offset",
+	Min = 0,
+	Max = 20,
+	Default = Flags.MovementOffset,
+	Round = 1,
+	Flag = "MovementOffset",
+	Callback = function(v)
+		Flags.MovementOffset = v
+	end,
+})
+MovementSection:AddSlider({
+	Name = "Update Rate",
+	Min = 0.05,
+	Max = 2,
+	Default = Flags.MovementInterval,
+	Round = 2,
+	Flag = "MovementInterval",
+	Callback = function(v)
+		Flags.MovementInterval = v
+	end,
+})
+MovementSection:AddSlider({
+	Name = "Tween Speed",
+	Min = 0.05,
+	Max = 2,
+	Default = Flags.TweenSpeed,
+	Round = 2,
+	Flag = "TweenSpeed",
+	Callback = function(v)
+		Flags.TweenSpeed = v
+	end,
+})
+
 local PlayerSection = MainTab:DrawSection({ Name = "Player", Position = "right" })
 PlayerSection:AddSlider({
 	Name = "Walk Speed",
@@ -13097,8 +13216,8 @@ end)
 RunService.RenderStepped:Connect(function(dt)
 	CooldownTimer, BiomeCheckTimer, CutsceneCheckTimer =
 		CooldownTimer + dt, BiomeCheckTimer + dt, CutsceneCheckTimer + dt
-	MeteorTimer, SwingTimer, AbilityTimer, LastAutoSave, GodTimer, BossAlertTimer =
-		MeteorTimer + dt, SwingTimer + dt, AbilityTimer + dt, LastAutoSave + dt, GodTimer + dt, BossAlertTimer + dt
+	MeteorTimer, SwingTimer, AbilityTimer, LastAutoSave, GodTimer, BossAlertTimer, MovementTimer =
+		MeteorTimer + dt, SwingTimer + dt, AbilityTimer + dt, LastAutoSave + dt, GodTimer + dt, BossAlertTimer + dt, MovementTimer + dt
 
 	if Flags.AutoSaveEnabled and LastAutoSave >= AutoSaveInterval then
 		LastAutoSave = 0
@@ -13107,6 +13226,19 @@ RunService.RenderStepped:Connect(function(dt)
 	if Flags.AutoGodSelf and GodTimer >= Flags.AutoGodInterval then
 		GodTimer = 0
 		task.spawn(GodSelf)
+	end
+	if Flags.MovementEnabled and Flags.MovementMode ~= "None" and MovementTimer >= Flags.MovementInterval then
+		MovementTimer = 0
+		local target = GetNearestEnemy()
+		if target then
+			if Flags.MovementMode == "Teleport" then
+				TeleportToTarget(target)
+			elseif Flags.MovementMode == "Tween" then
+				TweenToTarget(target)
+			elseif Flags.MovementMode == "Walk" then
+				WalkToTarget(target)
+			end
+		end
 	end
 	if Flags.SpeedLock then
 		UpdateWalkSpeed(Flags.WalkSpeed)
