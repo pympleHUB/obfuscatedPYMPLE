@@ -1,3 +1,4 @@
+import asyncio
 import collections
 import discord
 import requests
@@ -254,7 +255,7 @@ async def announce_key(new_key, expires_at=None):
 
     color = random.choice(COLORS)
     greeting = random.choice(GREETINGS)
-    rotation_count = get_rotation_count()
+    rotation_count = await asyncio.to_thread(get_rotation_count)
 
     desc = f"# `{new_key}`\n\n"
     if expires_at:
@@ -307,9 +308,9 @@ async def auto_rotate_key():
     if auto_rotate_key.current_loop == 0:
         return
     new_key = generate_key()
-    if update_key(new_key):
-        add_to_history(new_key)
-        increment_rotation_count()
+    if await asyncio.to_thread(update_key, new_key):
+        await asyncio.to_thread(add_to_history, new_key)
+        await asyncio.to_thread(increment_rotation_count)
         await log_rotation(new_key, triggered_by="Auto-rotation")
         await announce_key(new_key, expires_at=datetime.now() + timedelta(hours=ROTATION_HOURS))
 
@@ -372,7 +373,7 @@ async def announce(ctx):
         return
     await log_cmd(ctx)
     await delete_cmd(ctx)
-    key, _ = gh_get(KEY_FILE)
+    key, _ = await asyncio.to_thread(gh_get, KEY_FILE)
     if not key:
         await ctx.author.send("No key set yet.")
         return
@@ -432,7 +433,7 @@ async def clearhistory(ctx):
         return
     await log_cmd(ctx)
     await delete_cmd(ctx)
-    gh_delete(HISTORY_FILE)
+    await asyncio.to_thread(gh_delete, HISTORY_FILE)
     await ctx.author.send("Key history cleared.")
 
 @bot.command()
@@ -442,7 +443,7 @@ async def getkey(ctx):
         return
     await log_cmd(ctx)
     await delete_cmd(ctx)
-    key, _ = gh_get(KEY_FILE)
+    key, _ = await asyncio.to_thread(gh_get, KEY_FILE)
     if key:
         await ctx.author.send(f"Current key: `{key}`")
     else:
@@ -455,7 +456,7 @@ async def keyhistory(ctx):
         return
     await log_cmd(ctx)
     await delete_cmd(ctx)
-    history, _ = gh_get(HISTORY_FILE)
+    history, _ = await asyncio.to_thread(gh_get, HISTORY_FILE)
     if not history:
         await ctx.author.send("No key history yet.")
         return
@@ -534,9 +535,9 @@ async def rotatenow(ctx):
     await log_cmd(ctx)
     await delete_cmd(ctx)
     new_key = generate_key()
-    if update_key(new_key):
-        add_to_history(new_key)
-        increment_rotation_count()
+    if await asyncio.to_thread(update_key, new_key):
+        await asyncio.to_thread(add_to_history, new_key)
+        await asyncio.to_thread(increment_rotation_count)
         auto_rotate_key.restart()
         await log_rotation(new_key, triggered_by=f"Manual — {ctx.author}")
         await announce_key(new_key, expires_at=datetime.now() + timedelta(hours=ROTATION_HOURS))
@@ -573,9 +574,9 @@ async def setkey(ctx, new_key: str):
         return
     await log_cmd(ctx)
     await delete_cmd(ctx)
-    if update_key(new_key):
-        add_to_history(new_key)
-        increment_rotation_count()
+    if await asyncio.to_thread(update_key, new_key):
+        await asyncio.to_thread(add_to_history, new_key)
+        await asyncio.to_thread(increment_rotation_count)
         auto_rotate_key.restart()
         await log_rotation(new_key, triggered_by=f"Manual — {ctx.author}")
         await announce_key(new_key, expires_at=datetime.now() + timedelta(hours=ROTATION_HOURS))
@@ -592,7 +593,7 @@ async def stats(ctx):
         return
     await log_cmd(ctx)
     await delete_cmd(ctx)
-    count = get_rotation_count()
+    count = await asyncio.to_thread(get_rotation_count)
     uptime = datetime.now() - bot_start_time
     hours, rem = divmod(int(uptime.total_seconds()), 3600)
     minutes = rem // 60
@@ -612,7 +613,7 @@ async def status(ctx):
         return
     await log_cmd(ctx)
     await delete_cmd(ctx)
-    key, _ = gh_get(KEY_FILE)
+    key, _ = await asyncio.to_thread(gh_get, KEY_FILE)
     uptime = datetime.now() - bot_start_time
     hours, rem = divmod(int(uptime.total_seconds()), 3600)
     minutes = rem // 60
@@ -746,7 +747,7 @@ async def on_ready():
     global bot_start_time, THUMBNAIL_URL
     bot_start_time = datetime.now()
     if not THUMBNAIL_URL:
-        THUMBNAIL_URL = get_roblox_avatar()
+        THUMBNAIL_URL = await asyncio.to_thread(get_roblox_avatar)
     bot.add_view(CopyKeyView())
     auto_rotate_key.start()
     clean_key_channel.start()
