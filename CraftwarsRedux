@@ -155,6 +155,14 @@ local Flags = {
 	KillHealthValue = math.huge,
 	AutoGodSelf = false,
 	AutoGodInterval = 5,
+	KillAuraRadius = 50,
+	KillAuraRadiusEnabled = false,
+	TargetMode = "All",
+	MineRadius = 30,
+	MineRadiusEnabled = false,
+	MeteorRadius = 200,
+	MeteorRadiusEnabled = false,
+	SpeedLock = false,
 }
 
 local SaveableKeys = {
@@ -188,6 +196,14 @@ local SaveableKeys = {
 	"KillHealthInput",
 	"AutoGodSelf",
 	"AutoGodInterval",
+	"KillAuraRadius",
+	"KillAuraRadiusEnabled",
+	"TargetMode",
+	"MineRadius",
+	"MineRadiusEnabled",
+	"MeteorRadius",
+	"MeteorRadiusEnabled",
+	"SpeedLock",
 }
 
 local TOTAL_BIOMES = 41
@@ -975,6 +991,44 @@ end
 local function ToggleAutoAbilities()
 	Flags.AutoAbilities = not Flags.AutoAbilities
 	UpdateToggleState(AutoAbilitiesToggle, Flags.AutoAbilities)
+end
+
+local function GetFilteredEnemies()
+	local c = LocalPlayer.Character
+	local rp = c and c:FindFirstChild("HumanoidRootPart")
+	local list = {}
+	for _, m in ipairs(GetAllEnemies()) do
+		local isBoss = m:FindFirstChild("BossMain") ~= nil
+			or IsSpecialBoss(m)
+			or (function()
+				local h = m:FindFirstChild("Humanoid")
+				return h and type(h.MaxHealth) == "number" and h.MaxHealth > 100000
+			end)()
+		if Flags.TargetMode == "Bosses Only" and not isBoss then
+			continue
+		end
+		if Flags.KillAuraRadiusEnabled and rp then
+			local hd = m:FindFirstChild("Head") or m:FindFirstChild("HumanoidRootPart")
+			if not hd or (hd.Position - rp.Position).Magnitude > Flags.KillAuraRadius then
+				continue
+			end
+		end
+		table.insert(list, m)
+	end
+	if Flags.TargetMode == "Nearest" and #list > 0 and rp then
+		local ne, nd = nil, math.huge
+		for _, m in ipairs(list) do
+			local hd = m:FindFirstChild("Head") or m:FindFirstChild("HumanoidRootPart")
+			if hd then
+				local d = (hd.Position - rp.Position).Magnitude
+				if d < nd then
+					nd, ne = d, m
+				end
+			end
+		end
+		return ne and { ne } or {}
+	end
+	return list
 end
 
 LoadConfig()
@@ -12238,6 +12292,35 @@ KillAuraSection:AddSlider({
 		Flags.AttackCooldown = v
 	end,
 })
+KillAuraSection:AddDropdown({
+	Name = "Target Mode",
+	Default = Flags.TargetMode,
+	Flag = "TargetMode",
+	Values = { "All", "Nearest", "Bosses Only" },
+	Callback = function(v)
+		Flags.TargetMode = v
+	end,
+})
+local RadiusFilterToggle = KillAuraSection:AddToggle({
+	Name = "Radius Filter",
+	Flag = "KillAuraRadiusEnabled",
+	Default = Flags.KillAuraRadiusEnabled,
+	Callback = function(v)
+		Flags.KillAuraRadiusEnabled = v
+	end,
+})
+RadiusFilterToggle.Link:AddHelper({ Text = "Only attack within set range" })
+KillAuraSection:AddSlider({
+	Name = "Radius",
+	Min = 10,
+	Max = 500,
+	Default = Flags.KillAuraRadius,
+	Round = 0,
+	Flag = "KillAuraRadius",
+	Callback = function(v)
+		Flags.KillAuraRadius = v
+	end,
+})
 
 local PlayerSection = MainTab:DrawSection({ Name = "Player", Position = "right" })
 PlayerSection:AddSlider({
@@ -12273,6 +12356,15 @@ PlayerSection:AddButton({
 		Notifier.new({ Title = "Reset", Content = "Speed: 16 | Jump: 50", Duration = 3, Icon = AVATAR_ICON })
 	end,
 })
+local SpeedLockToggle = PlayerSection:AddToggle({
+	Name = "Speed Lock",
+	Flag = "SpeedLock",
+	Default = Flags.SpeedLock,
+	Callback = function(v)
+		Flags.SpeedLock = v
+	end,
+})
+SpeedLockToggle.Link:AddHelper({ Text = "Maintain speed every frame" })
 
 local MineSection = MainTab:DrawSection({ Name = "Mine Targets", Position = "right" })
 MineSection:AddDropdown({
@@ -12287,6 +12379,26 @@ MineSection:AddDropdown({
 			t[m] = true
 		end
 		Flags.MineTargets = t
+	end,
+})
+local MineRadiusToggle = MineSection:AddToggle({
+	Name = "Radius Filter",
+	Flag = "MineRadiusEnabled",
+	Default = Flags.MineRadiusEnabled,
+	Callback = function(v)
+		Flags.MineRadiusEnabled = v
+	end,
+})
+MineRadiusToggle.Link:AddHelper({ Text = "Only mine within set range" })
+MineSection:AddSlider({
+	Name = "Mine Radius",
+	Min = 5,
+	Max = 200,
+	Default = Flags.MineRadius,
+	Round = 0,
+	Flag = "MineRadius",
+	Callback = function(v)
+		Flags.MineRadius = v
 	end,
 })
 
@@ -12370,6 +12482,26 @@ MeteorSection:AddSlider({
 	Flag = "MeteorCooldown",
 	Callback = function(v)
 		Flags.MeteorCooldown = v
+	end,
+})
+local MeteorRadiusToggle = MeteorSection:AddToggle({
+	Name = "Radius Filter",
+	Flag = "MeteorRadiusEnabled",
+	Default = Flags.MeteorRadiusEnabled,
+	Callback = function(v)
+		Flags.MeteorRadiusEnabled = v
+	end,
+})
+MeteorRadiusToggle.Link:AddHelper({ Text = "Only fire within set range" })
+MeteorSection:AddSlider({
+	Name = "Radius",
+	Min = 10,
+	Max = 500,
+	Default = Flags.MeteorRadius,
+	Round = 0,
+	Flag = "MeteorRadius",
+	Callback = function(v)
+		Flags.MeteorRadius = v
 	end,
 })
 
@@ -12844,6 +12976,10 @@ RunService.RenderStepped:Connect(function(dt)
 		GodTimer = 0
 		task.spawn(GodSelf)
 	end
+	if Flags.SpeedLock then
+		UpdateWalkSpeed(Flags.WalkSpeed)
+		UpdateJumpPower(Flags.JumpPower)
+	end
 	if CutsceneCheckTimer >= 1 then
 		BossDetected = DetectBossPresence()
 	end
@@ -12862,7 +12998,16 @@ RunService.RenderStepped:Connect(function(dt)
 		if w and rf then
 			local e = GetNearestEnemy()
 			if e then
-				FireMeteor(rf, e)
+				if Flags.MeteorRadiusEnabled then
+					local mc = LocalPlayer.Character
+					local mrp = mc and mc:FindFirstChild("HumanoidRootPart")
+					local ehd = e:FindFirstChild("Head")
+					if mrp and ehd and (ehd.Position - mrp.Position).Magnitude <= Flags.MeteorRadius then
+						FireMeteor(rf, e)
+					end
+				else
+					FireMeteor(rf, e)
+				end
 			end
 		end
 	end
@@ -12907,7 +13052,7 @@ RunService.RenderStepped:Connect(function(dt)
 	local hv = GetDamageValue()
 
 	if Flags.AutoEnemies then
-		for _, m in ipairs(GetAllEnemies()) do
+		for _, m in ipairs(GetFilteredEnemies()) do
 			local h = m:FindFirstChild("Humanoid")
 			if h and IsUsableHealth(h.Health) then
 				pcall(function()
@@ -12918,6 +13063,7 @@ RunService.RenderStepped:Connect(function(dt)
 	end
 
 	if Flags.AutoMines and type(Flags.MineTargets) == "table" then
+		local mrp2 = LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
 		for mn, sel in pairs(Flags.MineTargets) do
 			if sel and type(mn) == "string" then
 				local mf = workspace:FindFirstChild(mn)
@@ -12925,6 +13071,14 @@ RunService.RenderStepped:Connect(function(dt)
 					for _, c in ipairs(mf:GetChildren()) do
 						local o = c:FindFirstChild("Ore")
 						if o then
+							if Flags.MineRadiusEnabled and mrp2 then
+								local bp = c:IsA("BasePart") and c
+									or c:FindFirstChildOfClass("BasePart")
+								local opos = bp and bp.Position
+								if not opos or (opos - mrp2.Position).Magnitude > Flags.MineRadius then
+									continue
+								end
+							end
 							local oh = GetOreHealth(o)
 							if oh == nil or IsUsableHealth(oh) then
 								pcall(function()
