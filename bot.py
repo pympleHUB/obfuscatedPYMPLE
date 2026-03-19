@@ -255,7 +255,6 @@ async def announce_key(new_key, expires_at=None):
     color = random.choice(COLORS)
     greeting = random.choice(GREETINGS)
     rotation_count = get_rotation_count()
-    member_count = channel.guild.member_count if channel.guild else 0
 
     desc = f"# `{new_key}`\n\n"
     if expires_at:
@@ -264,12 +263,10 @@ async def announce_key(new_key, expires_at=None):
     else:
         desc += "Key will be resetting soon! Please check out <#1183563684828688446> for all of my projects!\n\nALL script-related videos are found on my YouTube Channel, linked below! Please Subscribe, Comment, and Like!"
 
-    if member_count:
-        desc += f"\n\n👥 **{member_count:,}** members in the server!"
-
     today = datetime.now().strftime("%d %B %Y")
     embed = discord.Embed(title=greeting, description=desc, color=color)
-    embed.set_footer(text=f"pympleHUB • Key #{rotation_count} • {today}")
+    embed.set_author(name=f"Key #{rotation_count}")
+    embed.set_footer(text=f"pympleHUB • {today}")
 
     thumb = THUMBNAIL_URL or bot.user.display_avatar.url
     embed.set_thumbnail(url=thumb)
