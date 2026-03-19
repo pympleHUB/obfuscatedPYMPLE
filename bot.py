@@ -39,7 +39,9 @@ async def setkey(ctx, new_key: str):
         await ctx.send(f"Key updated to: `{new_key}`")
         channel = bot.get_channel(ANNOUNCE_CHANNEL_ID)
         if channel:
-            await channel.send(f"NEW KEY: {new_key}")
+            from datetime import datetime
+            today = datetime.now().strftime("%B %d, %Y")
+            await channel.send(f"{new_key} is the key as of {today}!")
     else:
         await ctx.send("Failed to update key.")
 
