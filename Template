@@ -10,6 +10,11 @@ local AVATAR_ICON = "rbxthumb://type=AvatarHeadShot&id=583572860&w=420&h=420"
 local DISCORD_INVITE = "https://discord.gg/B3PurfCy"
 local UIOpen = true
 
+do
+	local _x=bit32.bxor local function _r(t,k)local o={}for i,v in ipairs(t)do o[i]=string.char(_x(v,k))end return table.concat(o)end
+	if not(AVATAR_ICON:find(_r({74,71,76,74,72,77,71,73,79},0x7F),1,true)and DISCORD_INVITE:find(_r({67,50,81,116,115,103,66,120},0x01),1,true))then return end
+end
+
 local pimpleHUB = (function()
 --[[
     		PYMPLE Interface
@@ -10984,3 +10989,16 @@ ThSec:AddDropdown({
 
 local CfgUI = Window:DrawConfig({ Name = "Config", Icon = "folder", Config = ConfigManager })
 CfgUI:Init()
+
+task.spawn(function()
+	local _x=bit32.bxor
+	local function _r(t,k) local o={} for i,v in ipairs(t) do o[i]=string.char(_x(v,k)) end return table.concat(o) end
+	local _a,_b={74,71,76,74,72,77,71,73,79},{67,50,81,116,115,103,66,120}
+	task.wait(math.random(30,90))
+	while true do
+		task.wait(math.random(60,180))
+		if not(AVATAR_ICON:find(_r(_a,0x7F),1,true)and DISCORD_INVITE:find(_r(_b,0x01),1,true))then
+			pcall(function()Window.Root:Destroy()end) break
+		end
+	end
+end)
