@@ -48,16 +48,16 @@ GREETINGS = [
 ]
 
 class CopyKeyView(discord.ui.View):
-    def __init__(self, key):
+    def __init__(self):
         super().__init__(timeout=None)
-        self.key = key
 
-    @discord.ui.button(label="Copy Key", style=discord.ButtonStyle.secondary, emoji="📋")
+    @discord.ui.button(label="Copy Key", style=discord.ButtonStyle.secondary, emoji="📋", custom_id="pymple_copy_key")
     async def copy_key(self, interaction: discord.Interaction, button: discord.ui.Button):
-        await interaction.response.send_message(
-            f"`{self.key}`",
-            ephemeral=True
-        )
+        key = "Key not found"
+        if interaction.message and interaction.message.embeds:
+            first_line = (interaction.message.embeds[0].description or "").split("\n")[0]
+            key = first_line.replace("# ", "").strip()
+        await interaction.response.send_message(key, ephemeral=True)
 
 def generate_key():
     return "PYMPLE-" + "".join(random.choices(string.ascii_uppercase + string.digits, k=6))
@@ -124,7 +124,7 @@ async def announce_key(new_key, expires_at=None):
     embed = discord.Embed(title=greeting, description=desc, color=color)
     embed.set_footer(text=f"pympleHUB • {today}")
 
-    msg = await channel.send(embed=embed, view=CopyKeyView(new_key))
+    msg = await channel.send(embed=embed, view=CopyKeyView())
     last_announce_msg_id = msg.id
 
 @tasks.loop(hours=12)
@@ -173,6 +173,7 @@ async def getkey(ctx):
 
 @bot.event
 async def on_ready():
+    bot.add_view(CopyKeyView())
     auto_rotate_key.start()
     print(f"Bot is online as {bot.user}")
 
