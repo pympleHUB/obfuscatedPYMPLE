@@ -15,7 +15,9 @@ GITHUB_REPO = "pympleHUB/obfuscatedPYMPLE"
 KEY_FILE = "pympleKeyBot"
 HISTORY_FILE = "pympleKeyHistory"
 ROTATION_COUNT_FILE = "pympleKeyCount"
+EXEC_COUNT_FILE = "pympleExecCount"
 ANNOUNCE_CHANNEL_ID = int(os.environ["ANNOUNCE_CHANNEL_ID"])
+EXEC_STATS_CHANNEL_ID = int(os.environ.get("EXEC_STATS_CHANNEL_ID", 0))
 LOG_CHANNEL_ID = 1239788452623417405
 THUMBNAIL_URL = os.environ.get("THUMBNAIL_URL", "")
 ROBLOX_USER_ID = 583572860
@@ -192,6 +194,40 @@ def get_rotation_count():
         return int(content or 0)
     except:
         return 0
+
+def get_exec_count():
+    content, _ = gh_get(EXEC_COUNT_FILE)
+    try:
+        return int(content or 0)
+    except:
+        return 0
+
+def increment_exec_count():
+    content, sha = gh_get(EXEC_COUNT_FILE)
+    try:
+        count = int(content or 0) + 1
+    except:
+        count = 1
+    url = f"https://api.github.com/repos/{GITHUB_REPO}/contents/{EXEC_COUNT_FILE}"
+    headers = {"Authorization": f"token {GITHUB_TOKEN}"}
+    data = {
+        "message": "Update exec count",
+        "content": base64.b64encode(str(count).encode()).decode()
+    }
+    if sha:
+        data["sha"] = sha
+    requests.put(url, json=data, headers=headers)
+    return count
+
+async def update_exec_channel(count):
+    if not EXEC_STATS_CHANNEL_ID:
+        return
+    channel = bot.get_channel(EXEC_STATS_CHANNEL_ID)
+    if channel:
+        try:
+            await channel.edit(name=f"Executes: {count:,}")
+        except:
+            pass
 
 
 # --- Logging ---
@@ -723,6 +759,11 @@ async def on_message_edit(before: discord.Message, after: discord.Message):
 
 @bot.event
 async def on_message(message: discord.Message):
+    if message.webhook_id and message.channel.id == LOG_CHANNEL_ID:
+        if message.embeds and message.embeds[0].title == "pimpleHUB Executed":
+            count = await asyncio.to_thread(increment_exec_count)
+            await update_exec_channel(count)
+        return
     if message.author.bot or message.channel.id != ANNOUNCE_CHANNEL_ID:
         await bot.process_commands(message)
         return
@@ -744,14 +785,22 @@ async def on_message(message: discord.Message):
 
 @bot.event
 async def on_ready():
-    global bot_start_time, THUMBNAIL_URL
+    global bot_start_time, THUMBNAIL_URL, last_announce_msg_id
     bot_start_time = datetime.now()
     if not THUMBNAIL_URL:
         THUMBNAIL_URL = await asyncio.to_thread(get_roblox_avatar)
     bot.add_view(CopyKeyView())
+    channel = bot.get_channel(ANNOUNCE_CHANNEL_ID)
+    if channel and not last_announce_msg_id:
+        async for m in channel.history(limit=10):
+            if m.author == bot.user and m.embeds:
+                last_announce_msg_id = m.id
+                break
     auto_rotate_key.start()
     clean_key_channel.start()
     missed_rotation_check.start()
+    exec_count = await asyncio.to_thread(get_exec_count)
+    await update_exec_channel(exec_count)
     await log("✅ Bot Online", 0x2ECC71, [
         ("Bot", str(bot.user), True),
         ("Started At", f"<t:{int(bot_start_time.timestamp())}:F>", True),
