@@ -1,4 +1,3 @@
-import asyncio
 import discord
 import requests
 import base64
@@ -72,20 +71,19 @@ def update_key(new_key):
 
 async def expire_last_message():
     global last_announce_msg_id
-    if not last_announce_msg_id:
+    channel = bot.get_channel(ANNOUNCE_CHANNEL_ID)
+    if not channel:
+        return
+    msg_id = last_announce_msg_id
+    if not msg_id:
+        async for m in channel.history(limit=10):
+            if m.author == bot.user and m.embeds:
+                msg_id = m.id
+                break
+    if not msg_id:
         return
     try:
-        channel = bot.get_channel(ANNOUNCE_CHANNEL_ID)
-        old_msg = await channel.fetch_message(last_announce_msg_id)
-        old_embed = old_msg.embeds[0]
-        first_line = (old_embed.description or "").split("\n")[0].replace("# ", "")
-        footer = (old_embed.footer.text or "") + " • Expired"
-        for i in range(10, 0, -1):
-            desc = f"~~{first_line}~~\n\n~~This key has been rotated.~~\n\n*Deleting in {i}...*"
-            expired = discord.Embed(title=old_embed.title, description=desc, color=0x555555)
-            expired.set_footer(text=footer)
-            await old_msg.edit(embed=expired)
-            await asyncio.sleep(1)
+        old_msg = await channel.fetch_message(msg_id)
         await old_msg.delete()
     except:
         pass
