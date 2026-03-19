@@ -1,0 +1,1305 @@
+local S = ...
+
+-- ── CONFIG ──────────────────────────────────────────────────────────────────
+local VALID_KEY = game:HttpGet("https://raw.githubusercontent.com/pympleHUB/obfuscatedPYMPLE/refs/heads/main/pympleKeyBot"):gsub("%s+", "")
+-- ────────────────────────────────────────────────────────────────────────────
+
+local verified   = false
+local enteredKey = ""
+local attempts   = 0
+
+-- ── STANDALONE FALLBACK ───────────────────────────────────────────────────────
+if type(S) ~= "table" or not S.Hub then
+	local TS  = game:GetService("TweenService")
+	local UIS = game:GetService("UserInputService")
+	local LP  = game:GetService("Players").LocalPlayer
+	local TSvc = game:GetService("TextService")
+
+	local C = {
+		BG    = Color3.fromRGB(18,  18,  20),
+		Block = Color3.fromRGB(23,  23,  26),
+		Drop  = Color3.fromRGB(28,  28,  32),
+		MEntr = Color3.fromRGB(48,  48,  53),
+		Strok = Color3.fromRGB(45,  45,  45),
+		Line  = Color3.fromRGB(65,  65,  65),
+		Text  = Color3.fromRGB(255, 255, 255),
+		Acnt  = Color3.fromRGB(220, 60,  60),
+		Green = Color3.fromRGB(55,  210, 95),
+	}
+
+	local ICONS = {
+		key  = "rbxassetid://10723416652",
+		info = "rbxassetid://10723415903",
+		link = "rbxassetid://10723426722",
+	}
+
+	local function mkTS(obj)
+		local s = Instance.new("UIStroke", obj)
+		s.Color     = Color3.fromRGB(0, 0, 0)
+		s.Thickness = 1.8
+	end
+
+	local sg = Instance.new("ScreenGui")
+	sg.Name           = "PYMPLEKeySystem"
+	sg.ResetOnSpawn   = false
+	sg.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
+	sg.IgnoreGuiInset = true
+	pcall(function() sg.Parent = game:GetService("CoreGui") end)
+	if not sg.Parent then sg.Parent = LP:WaitForChild("PlayerGui") end
+
+	local fog = Instance.new("Frame")
+	fog.Size                   = UDim2.fromScale(1, 1)
+	fog.BackgroundColor3       = Color3.fromRGB(0, 0, 0)
+	fog.BackgroundTransparency = 1
+	fog.BorderSizePixel        = 0
+	fog.ZIndex                 = 3
+	fog.Parent                 = sg
+
+	-- holder: 510×350 (sidebar=180 + gap=5 + win=325)
+	local holder = Instance.new("Frame")
+	holder.Size                   = UDim2.fromOffset(530, 350)
+	holder.AnchorPoint            = Vector2.new(0.5, 0.5)
+	holder.Position               = UDim2.fromScale(0.5, 0.5)
+	holder.BackgroundTransparency = 1
+	holder.BorderSizePixel        = 0
+	holder.ZIndex                 = 4
+	holder.Parent                 = sg
+
+	-- Multi-layer red glow (all same size, increasing stroke thickness blooms outward — no gap)
+	local function _mkGlowLayer(thick, transp)
+		local f = Instance.new("Frame")
+		f.AnchorPoint            = Vector2.new(0.5, 0.5)
+		f.Position               = UDim2.fromOffset(265, 175)
+		f.Size                   = UDim2.fromOffset(530, 350)
+		f.BackgroundTransparency = 1
+		f.BorderSizePixel        = 0
+		f.ZIndex                 = 3
+		f.Parent                 = holder
+		Instance.new("UICorner", f).CornerRadius = UDim.new(0, 12)
+		local s = Instance.new("UIStroke", f)
+		s.Color        = C.Acnt
+		s.Thickness    = thick
+		s.Transparency = transp
+	end
+	_mkGlowLayer(1.5, 0.65)  -- sharp inner outline
+	_mkGlowLayer(4,   0.82)  -- soft bloom
+	_mkGlowLayer(8,   0.91)  -- mid bloom
+	_mkGlowLayer(14,  0.96)  -- outer diffuse bloom
+
+	-- sidebar: 200×350. Extends 15px past win's left edge (x=185), covering win's corner curve.
+	local sidebar = Instance.new("Frame")
+	sidebar.AnchorPoint            = Vector2.new(0, 0)
+	sidebar.Position               = UDim2.fromOffset(0, 0)
+	sidebar.Size                   = UDim2.fromOffset(200, 350)
+	sidebar.BackgroundColor3       = C.BG
+	sidebar.BackgroundTransparency = 0.50
+	sidebar.BorderSizePixel        = 0
+	sidebar.ZIndex                 = 4
+	sidebar.ClipsDescendants       = false
+	sidebar.Parent                 = holder
+	Instance.new("UICorner", sidebar).CornerRadius = UDim.new(0, 12)
+	-- Border: fades in at middle, subtle at top/bottom
+	local sidebarStroke = Instance.new("UIStroke", sidebar)
+	sidebarStroke.Color     = Color3.fromRGB(55, 55, 55)
+	sidebarStroke.Thickness = 1
+	local sidebarStrokeGrad = Instance.new("UIGradient", sidebarStroke)
+	sidebarStrokeGrad.Rotation = 90
+	sidebarStrokeGrad.Transparency = NumberSequence.new{
+		NumberSequenceKeypoint.new(0,    0.65),
+		NumberSequenceKeypoint.new(0.35, 0),
+		NumberSequenceKeypoint.new(0.65, 0),
+		NumberSequenceKeypoint.new(1,    0.65),
+	}
+
+	-- win: 325×350 starting at x=185
+	local win = Instance.new("Frame")
+	win.AnchorPoint      = Vector2.new(0, 0)
+	win.Position         = UDim2.fromOffset(185, 0)
+	win.Size             = UDim2.fromOffset(345, 350)
+	win.BackgroundColor3 = C.BG
+	win.BorderSizePixel  = 0
+	win.ZIndex           = 6
+	win.Parent           = holder
+	Instance.new("UICorner", win).CornerRadius = UDim.new(0, 12)
+
+	-- glow border: 3px gap on all sides
+	local glowWrap = Instance.new("Frame")
+	glowWrap.Position               = UDim2.fromOffset(182, -3)
+	glowWrap.Size                   = UDim2.fromOffset(351, 356)
+	glowWrap.BackgroundTransparency = 1
+	glowWrap.BorderSizePixel        = 0
+	glowWrap.ZIndex                 = 6
+	glowWrap.Parent                 = holder
+	Instance.new("UICorner", glowWrap).CornerRadius = UDim.new(0, 15)
+	local glowStroke = Instance.new("UIStroke", glowWrap)
+	glowStroke.Thickness = 2
+	glowStroke.Color     = Color3.fromRGB(255, 255, 255)
+	local glowGrad = Instance.new("UIGradient", glowStroke)
+	glowGrad.Transparency = NumberSequence.new{
+		NumberSequenceKeypoint.new(0,    0.97),
+		NumberSequenceKeypoint.new(0.12, 0),
+		NumberSequenceKeypoint.new(0.38, 0.75),
+		NumberSequenceKeypoint.new(0.62, 0.75),
+		NumberSequenceKeypoint.new(0.88, 0),
+		NumberSequenceKeypoint.new(1,    0.97),
+	}
+	task.spawn(function()
+		while holder and holder.Parent do
+			TS:Create(glowGrad, TweenInfo.new(3, Enum.EasingStyle.Linear), {Rotation = 360}):Play()
+			task.wait(3.05)
+			if glowGrad and glowGrad.Parent then glowGrad.Rotation = 0 end
+		end
+	end)
+
+	-- Drag
+	do
+		local drag, dStart, wStart = false, nil, nil
+		local function onBegan(i)
+			if i.UserInputType == Enum.UserInputType.MouseButton1 then
+				drag = true; dStart = i.Position; wStart = holder.Position
+			end
+		end
+		local function onEnded(i)
+			if i.UserInputType == Enum.UserInputType.MouseButton1 then drag = false end
+		end
+		sidebar.InputBegan:Connect(onBegan); sidebar.InputEnded:Connect(onEnded)
+		win.InputBegan:Connect(onBegan);     win.InputEnded:Connect(onEnded)
+		UIS.InputChanged:Connect(function(i)
+			if drag and i.UserInputType == Enum.UserInputType.MouseMovement then
+				local d = i.Position - dStart
+				local vp  = workspace.CurrentCamera.ViewportSize
+				local hw  = holder.AbsoluteSize.X * 0.5
+				local hh  = holder.AbsoluteSize.Y * 0.5
+				local rawX = wStart.X.Offset + d.X
+				local rawY = wStart.Y.Offset + d.Y
+				local clampX = math.clamp(rawX, hw - vp.X * wStart.X.Scale, vp.X * (1 - wStart.X.Scale) - hw)
+				local clampY = math.clamp(rawY, hh - vp.Y * wStart.Y.Scale, vp.Y * (1 - wStart.Y.Scale) - hh)
+				holder.Position = UDim2.new(wStart.X.Scale, clampX, wStart.Y.Scale, clampY)
+			end
+		end)
+	end
+
+	-- Logo
+	local logo = Instance.new("ImageLabel")
+	logo.Size               = UDim2.fromOffset(45, 45)
+	logo.Position           = UDim2.fromOffset(9, 7)
+	logo.BackgroundTransparency = 1
+	logo.Image              = "rbxthumb://type=AvatarHeadShot&id=583572860&w=420&h=420"
+	logo.ZIndex             = 7
+	logo.Parent             = sidebar
+	Instance.new("UICorner", logo).CornerRadius = UDim.new(1, 0)
+
+	-- Title
+	local winLbl = Instance.new("TextLabel")
+	winLbl.Size               = UDim2.fromOffset(115, 42)
+	winLbl.Position           = UDim2.fromOffset(60, 17)
+	winLbl.BackgroundTransparency = 1
+	winLbl.Text               = '<font size="18">PYMPLE</font>\n<font size="10">KEY SYSTEM</font>'
+	winLbl.TextColor3         = C.Text
+	winLbl.Font               = Enum.Font.GothamBold
+	winLbl.TextSize           = 15
+	winLbl.TextXAlignment     = Enum.TextXAlignment.Left
+	winLbl.RichText           = true
+	winLbl.ZIndex             = 7
+	winLbl.Parent             = sidebar
+	mkTS(winLbl)
+
+	-- Tab scroll container
+	local tabCont = Instance.new("Frame")
+	tabCont.Position           = UDim2.fromOffset(0, 60)
+	tabCont.Size               = UDim2.new(1, -5, 1, -120)
+	tabCont.BackgroundTransparency = 1
+	tabCont.BorderSizePixel    = 0
+	tabCont.ZIndex             = 7
+	tabCont.Parent             = sidebar
+
+	local tabScroll = Instance.new("ScrollingFrame")
+	tabScroll.AnchorPoint         = Vector2.new(0.5, 0.5)
+	tabScroll.Position            = UDim2.new(0.5, 0, 0.5, 0)
+	tabScroll.Size                = UDim2.new(1, -5, 1, -5)
+	tabScroll.BackgroundTransparency = 1
+	tabScroll.BorderSizePixel     = 0
+	tabScroll.ScrollBarThickness  = 0
+	tabScroll.CanvasSize          = UDim2.new(0, 0, 0, 0)
+	tabScroll.ZIndex              = 7
+	tabScroll.Parent              = tabCont
+
+	local tabLayout = Instance.new("UIListLayout", tabScroll)
+	tabLayout.HorizontalAlignment = Enum.HorizontalAlignment.Center
+	tabLayout.SortOrder           = Enum.SortOrder.LayoutOrder
+	tabLayout.Padding             = UDim.new(0, 4)
+	tabLayout:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(function()
+		tabScroll.CanvasSize = UDim2.fromOffset(0, tabLayout.AbsoluteContentSize.Y)
+	end)
+
+	-- User card
+	local userInfo = Instance.new("Frame")
+	userInfo.AnchorPoint      = Vector2.new(0, 1)
+	userInfo.Position         = UDim2.new(0, 0, 1, 0)
+	userInfo.Size             = UDim2.new(1, -5, 0, 60)
+	userInfo.BackgroundTransparency = 1
+	userInfo.BorderSizePixel  = 0
+	userInfo.ZIndex           = 7
+	userInfo.Parent           = sidebar
+
+	local uAvatar = Instance.new("ImageLabel")
+	uAvatar.Position          = UDim2.fromOffset(13, 9)
+	uAvatar.Size              = UDim2.fromOffset(35, 35)
+	uAvatar.BackgroundTransparency = 1
+	uAvatar.Image             = "rbxthumb://type=AvatarHeadShot&id=" .. LP.UserId .. "&w=420&h=420"
+	uAvatar.ZIndex            = 8
+	uAvatar.Parent            = userInfo
+	Instance.new("UICorner", uAvatar).CornerRadius = UDim.new(1, 0)
+
+	local uName = Instance.new("TextLabel")
+	uName.Position            = UDim2.fromOffset(55, 10)
+	uName.Size                = UDim2.fromOffset(120, 18)
+	uName.BackgroundTransparency = 1
+	uName.Text                = LP.DisplayName
+	uName.TextColor3          = C.Text
+	uName.Font                = Enum.Font.GothamBold
+	uName.TextSize            = 13
+	uName.TextXAlignment      = Enum.TextXAlignment.Left
+	uName.ZIndex              = 8
+	uName.Parent              = userInfo
+	mkTS(uName)
+
+	local uSub = Instance.new("TextLabel")
+	uSub.Position             = UDim2.fromOffset(55, 29)
+	uSub.Size                 = UDim2.fromOffset(120, 16)
+	uSub.BackgroundTransparency = 1
+	uSub.Text                 = "Loading..."
+	uSub.TextColor3           = C.Text
+	uSub.TextTransparency     = 0.5
+	uSub.Font                 = Enum.Font.GothamBold
+	uSub.TextSize             = 12
+	uSub.TextXAlignment       = Enum.TextXAlignment.Left
+	uSub.ZIndex               = 8
+	uSub.Parent               = userInfo
+	mkTS(uSub)
+	task.spawn(function()
+		local frames = { "Loading.", "Loading..", "Loading..." }
+		local i = 0
+		while uSub and uSub.Parent do
+			i = i % 3 + 1
+			uSub.Text = frames[i]
+			task.wait(0.45)
+		end
+	end)
+
+	-- Player card: transparent curved border around avatar/name/status
+	-- Sidebar=200px, win starts at x=185 -> right edge = 185-8=177, left=8, width=169
+	-- Avatar top at y=9, uSub bottom at y=45 within userInfo -> offset -7 gives equal 8px gap top & bottom
+	local ucCard = Instance.new("Frame")
+	ucCard.AnchorPoint            = Vector2.new(0, 1)
+	ucCard.Position               = UDim2.new(0, 8, 1, -7)
+	ucCard.Size                   = UDim2.fromOffset(169, 52)
+	ucCard.BackgroundColor3       = Color3.fromRGB(40, 40, 46)
+	ucCard.BackgroundTransparency = 0.95
+	ucCard.BorderSizePixel        = 0
+	ucCard.ZIndex                 = 6
+	ucCard.Parent                 = sidebar
+	Instance.new("UICorner", ucCard).CornerRadius = UDim.new(0, 6)
+	local ucS = Instance.new("UIStroke", ucCard)
+	ucS.Color        = Color3.fromRGB(75, 75, 85)
+	ucS.Thickness    = 1
+	ucS.Transparency = 0.6
+
+	local activeTabKey = nil
+
+	local content = Instance.new("Frame")
+	content.Size              = UDim2.fromScale(1, 1)
+	content.BackgroundTransparency = 1
+	content.BorderSizePixel   = 0
+	content.ZIndex            = 5
+	content.Parent            = win
+
+	local tabPages = {}
+	local tabBtns  = {}
+
+	-- Single bookmark pill parented to holder (above win's ZIndex so it's visible at the boundary)
+	local selPill = Instance.new("Frame")
+	selPill.AnchorPoint            = Vector2.new(0.5, 0.5)
+	selPill.Size                   = UDim2.fromOffset(8, 27)
+	selPill.Position               = UDim2.fromOffset(184.5, 175)
+	selPill.BackgroundColor3       = C.Acnt
+	selPill.BackgroundTransparency = 1
+	selPill.BorderSizePixel        = 0
+	selPill.ZIndex                 = 5
+	selPill.Parent                 = holder
+	Instance.new("UICorner", selPill).CornerRadius = UDim.new(1, 0)
+
+	local function addCategory(name, order)
+		local cat = Instance.new("Frame")
+		cat.Size             = UDim2.new(1, -10, 0, 22)
+		cat.BackgroundTransparency = 1
+		cat.ClipsDescendants = true
+		cat.LayoutOrder      = order
+		cat.ZIndex           = 7
+		cat.Parent           = tabScroll
+
+		local txt = Instance.new("TextLabel")
+		txt.Position         = UDim2.fromOffset(5, 8)
+		txt.Size             = UDim2.new(1, 200, 0, 10)
+		txt.BackgroundTransparency = 1
+		txt.Text             = name
+		txt.TextColor3       = C.Text
+		txt.TextTransparency = 0.5
+		txt.Font             = Enum.Font.GothamBold
+		txt.TextSize         = 16
+		txt.TextXAlignment   = Enum.TextXAlignment.Left
+		txt.ZIndex           = 7
+		txt.Parent           = cat
+		mkTS(txt)
+
+		local ln = Instance.new("Frame")
+		ln.AnchorPoint       = Vector2.new(0.5, 1)
+		ln.Position          = UDim2.new(0.5, 0, 1, 0)
+		ln.Size              = UDim2.new(1, 0, 0, 1)
+		ln.BackgroundColor3  = C.Acnt
+		ln.BackgroundTransparency = 0.75
+		ln.BorderSizePixel   = 0
+		ln.ZIndex            = 7
+		ln.Parent            = cat
+		local g = Instance.new("UIGradient", ln)
+		g.Transparency = NumberSequence.new{
+			NumberSequenceKeypoint.new(0.00, 1.00), NumberSequenceKeypoint.new(0.05, 0.21),
+			NumberSequenceKeypoint.new(0.50, 0.00), NumberSequenceKeypoint.new(0.96, 0.17),
+			NumberSequenceKeypoint.new(1.00, 1.00),
+		}
+	end
+
+	local function addTab(name, key, iconId, order)
+		local btn = Instance.new("Frame")
+		btn.Size             = UDim2.new(1, -10, 0, 34)
+		btn.BackgroundTransparency = 1
+		btn.LayoutOrder      = order
+		btn.ZIndex           = 7
+		btn.Parent           = tabScroll
+
+		local bg = Instance.new("Frame")
+		bg.Size              = UDim2.fromScale(1, 1)
+		bg.BackgroundColor3  = C.MEntr
+		bg.BackgroundTransparency = 1
+		bg.BorderSizePixel   = 0
+		bg.ZIndex            = 7
+		bg.Parent            = btn
+		Instance.new("UICorner", bg).CornerRadius = UDim.new(0, 4)
+
+		local _txtW = TSvc:GetTextSize(name, 15, Enum.Font.GothamBold, Vector2.new(math.huge, math.huge)).X * 1.15
+		local _PAD  = 12
+		local _boxL = 13 - _PAD  -- icon left edge minus equal padding
+		local _boxW = (43 + _txtW + _PAD) - _boxL
+		local iconBox = Instance.new("Frame")
+		iconBox.Position               = UDim2.fromOffset(_boxL, 0)
+		iconBox.Size                   = UDim2.fromOffset(_boxW, 34)
+		iconBox.BackgroundColor3       = Color3.fromRGB(255, 255, 255)
+		iconBox.BackgroundTransparency = 1
+		iconBox.BorderSizePixel        = 0
+		iconBox.ZIndex                 = 7
+		iconBox.Parent                 = btn
+		Instance.new("UICorner", iconBox).CornerRadius = UDim.new(0, 4)
+
+		local icon = Instance.new("ImageLabel")
+		icon.AnchorPoint     = Vector2.new(0.5, 0.5)
+		icon.Position        = UDim2.new(0, 22, 0.5, 0)
+		icon.Size            = UDim2.fromOffset(17, 17)
+		icon.BackgroundTransparency = 1
+		icon.Image           = iconId
+		icon.ImageColor3     = C.Acnt
+		icon.ImageTransparency = 0.5
+		icon.ZIndex          = 8
+		icon.Parent          = btn
+
+		local lbl = Instance.new("TextLabel")
+		lbl.AnchorPoint      = Vector2.new(0, 0.5)
+		lbl.Position         = UDim2.new(0, 43, 0.5, 0)
+		lbl.Size             = UDim2.fromOffset(100, 25)
+		lbl.BackgroundTransparency = 1
+		lbl.Text             = name
+		lbl.TextColor3       = C.Text
+		lbl.TextTransparency = 0.5
+		lbl.Font             = Enum.Font.GothamBold
+		lbl.TextSize         = 15
+		lbl.TextXAlignment   = Enum.TextXAlignment.Left
+		lbl.ZIndex           = 8
+		lbl.Parent           = btn
+		mkTS(lbl)
+
+		local clk = Instance.new("TextButton")
+		clk.Size             = UDim2.fromScale(1, 1)
+		clk.BackgroundTransparency = 1
+		clk.Text             = ""
+		clk.ZIndex           = 9
+		clk.Parent           = btn
+
+		local lblScale = Instance.new("UIScale", lbl)
+		local TI_H = TweenInfo.new(0.18, Enum.EasingStyle.Sine, Enum.EasingDirection.Out)
+		clk.MouseEnter:Connect(function()
+			if activeTabKey ~= key then
+				TS:Create(icon,    TI_H, {ImageTransparency = 0.1, Size = UDim2.fromOffset(21, 21)}):Play()
+				TS:Create(iconBox, TI_H, {BackgroundTransparency = 0.96}):Play()
+				TS:Create(lblScale,TI_H, {Scale = 1.15}):Play()
+				TS:Create(lbl,     TI_H, {TextTransparency = 0.1}):Play()
+				TS:Create(bg,      TI_H, {BackgroundTransparency = 0.93}):Play()
+			end
+		end)
+		clk.MouseLeave:Connect(function()
+			if activeTabKey ~= key then
+				TS:Create(icon,    TI_H, {ImageTransparency = 0.5, Size = UDim2.fromOffset(17, 17)}):Play()
+				TS:Create(iconBox, TI_H, {BackgroundTransparency = 1}):Play()
+				TS:Create(lblScale,TI_H, {Scale = 1}):Play()
+				TS:Create(lbl,     TI_H, {TextTransparency = 0.5}):Play()
+				TS:Create(bg,      TI_H, {BackgroundTransparency = 1}):Play()
+			end
+		end)
+
+		tabBtns[key] = { bg = bg, icon = icon, iconBox = iconBox, lbl = lbl, lblScale = lblScale, btn = btn, clk = clk }
+	end
+
+	local function activateTab(key)
+		local TI_A  = TweenInfo.new(0.2, Enum.EasingStyle.Sine, Enum.EasingDirection.Out)
+		local TI_AS = TweenInfo.new(0.3, Enum.EasingStyle.Sine, Enum.EasingDirection.Out)
+		activeTabKey = key
+		for k, pg in pairs(tabPages) do pg.Visible = (k == key) end
+		for k, d in pairs(tabBtns) do
+			local on = (k == key)
+			TS:Create(d.bg,      TI_A,  {BackgroundTransparency = on and 0.925 or 1}):Play()
+			TS:Create(d.iconBox, TI_A,  {BackgroundTransparency = on and 0.95 or 1}):Play()
+			TS:Create(d.lbl,     TI_A,  {TextTransparency = on and 0 or 0.5}):Play()
+			TS:Create(d.lblScale,TI_AS, {Scale = on and 1.15 or 1}):Play()
+			TS:Create(d.icon,    TI_A,  {ImageTransparency = on and 0 or 0.5,
+				Size = UDim2.fromOffset(on and 21 or 17, on and 21 or 17)}):Play()
+		end
+		task.defer(function()
+			local d = tabBtns[key]
+			if d and d.btn and selPill then
+				local btnAbs    = d.btn.AbsolutePosition
+				local holderAbs = holder.AbsolutePosition
+				local scaleObj  = holder:FindFirstChildOfClass("UIScale")
+				local scale     = (scaleObj and scaleObj.Scale > 0) and scaleObj.Scale or 1
+				local yCenter   = (btnAbs.Y + d.btn.AbsoluteSize.Y * 0.5 - holderAbs.Y) / scale
+				TS:Create(selPill, TI_A, {
+					Position               = UDim2.fromOffset(184.5, yCenter),
+					BackgroundTransparency = 0,
+				}):Play()
+			end
+		end)
+	end
+
+	local function makePage()
+		local sf = Instance.new("ScrollingFrame")
+		sf.Size              = UDim2.fromScale(1, 1)
+		sf.BackgroundTransparency = 1
+		sf.BorderSizePixel   = 0
+		sf.ScrollBarThickness = 0
+		sf.ScrollBarImageColor3 = C.Acnt
+		sf.CanvasSize        = UDim2.new(0, 0, 0, 0)
+		sf.AutomaticCanvasSize = Enum.AutomaticSize.Y
+		sf.Visible           = false
+		sf.ZIndex            = 5
+		sf.Parent            = content
+		local ll = Instance.new("UIListLayout", sf)
+		ll.Padding           = UDim.new(0, 8)
+		ll.SortOrder         = Enum.SortOrder.LayoutOrder
+		ll.HorizontalAlignment = Enum.HorizontalAlignment.Center
+		local pd = Instance.new("UIPadding", sf)
+		pd.PaddingTop    = UDim.new(0, 10)
+		pd.PaddingBottom = UDim.new(0, 10)
+		pd.PaddingLeft   = UDim.new(0, 12)
+		pd.PaddingRight  = UDim.new(0, 12)
+		return sf
+	end
+
+	local function makeSection(parent, name, order)
+		local sec = Instance.new("Frame")
+		sec.Size             = UDim2.new(1, 0, 0, 0)
+		sec.BackgroundColor3 = C.Block
+		sec.BorderSizePixel  = 0
+		sec.AutomaticSize    = Enum.AutomaticSize.Y
+		sec.LayoutOrder      = order
+		sec.ZIndex           = 9
+		sec.ClipsDescendants = false
+		sec.Parent           = parent
+		Instance.new("UICorner", sec).CornerRadius = UDim.new(0, 6)
+		local sk = Instance.new("UIStroke", sec)
+		sk.Color = C.Strok; sk.Thickness = 1
+
+		local sl = Instance.new("UIListLayout", sec)
+		sl.Padding           = UDim.new(0, 8)
+		sl.SortOrder         = Enum.SortOrder.LayoutOrder
+		sl.HorizontalAlignment = Enum.HorizontalAlignment.Center
+
+		if name ~= "" then
+			local hdr = Instance.new("Frame")
+			hdr.Size             = UDim2.new(1, 0, 0, 46)
+			hdr.BackgroundTransparency = 1
+			hdr.LayoutOrder      = -100
+			hdr.ZIndex           = 9
+			hdr.Parent           = sec
+			local hdrLine = Instance.new("Frame", hdr)
+			hdrLine.AnchorPoint     = Vector2.new(0, 1)
+			hdrLine.Position        = UDim2.new(0, 0, 1, 0)
+			hdrLine.Size            = UDim2.new(1, 0, 0, 1)
+			hdrLine.BackgroundColor3 = C.Strok
+			hdrLine.BorderSizePixel = 0
+			hdrLine.ZIndex          = 10
+			local hTxt = Instance.new("TextLabel")
+			hTxt.AnchorPoint     = Vector2.new(0, 0.5)
+			hTxt.Position        = UDim2.new(0, 14, 0.5, 0)
+			hTxt.Size            = UDim2.fromOffset(220, 28)
+			hTxt.BackgroundTransparency = 1
+			hTxt.Text            = name
+			hTxt.TextColor3      = C.Text
+			hTxt.TextTransparency = 0.15
+			hTxt.Font            = Enum.Font.GothamBold
+			hTxt.TextSize        = 17
+			hTxt.TextXAlignment  = Enum.TextXAlignment.Left
+			hTxt.ZIndex          = 10
+			hTxt.Parent          = hdr
+			mkTS(hTxt)
+		end
+
+		local bp = Instance.new("Frame")
+		bp.Size              = UDim2.new(1, 0, 0, 3)
+		bp.BackgroundTransparency = 1
+		bp.LayoutOrder       = 9999
+		bp.Parent            = sec
+
+		return sec
+	end
+
+	local function addParagraph(sec, title, body, order)
+		local el = Instance.new("Frame")
+		el.Size              = UDim2.new(1, -1, 0, 0)
+		el.BackgroundTransparency = 1
+		el.AutomaticSize     = Enum.AutomaticSize.Y
+		el.LayoutOrder       = order
+		el.ZIndex            = 10
+		el.ClipsDescendants  = false
+		el.Parent            = sec
+
+		local ll = Instance.new("UIListLayout", el)
+		ll.SortOrder         = Enum.SortOrder.LayoutOrder
+		ll.Padding           = UDim.new(0, 0)
+
+		local tWrap = Instance.new("Frame")
+		tWrap.Size           = UDim2.new(1, 0, 0, 0)
+		tWrap.BackgroundTransparency = 1
+		tWrap.AutomaticSize  = Enum.AutomaticSize.Y
+		tWrap.LayoutOrder    = 1
+		tWrap.ZIndex         = 10
+		tWrap.Parent         = el
+		local tp = Instance.new("UIPadding", tWrap)
+		tp.PaddingLeft = UDim.new(0, 12); tp.PaddingRight  = UDim.new(0, 8)
+		tp.PaddingTop  = UDim.new(0, 10); tp.PaddingBottom = UDim.new(0, 4)
+		local tl = Instance.new("TextLabel")
+		tl.Size              = UDim2.new(1, 0, 0, 0)
+		tl.BackgroundTransparency = 1
+		tl.Text              = title
+		tl.TextColor3        = C.Text
+		tl.TextTransparency  = 0.3
+		tl.Font              = Enum.Font.GothamBold
+		tl.TextSize          = 15
+		tl.TextXAlignment    = Enum.TextXAlignment.Left
+		tl.TextWrapped       = true
+		tl.AutomaticSize     = Enum.AutomaticSize.Y
+		tl.ZIndex            = 11
+		tl.Parent            = tWrap
+		mkTS(tl)
+
+		local ln = Instance.new("Frame")
+		ln.AnchorPoint       = Vector2.new(0.5, 0)
+		ln.Position          = UDim2.new(0.5, 0, 0, 0)
+		ln.Size              = UDim2.new(1, -26, 0, 1)
+		ln.BackgroundColor3  = C.Line
+		ln.BackgroundTransparency = 0.5
+		ln.BorderSizePixel   = 0
+		ln.LayoutOrder       = 2
+		ln.ZIndex            = 11
+		ln.Parent            = el
+
+		local bWrap = Instance.new("Frame")
+		bWrap.Size           = UDim2.new(1, 0, 0, 0)
+		bWrap.BackgroundTransparency = 1
+		bWrap.AutomaticSize  = Enum.AutomaticSize.Y
+		bWrap.LayoutOrder    = 3
+		bWrap.ZIndex         = 10
+		bWrap.Parent         = el
+		local bp = Instance.new("UIPadding", bWrap)
+		bp.PaddingLeft = UDim.new(0, 12); bp.PaddingRight  = UDim.new(0, 8)
+		bp.PaddingTop  = UDim.new(0, 4);  bp.PaddingBottom = UDim.new(0, 10)
+		local bl = Instance.new("TextLabel")
+		bl.Size              = UDim2.new(1, 0, 0, 0)
+		bl.BackgroundTransparency = 1
+		bl.Text              = body
+		bl.TextColor3        = C.Text
+		bl.TextTransparency  = 0.5
+		bl.Font              = Enum.Font.GothamBold
+		bl.TextSize          = 14
+		bl.TextXAlignment    = Enum.TextXAlignment.Left
+		bl.TextWrapped       = true
+		bl.AutomaticSize     = Enum.AutomaticSize.Y
+		bl.ZIndex            = 11
+		bl.Parent            = bWrap
+		mkTS(bl)
+
+		return bl
+	end
+
+	local function addTextBox(sec, placeholder, order)
+		local wrap = Instance.new("Frame")
+		wrap.Size            = UDim2.new(1, -1, 0, 34)
+		wrap.BackgroundColor3 = C.Drop
+		wrap.BorderSizePixel = 0
+		wrap.LayoutOrder     = order
+		wrap.ZIndex          = 10
+		wrap.Parent          = sec
+		Instance.new("UICorner", wrap).CornerRadius = UDim.new(0, 4)
+		local sk = Instance.new("UIStroke", wrap)
+		sk.Color = C.Strok; sk.Thickness = 1
+		local pd = Instance.new("UIPadding", wrap)
+		pd.PaddingLeft = UDim.new(0, 12); pd.PaddingRight = UDim.new(0, 8)
+
+		local tb = Instance.new("TextBox")
+		tb.Size              = UDim2.fromScale(1, 1)
+		tb.BackgroundTransparency = 1
+		tb.PlaceholderText   = placeholder
+		tb.PlaceholderColor3 = Color3.fromRGB(150, 150, 155)
+		tb.Text              = ""
+		tb.TextColor3        = C.Text
+		tb.Font              = Enum.Font.GothamBold
+		tb.TextSize          = 13
+		tb.ClearTextOnFocus  = false
+		tb.ZIndex            = 11
+		tb.Parent            = wrap
+		tb.Focused:Connect(function() TS:Create(sk, TweenInfo.new(0.15), {Color = C.Acnt}):Play() end)
+		tb.FocusLost:Connect(function() TS:Create(sk, TweenInfo.new(0.15), {Color = C.Strok}):Play() end)
+		tb:GetPropertyChangedSignal("Text"):Connect(function() enteredKey = tb.Text end)
+		return tb
+	end
+
+
+	-- ── BUILD ───────────────────────────────────────────────────────────────
+	local lo = 0
+
+	addCategory("AUTHENTICATION", lo) lo += 1
+	local keyPage = makePage(); tabPages["Key"] = keyPage
+	addTab("Key System", "Key", ICONS.key, lo) lo += 1
+
+	do
+		local card = Instance.new("Frame")
+		card.Size               = UDim2.new(1, 0, 0, 278)
+		card.BackgroundColor3   = C.Block
+		card.BorderSizePixel    = 0
+		card.LayoutOrder        = 1
+		card.ZIndex             = 9
+		card.Parent             = keyPage
+		Instance.new("UICorner", card).CornerRadius = UDim.new(0, 8)
+		local cardStroke = Instance.new("UIStroke", card)
+		cardStroke.Color = C.Strok; cardStroke.Thickness = 1
+		local cardList = Instance.new("UIListLayout", card)
+		cardList.SortOrder = Enum.SortOrder.LayoutOrder
+		cardList.HorizontalAlignment = Enum.HorizontalAlignment.Center
+
+		-- Card header
+		local hdr = Instance.new("Frame")
+		hdr.Size                = UDim2.new(1, 0, 0, 46)
+		hdr.BackgroundTransparency = 1
+		hdr.LayoutOrder         = 1
+		hdr.ZIndex              = 10
+		hdr.Parent              = card
+		local hdrLine = Instance.new("Frame", hdr)
+		hdrLine.AnchorPoint     = Vector2.new(0, 1)
+		hdrLine.Position        = UDim2.new(0, 0, 1, 0)
+		hdrLine.Size            = UDim2.new(1, 0, 0, 1)
+		hdrLine.BackgroundColor3 = C.Strok
+		hdrLine.BorderSizePixel = 0
+		hdrLine.ZIndex          = 10
+		local hdrPad = Instance.new("UIPadding", hdr)
+		hdrPad.PaddingLeft      = UDim.new(0, 14)
+		local hdrTxt = Instance.new("TextLabel", hdr)
+		hdrTxt.Size             = UDim2.fromScale(1, 1)
+		hdrTxt.BackgroundTransparency = 1
+		hdrTxt.Text             = "Enter Your Key"
+		hdrTxt.TextColor3       = C.Text
+		hdrTxt.TextTransparency = 0.15
+		hdrTxt.Font             = Enum.Font.GothamBold
+		hdrTxt.TextSize         = 17
+		hdrTxt.TextXAlignment   = Enum.TextXAlignment.Left
+		hdrTxt.ZIndex           = 11
+		mkTS(hdrTxt)
+
+		-- Card body
+		local body = Instance.new("Frame")
+		body.Size               = UDim2.new(1, 0, 0, 232)
+		body.BackgroundTransparency = 1
+		body.LayoutOrder        = 2
+		body.ZIndex             = 10
+		body.Parent             = card
+		local bodyList = Instance.new("UIListLayout", body)
+		bodyList.SortOrder      = Enum.SortOrder.LayoutOrder
+		bodyList.Padding        = UDim.new(0, 10)
+		bodyList.HorizontalAlignment = Enum.HorizontalAlignment.Center
+		local bodyPad = Instance.new("UIPadding", body)
+		bodyPad.PaddingLeft     = UDim.new(0, 12)
+		bodyPad.PaddingRight    = UDim.new(0, 12)
+		bodyPad.PaddingTop      = UDim.new(0, 10)
+		bodyPad.PaddingBottom   = UDim.new(0, 12)
+
+		-- Description (fixed 34 px so canvas math is deterministic)
+		local desc = Instance.new("TextLabel")
+		desc.Size               = UDim2.new(1, 0, 0, 34)
+		desc.BackgroundTransparency = 1
+		desc.Text               = "Enter your access key below to continue.\nJoin our Discord to receive one."
+		desc.TextColor3         = C.Text
+		desc.TextTransparency   = 0.45
+		desc.Font               = Enum.Font.GothamBold
+		desc.TextSize           = 14
+		desc.TextXAlignment     = Enum.TextXAlignment.Left
+		desc.TextWrapped        = true
+		desc.LayoutOrder        = 1
+		desc.ZIndex             = 11
+		desc.Parent             = body
+		mkTS(desc)
+
+		-- Status row - taller than original
+		local statRow = Instance.new("Frame")
+		statRow.Size            = UDim2.new(1, 0, 0, 42)
+		statRow.BackgroundColor3 = C.Drop
+		statRow.BorderSizePixel = 0
+		statRow.LayoutOrder     = 2
+		statRow.ZIndex          = 11
+		statRow.Parent          = body
+		Instance.new("UICorner", statRow).CornerRadius = UDim.new(0, 6)
+		local statStroke = Instance.new("UIStroke", statRow)
+		statStroke.Color = C.Strok; statStroke.Thickness = 1
+		local statPad = Instance.new("UIPadding", statRow)
+		statPad.PaddingLeft     = UDim.new(0, 10)
+		local statDot = Instance.new("TextLabel", statRow)
+		statDot.AnchorPoint     = Vector2.new(0, 0.5)
+		statDot.Position        = UDim2.new(0, 0, 0.5, 0)
+		statDot.Size            = UDim2.fromOffset(12, 12)
+		statDot.BackgroundTransparency = 1
+		statDot.Text            = "•"
+		statDot.TextColor3      = Color3.fromRGB(180, 180, 182)
+		statDot.Font            = Enum.Font.GothamBold
+		statDot.TextSize        = 11
+		statDot.ZIndex          = 12
+		mkTS(statDot)
+		local statusLbl = Instance.new("TextLabel", statRow)
+		statusLbl.AnchorPoint   = Vector2.new(0, 0.5)
+		statusLbl.Position      = UDim2.new(0, 20, 0.5, 0)
+		statusLbl.Size          = UDim2.new(1, -20, 1, 0)
+		statusLbl.BackgroundTransparency = 1
+		statusLbl.Text          = "Awaiting key."
+		statusLbl.TextColor3    = Color3.fromRGB(180, 180, 182)
+		statusLbl.Font          = Enum.Font.GothamBold
+		statusLbl.TextSize      = 14
+		statusLbl.TextXAlignment = Enum.TextXAlignment.Left
+		statusLbl.ZIndex        = 12
+		mkTS(statusLbl)
+		local statusAnimating = true
+		task.spawn(function()
+			local sf = { "Awaiting key.", "Awaiting key..", "Awaiting key..." }
+			local i = 0
+			while statusLbl and statusLbl.Parent and statusAnimating do
+				i = i % 3 + 1
+				statusLbl.Text = sf[i]
+				task.wait(0.45)
+			end
+		end)
+
+		-- Text input - taller than original
+		local tbWrap = Instance.new("Frame")
+		tbWrap.Size             = UDim2.new(1, 0, 0, 48)
+		tbWrap.BackgroundColor3 = C.Drop
+		tbWrap.BorderSizePixel  = 0
+		tbWrap.LayoutOrder      = 3
+		tbWrap.ZIndex           = 11
+		tbWrap.Parent           = body
+		Instance.new("UICorner", tbWrap).CornerRadius = UDim.new(0, 6)
+		local tbStroke = Instance.new("UIStroke", tbWrap)
+		tbStroke.Color = C.Strok; tbStroke.Thickness = 1
+		local tbPad = Instance.new("UIPadding", tbWrap)
+		tbPad.PaddingLeft = UDim.new(0, 12); tbPad.PaddingRight = UDim.new(0, 8)
+		local tb = Instance.new("TextBox", tbWrap)
+		tb.Size                 = UDim2.fromScale(1, 1)
+		tb.BackgroundTransparency = 1
+		tb.PlaceholderText      = "Paste your key here..."
+		tb.PlaceholderColor3    = Color3.fromRGB(150, 150, 155)
+		tb.Text                 = ""
+		tb.TextColor3           = C.Text
+		tb.Font                 = Enum.Font.GothamBold
+		tb.TextSize             = 15
+		tb.ClearTextOnFocus     = false
+		tb.ZIndex               = 12
+		tb.Focused:Connect(function()  TS:Create(tbStroke, TweenInfo.new(0.15), {Color = C.Acnt}):Play() end)
+		tb.FocusLost:Connect(function() TS:Create(tbStroke, TweenInfo.new(0.15), {Color = C.Strok}):Play() end)
+		tb:GetPropertyChangedSignal("Text"):Connect(function() enteredKey = tb.Text end)
+		task.spawn(function()
+			local pf = { "Paste your key here.", "Paste your key here..", "Paste your key here..." }
+			local i = 0
+			while tb and tb.Parent do
+				i = i % 3 + 1
+				tb.PlaceholderText = pf[i]
+				task.wait(0.45)
+			end
+		end)
+
+		-- Submit container: extra height so external glow has room (56px = 48btn + 4px each side)
+		local submitCont = Instance.new("Frame")
+		submitCont.Size             = UDim2.new(1, 0, 0, 56)
+		submitCont.BackgroundTransparency = 1
+		submitCont.BorderSizePixel  = 0
+		submitCont.LayoutOrder      = 4
+		submitCont.ZIndex           = 11
+		submitCont.ClipsDescendants = false
+		submitCont.Parent           = body
+
+		-- External glow wrap: 3px outside button top/bottom, same width (sides hidden to avoid border artifact)
+		local submitGlowWrap = Instance.new("Frame")
+		submitGlowWrap.AnchorPoint            = Vector2.new(0.5, 0.5)
+		submitGlowWrap.Position               = UDim2.new(0.5, 0, 0.5, 0)
+		submitGlowWrap.Size                   = UDim2.new(1, 0, 0, 54)
+		submitGlowWrap.BackgroundTransparency = 1
+		submitGlowWrap.BorderSizePixel        = 0
+		submitGlowWrap.ZIndex                 = 10
+		submitGlowWrap.Parent                 = submitCont
+		Instance.new("UICorner", submitGlowWrap).CornerRadius = UDim.new(0, 10)
+		local submitGlowStroke = Instance.new("UIStroke", submitGlowWrap)
+		submitGlowStroke.Thickness = 2
+		submitGlowStroke.Color     = C.Acnt
+		local submitGlowGrad = Instance.new("UIGradient", submitGlowStroke)
+		submitGlowGrad.Transparency = NumberSequence.new{
+			NumberSequenceKeypoint.new(0,    0.97),
+			NumberSequenceKeypoint.new(0.12, 0),
+			NumberSequenceKeypoint.new(0.38, 0.97),
+			NumberSequenceKeypoint.new(0.62, 0.97),
+			NumberSequenceKeypoint.new(0.88, 0),
+			NumberSequenceKeypoint.new(1,    0.97),
+		}
+		task.spawn(function()
+			while submitCont and submitCont.Parent do
+				TS:Create(submitGlowGrad, TweenInfo.new(3, Enum.EasingStyle.Linear), {Rotation = 360}):Play()
+				task.wait(3.05)
+				if submitGlowGrad and submitGlowGrad.Parent then submitGlowGrad.Rotation = 0 end
+			end
+		end)
+
+		-- Submit button (centered inside container)
+		local submit = Instance.new("TextButton")
+		submit.AnchorPoint      = Vector2.new(0.5, 0.5)
+		submit.Position         = UDim2.fromScale(0.5, 0.5)
+		submit.Size             = UDim2.new(1, 0, 0, 48)
+		submit.BackgroundColor3 = C.Acnt
+		submit.Text             = "Submit Key"
+		submit.TextColor3       = Color3.fromRGB(255, 255, 255)
+		submit.Font             = Enum.Font.GothamBold
+		submit.TextSize         = 16
+		submit.BorderSizePixel  = 0
+		submit.ZIndex           = 12
+		submit.Parent           = submitCont
+		mkTS(submit)
+		Instance.new("UICorner", submit).CornerRadius = UDim.new(0, 6)
+
+		local abadge = Instance.new("Frame", submit)
+		abadge.AnchorPoint      = Vector2.new(0, 0.5)
+		abadge.Position         = UDim2.new(0, 10, 0.5, 0)
+		abadge.Size             = UDim2.fromOffset(23, 23)
+		abadge.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+		abadge.BackgroundTransparency = 0.82
+		abadge.BorderSizePixel  = 0
+		abadge.ZIndex           = 13
+		Instance.new("UICorner", abadge).CornerRadius = UDim.new(0, 4)
+		local atxt = Instance.new("TextLabel", abadge)
+		atxt.Size               = UDim2.fromScale(1, 1)
+		atxt.BackgroundTransparency = 1
+		atxt.Text               = "★"
+		atxt.TextColor3         = Color3.fromRGB(255, 255, 255)
+		atxt.Font               = Enum.Font.GothamBold
+		atxt.TextSize           = 14
+		atxt.ZIndex             = 14
+		mkTS(atxt)
+
+		local submitBtnScale  = Instance.new("UIScale", submit)
+		local submitGlowScale = Instance.new("UIScale", submitGlowWrap)
+
+		-- Bottom row
+		local row = Instance.new("Frame")
+		row.Size                = UDim2.new(1, 0, 0, 44)
+		row.BackgroundTransparency = 1
+		row.LayoutOrder         = 2
+		row.ZIndex              = 9
+		row.Parent              = keyPage
+		local rl = Instance.new("UIListLayout", row)
+		rl.FillDirection        = Enum.FillDirection.Horizontal
+		rl.Padding              = UDim.new(0, 8)
+		rl.SortOrder            = Enum.SortOrder.LayoutOrder
+
+		local function makeRowBtn(label, glyph, order)
+			local b = Instance.new("TextButton")
+			b.Size              = UDim2.new(0.5, -4, 1, 0)
+			b.BackgroundColor3  = C.Block
+			b.Text              = "       " .. label
+			b.TextColor3        = C.Text
+			b.TextTransparency  = 0.3
+			b.Font              = Enum.Font.GothamBold
+			b.TextSize          = 14
+			b.BorderSizePixel   = 0
+			b.LayoutOrder       = order
+			b.ZIndex            = 9
+			b.Parent            = row
+			Instance.new("UICorner", b).CornerRadius = UDim.new(0, 7)
+			local sk = Instance.new("UIStroke", b)
+			sk.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
+			sk.Color = C.Strok; sk.Thickness = 1.5
+			if type(glyph) == "string" and glyph:sub(1, 13) == "rbxassetid://" then
+				local gl = Instance.new("ImageLabel", b)
+				gl.AnchorPoint         = Vector2.new(0, 0.5)
+				gl.Position            = UDim2.new(0, 12, 0.5, 0)
+				gl.Size                = UDim2.fromOffset(17, 17)
+				gl.BackgroundTransparency = 1
+				gl.Image               = glyph
+				gl.ImageColor3         = C.Text
+				gl.ImageTransparency   = 0.3
+				gl.ZIndex              = 10
+			else
+				local gl = Instance.new("TextLabel", b)
+				gl.AnchorPoint      = Vector2.new(0, 0.5)
+				gl.Position         = UDim2.new(0, 12, 0.5, 0)
+				gl.Size             = UDim2.fromOffset(18, 18)
+				gl.BackgroundTransparency = 1
+				gl.Text             = glyph
+				gl.TextColor3       = C.Text
+				gl.TextTransparency = 0.3
+				gl.Font             = Enum.Font.GothamBold
+				gl.TextSize         = 15
+				gl.ZIndex           = 10
+				mkTS(gl)
+			end
+			return b, sk
+		end
+
+		local getKeyBtn, gkStroke = makeRowBtn("Get Key", "#", 1)
+		local exitBtn,   exStroke = makeRowBtn("Exit",    "rbxassetid://7072706796", 2)
+
+		local TI_B = TweenInfo.new(0.1)
+		local ROW_BORDER = C.Strok
+		getKeyBtn.MouseEnter:Connect(function() TS:Create(gkStroke, TI_B, {Color = C.Acnt}):Play() end)
+		getKeyBtn.MouseLeave:Connect(function() TS:Create(gkStroke, TI_B, {Color = ROW_BORDER}):Play() end)
+		exitBtn.MouseEnter:Connect(function()
+			TS:Create(exStroke, TI_B, {Color = C.Acnt}):Play()
+		end)
+		exitBtn.MouseLeave:Connect(function()
+			TS:Create(exStroke, TI_B, {Color = ROW_BORDER}):Play()
+		end)
+
+		getKeyBtn.MouseButton1Click:Connect(function()
+			pcall(function() setclipboard("https://discord.gg/apKnSVs68M") end)
+			local o = getKeyBtn.Text; getKeyBtn.Text = "   Copied!"; task.wait(1.5); getKeyBtn.Text = o
+		end)
+		exitBtn.MouseButton1Click:Connect(function()
+			LP:Kick("Please input a key! Check #get-key in our Discord!")
+		end)
+
+		local submitDone = false
+		local TI_SCALE_IN  = TweenInfo.new(0.18, Enum.EasingStyle.Back, Enum.EasingDirection.Out)
+		local TI_SCALE_OUT = TweenInfo.new(0.12, Enum.EasingStyle.Sine)
+		submit.MouseEnter:Connect(function()
+			if not submitDone then
+				TS:Create(submit,          TweenInfo.new(0.1), {BackgroundColor3 = Color3.fromRGB(240, 80, 80)}):Play()
+				TS:Create(submitBtnScale,  TI_SCALE_IN,  {Scale = 1.04}):Play()
+				TS:Create(submitGlowScale, TI_SCALE_IN,  {Scale = 1.04}):Play()
+			end
+		end)
+		submit.MouseLeave:Connect(function()
+			if not submitDone then
+				TS:Create(submit,          TweenInfo.new(0.1), {BackgroundColor3 = C.Acnt}):Play()
+				TS:Create(submitBtnScale,  TI_SCALE_OUT, {Scale = 1}):Play()
+				TS:Create(submitGlowScale, TI_SCALE_OUT, {Scale = 1}):Play()
+			end
+		end)
+		submit.MouseButton1Click:Connect(function()
+			attempts += 1
+			if enteredKey == VALID_KEY then
+				verified = true
+				submitDone = true
+				statusAnimating = false
+				statDot.TextColor3  = C.Green
+				statusLbl.Text      = "Access granted - loading..."
+				statusLbl.TextColor3 = C.Green
+				TS:Create(statStroke,       TweenInfo.new(0.2),  {Color = Color3.fromRGB(34, 160, 65)}):Play()
+				TS:Create(submit,           TweenInfo.new(0.25), {BackgroundColor3 = Color3.fromRGB(34, 197, 94)}):Play()
+				TS:Create(submitGlowStroke, TweenInfo.new(0.4),  {Color = Color3.fromRGB(50, 230, 100)}):Play()
+				submit.Text = "✓  Verified"
+				task.wait(0.8); sg:Destroy()
+			else
+				statDot.TextColor3  = C.Acnt
+				statusLbl.TextColor3 = C.Acnt
+				TS:Create(statStroke,       TweenInfo.new(0.1),  {Color = C.Acnt}):Play()
+				TS:Create(glowStroke,       TweenInfo.new(0.08), {Thickness = 5}):Play()
+				TS:Create(submitGlowStroke, TweenInfo.new(0.08), {Thickness = 5}):Play()
+				if attempts >= 3 then
+					statusLbl.Text = "Too many attempts - you've been kicked."
+					-- Dramatic red screen before kick
+					local redFlash = Instance.new("Frame")
+					redFlash.Size                   = UDim2.fromScale(1, 1)
+					redFlash.BackgroundColor3       = Color3.fromRGB(150, 8, 8)
+					redFlash.BackgroundTransparency = 1
+					redFlash.BorderSizePixel        = 0
+					redFlash.ZIndex                 = 100
+					redFlash.Parent                 = sg
+					local kickLbl = Instance.new("TextLabel", redFlash)
+					kickLbl.Size                  = UDim2.fromScale(1, 1)
+					kickLbl.BackgroundTransparency = 1
+					kickLbl.Text                  = "ACCESS DENIED"
+					kickLbl.TextColor3            = Color3.fromRGB(255, 255, 255)
+					kickLbl.TextTransparency      = 1
+					kickLbl.Font                  = Enum.Font.GothamBold
+					kickLbl.TextSize              = 52
+					kickLbl.ZIndex                = 101
+					local kickStroke = Instance.new("UIStroke", kickLbl)
+					kickStroke.Color       = Color3.fromRGB(120, 0, 0)
+					kickStroke.Thickness   = 5
+					kickStroke.Transparency = 1
+					-- Rapid strobe flashes
+					for _ = 1, 3 do
+						TS:Create(redFlash, TweenInfo.new(0.06), {BackgroundTransparency = 0.15}):Play()
+						task.wait(0.06)
+						TS:Create(redFlash, TweenInfo.new(0.06), {BackgroundTransparency = 0.88}):Play()
+						task.wait(0.06)
+					end
+					-- Hold full red with text
+					TS:Create(redFlash, TweenInfo.new(0.2),  {BackgroundTransparency = 0}):Play()
+					TS:Create(kickLbl,  TweenInfo.new(0.2),  {TextTransparency = 0.1}):Play()
+					TS:Create(kickStroke, TweenInfo.new(0.2), {Transparency = 0}):Play()
+					task.wait(1.0)
+					LP:Kick("Too many failed key attempts! Check #get-key in our Discord!")
+				else
+					statusLbl.Text = "Wrong key - attempt " .. attempts .. "/3. Check Discord."
+					task.wait(0.2)
+					TS:Create(glowStroke,       TweenInfo.new(0.3), {Thickness = 2}):Play()
+					TS:Create(submitGlowStroke, TweenInfo.new(0.3), {Thickness = 2}):Play()
+					TS:Create(statStroke,       TweenInfo.new(0.4), {Color = C.Strok}):Play()
+				end
+			end
+		end)
+	end
+
+	-- INFORMATION
+	addCategory("ABOUT", lo) lo += 1
+	local infoPage = makePage(); tabPages["Info"] = infoPage
+	addTab("Information", "Info", ICONS.info, lo) lo += 1
+
+	do
+		local sec = makeSection(infoPage, "About PYMPLE", 1)
+		addParagraph(sec, "What is PYMPLE?",
+			"A full-featured automation suite for Roblox anime games. Auto Farm, Boss Rush, Dungeons, Quests, Skills, Merchant - all in one.", 1)
+		addParagraph(sec, "Version & Keybinds",
+			"PYMPLE v1.0  -  Left Alt = Toggle UI\nV = Farm  -  B = Boss  -  M = All Skills", 2)
+	end
+
+	-- LINKS
+	addCategory("COMMUNITY", lo) lo += 1
+	local linksPage = makePage(); tabPages["Links"] = linksPage
+	addTab("Links", "Links", ICONS.link, lo) lo += 1
+
+	do
+		local sec = makeSection(linksPage, "Community", 1)
+		addParagraph(sec, "PYMPLE Discord",
+			"Key distribution, updates, support, and events all live in our Discord server.", 1)
+		-- Discord button: glow border + hover scale (matches Submit Key)
+		local discCont = Instance.new("Frame")
+		discCont.Size                   = UDim2.new(1, 0, 0, 56)
+		discCont.BackgroundTransparency = 1
+		discCont.BorderSizePixel        = 0
+		discCont.LayoutOrder            = 2
+		discCont.ZIndex                 = 11
+		discCont.ClipsDescendants       = false
+		discCont.Parent                 = sec
+
+		local discGlowWrap = Instance.new("Frame")
+		discGlowWrap.AnchorPoint            = Vector2.new(0.5, 0.5)
+		discGlowWrap.Position               = UDim2.fromScale(0.5, 0.5)
+		discGlowWrap.Size                   = UDim2.new(0.78, 0, 0, 54)
+		discGlowWrap.BackgroundTransparency = 1
+		discGlowWrap.BorderSizePixel        = 0
+		discGlowWrap.ZIndex                 = 10
+		discGlowWrap.Parent                 = discCont
+		Instance.new("UICorner", discGlowWrap).CornerRadius = UDim.new(0, 10)
+		local discGlowStroke = Instance.new("UIStroke", discGlowWrap)
+		discGlowStroke.Thickness = 2
+		discGlowStroke.Color     = C.Acnt
+		local discGlowGrad = Instance.new("UIGradient", discGlowStroke)
+		discGlowGrad.Transparency = NumberSequence.new{
+			NumberSequenceKeypoint.new(0,    0.97),
+			NumberSequenceKeypoint.new(0.12, 0),
+			NumberSequenceKeypoint.new(0.38, 0.97),
+			NumberSequenceKeypoint.new(0.62, 0.97),
+			NumberSequenceKeypoint.new(0.88, 0),
+			NumberSequenceKeypoint.new(1,    0.97),
+		}
+		task.spawn(function()
+			while discCont and discCont.Parent do
+				TS:Create(discGlowGrad, TweenInfo.new(3, Enum.EasingStyle.Linear), {Rotation = 360}):Play()
+				task.wait(3.05)
+				if discGlowGrad and discGlowGrad.Parent then discGlowGrad.Rotation = 0 end
+			end
+		end)
+
+		local discBtn = Instance.new("TextButton")
+		discBtn.AnchorPoint      = Vector2.new(0.5, 0.5)
+		discBtn.Position         = UDim2.fromScale(0.5, 0.5)
+		discBtn.Size             = UDim2.new(0.78, 0, 0, 48)
+		discBtn.BackgroundColor3 = C.Acnt
+		discBtn.Text             = "Copy Discord Invite"
+		discBtn.TextColor3       = Color3.fromRGB(255, 255, 255)
+		discBtn.Font             = Enum.Font.GothamBold
+		discBtn.TextSize         = 14
+		discBtn.BorderSizePixel  = 0
+		discBtn.ZIndex           = 12
+		discBtn.Parent           = discCont
+		mkTS(discBtn)
+		Instance.new("UICorner", discBtn).CornerRadius = UDim.new(0, 6)
+
+		local discBtnScale  = Instance.new("UIScale", discBtn)
+		local discGlowScale = Instance.new("UIScale", discGlowWrap)
+
+		local TI_DISC_IN  = TweenInfo.new(0.18, Enum.EasingStyle.Back, Enum.EasingDirection.Out)
+		local TI_DISC_OUT = TweenInfo.new(0.12, Enum.EasingStyle.Sine)
+		discBtn.MouseEnter:Connect(function()
+			TS:Create(discBtn,       TweenInfo.new(0.1), {BackgroundColor3 = Color3.fromRGB(240, 80, 80)}):Play()
+			TS:Create(discBtnScale,  TI_DISC_IN,  {Scale = 1.04}):Play()
+			TS:Create(discGlowScale, TI_DISC_IN,  {Scale = 1.04}):Play()
+		end)
+		discBtn.MouseLeave:Connect(function()
+			TS:Create(discBtn,       TweenInfo.new(0.1), {BackgroundColor3 = C.Acnt}):Play()
+			TS:Create(discBtnScale,  TI_DISC_OUT, {Scale = 1}):Play()
+			TS:Create(discGlowScale, TI_DISC_OUT, {Scale = 1}):Play()
+		end)
+		discBtn.MouseButton1Click:Connect(function()
+			pcall(function() setclipboard("https://discord.gg/apKnSVs68M") end)
+			local o = discBtn.Text; discBtn.Text = "✓  Copied!"; task.wait(1.5); discBtn.Text = o
+		end)
+	end
+
+	-- Wire tabs
+	for key, d in pairs(tabBtns) do
+		local k = key
+		d.clk.MouseButton1Click:Connect(function() activateTab(k) end)
+	end
+	-- Intro transition
+	holder.Visible = false
+	local introScale = Instance.new("UIScale", holder)
+	introScale.Scale = 0.93
+	task.spawn(function()
+		TS:Create(fog, TweenInfo.new(0.35, Enum.EasingStyle.Sine), {BackgroundTransparency = 0.45}):Play()
+		task.wait(0.35)
+		holder.Visible = true
+		TS:Create(introScale, TweenInfo.new(0.4, Enum.EasingStyle.Back, Enum.EasingDirection.Out), {Scale = 1}):Play()
+		task.wait() -- one frame for layout to compute AbsolutePositions
+		activateTab("Key")
+	end)
+
+	repeat task.wait(0.1) until verified
+	TS:Create(introScale, TweenInfo.new(0.45, Enum.EasingStyle.Back, Enum.EasingDirection.In), {Scale = 0}):Play()
+	TS:Create(fog, TweenInfo.new(0.55, Enum.EasingStyle.Sine), {BackgroundTransparency = 1}):Play()
+	task.wait(0.6)
+	return
+end
+
+-- ── HUB WINDOW (via MainScript) ──────────────────────────────────────────────
+local KeyWin = S.Hub.new({
+	Name     = '<font size="22">PYMPLE</font>\n<font size="10">KEY SYSTEM</font>',
+	Keybind  = "RightAlt",
+	Logo     = S.ICON,
+	TextSize = 18,
+	Font     = Enum.Font.GothamBold,
+})
+
+-- Glow (same as MainScript S.Win)
+do
+	local _ts = game:GetService("TweenService")
+	local _pg = KeyWin.Root
+	local _mf = nil
+	for _, _c in ipairs(_pg:GetChildren()) do
+		if _c:IsA("Frame") and _c.ZIndex == 4 then _mf = _c break end
+	end
+	if _mf then
+		local _gw = Instance.new("Frame")
+		_gw.BackgroundTransparency = 1
+		_gw.AnchorPoint = _mf.AnchorPoint
+		_gw.Position    = _mf.Position
+		_gw.Size        = UDim2.new(_mf.Size.X.Scale, _mf.Size.X.Offset+2, _mf.Size.Y.Scale, _mf.Size.Y.Offset+2)
+		_gw.ZIndex      = 3
+		_gw.Parent      = _pg
+		Instance.new("UICorner", _gw).CornerRadius = UDim.new(0, 18)
+		local _gs = Instance.new("UIStroke", _gw)
+		_gs.Color = Color3.fromRGB(255,255,255); _gs.Thickness = 2.5
+		local _gg = Instance.new("UIGradient", _gs)
+		_gg.Transparency = NumberSequence.new{
+			NumberSequenceKeypoint.new(0,0.97), NumberSequenceKeypoint.new(0.12,0),
+			NumberSequenceKeypoint.new(0.38,0.75), NumberSequenceKeypoint.new(0.62,0.75),
+			NumberSequenceKeypoint.new(0.88,0), NumberSequenceKeypoint.new(1,0.97),
+		}
+		local function _sync()
+			_gw.AnchorPoint=_mf.AnchorPoint _gw.Position=_mf.Position
+			_gw.Size=UDim2.new(_mf.Size.X.Scale,_mf.Size.X.Offset+2,_mf.Size.Y.Scale,_mf.Size.Y.Offset+2)
+			_gw.Visible=_mf.Visible
+		end
+		_mf:GetPropertyChangedSignal("Position"):Connect(_sync)
+		_mf:GetPropertyChangedSignal("Size"):Connect(_sync)
+		_mf:GetPropertyChangedSignal("Visible"):Connect(_sync)
+		task.spawn(function()
+			while _gw and _gw.Parent do
+				_ts:Create(_gg,TweenInfo.new(3,Enum.EasingStyle.Linear),{Rotation=360}):Play()
+				task.wait(3.05)
+				if _gg and _gg.Parent then _gg.Rotation=0 end
+			end
+		end)
+	end
+end
+
+-- Key System tab
+KeyWin:DrawCategory({ Name = "AUTHENTICATION" })
+local KTab = KeyWin:DrawTab({ Name = "Key System", Icon = "key", EnableScrolling = true })
+
+local KSec = KTab:DrawSection({ Name = "Enter Your Key", Position = "left" })
+KSec:AddParagraph({ Title = "• Status", Content = "Awaiting key - paste your key below and press Submit." })
+KSec:AddTextBox({ Name = "Key Input", Default = "", Placeholder = "Paste your key here...", Callback = function(v) enteredKey = v end })
+KSec:AddButton({ Name = "Submit Key", Callback = function()
+	attempts += 1
+	if enteredKey == VALID_KEY then
+		verified = true
+		S.Notify.new({ Title="Access Granted", Content="Key verified! Loading PYMPLE...", Duration=3, Icon=S.ICON })
+		KeyWin:Destroy()
+	else
+		S.Notify.new({ Title="Access Denied", Content="Wrong key. Attempt #"..attempts..". Check Discord.", Duration=3, Icon=S.ICON })
+	end
+end })
+
+local KSec2 = KTab:DrawSection({ Name = "How To Unlock", Position = "right" })
+KSec2:AddParagraph({ Title = "Step-by-Step", Content = "1. Join PYMPLE Discord\n2. Go to #get-key\n3. Follow the pinned instructions\n4. Copy & paste key above" })
+KSec2:AddParagraph({ Title = "Key Rules", Content = "- Case-sensitive - copy exactly\n- Do not share your key\n- Keys rotate - check Discord if expired" })
+
+-- Information tab
+KeyWin:DrawCategory({ Name = "ABOUT" })
+local ITab = KeyWin:DrawTab({ Name = "Information", Icon = "info", EnableScrolling = true })
+
+local ISec = ITab:DrawSection({ Name = "About PYMPLE", Position = "left" })
+ISec:AddParagraph({ Title = "What is PYMPLE?", Content = "Full-featured automation for Roblox anime games - Auto Farm, Dungeons, Boss Rush, Quests, Skills & more." })
+ISec:AddParagraph({ Title = "Version", Content = "PYMPLE v1.0  -  Loader: Pymple Hub\nLeft Alt = UI  -  V = Farm  -  B = Boss  -  M = Skills" })
+
+-- Links tab
+KeyWin:DrawCategory({ Name = "COMMUNITY" })
+local LTab = KeyWin:DrawTab({ Name = "Links", Icon = "link", EnableScrolling = true })
+
+local LSec = LTab:DrawSection({ Name = "Community", Position = "left" })
+LSec:AddParagraph({ Title = "PYMPLE Discord", Content = "Keys, updates, support & events - all in our Discord." })
+LSec:AddButton({ Name = "Copy Discord Invite", Callback = function()
+	pcall(function() setclipboard(S.DISCORD) end)
+	S.Notify.new({ Title="Copied!", Content="Discord link copied to clipboard.", Duration=2, Icon=S.ICON })
+end })
+
+repeat task.wait(0.1) until verified

@@ -1,0 +1,8 @@
+local S = ...
+local GAMES = {
+	[77747658251236] = "https://raw.githubusercontent.com/pympleHUB/obfuscatedPYMPLE/refs/heads/main/SailorPiece",
+}
+local featuresUrl = GAMES[game.PlaceId]
+if featuresUrl then
+	loadstring(game:HttpGet(featuresUrl))(S)
+end
