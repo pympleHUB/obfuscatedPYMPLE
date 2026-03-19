@@ -23,6 +23,7 @@ bot = commands.Bot(command_prefix="!", intents=intents)
 
 last_announce_msg_id = None
 bot_start_time = None
+ROTATION_HOURS = 12.0
 
 COLORS = [
     0xDC3C3C, 0x3C6EDC, 0x8C3CDC,
@@ -95,6 +96,13 @@ def gh_put(filename, content_str, commit_msg="Update"):
         data["sha"] = sha
     r = requests.put(url, json=data, headers=headers)
     return r.status_code in (200, 201)
+
+def gh_delete(filename):
+    url = f"https://api.github.com/repos/{GITHUB_REPO}/contents/{filename}"
+    headers = {"Authorization": f"token {GITHUB_TOKEN}"}
+    _, sha = gh_get(filename)
+    if sha:
+        requests.delete(url, json={"message": "Delete file", "sha": sha}, headers=headers)
 
 def get_roblox_avatar():
     try:
@@ -197,7 +205,19 @@ async def auto_rotate_key():
     new_key = generate_key()
     if update_key(new_key):
         add_to_history(new_key)
-        await announce_key(new_key, expires_at=datetime.now() + timedelta(hours=12))
+        await announce_key(new_key, expires_at=datetime.now() + timedelta(hours=ROTATION_HOURS))
+
+@tasks.loop(minutes=30)
+async def clean_key_channel():
+    if clean_key_channel.current_loop == 0:
+        return
+    channel = bot.get_channel(ANNOUNCE_CHANNEL_ID)
+    if not channel:
+        return
+    try:
+        await channel.purge(limit=50, check=lambda m: m.id != last_announce_msg_id)
+    except:
+        pass
 
 
 # --- Commands ---
@@ -210,7 +230,7 @@ async def setkey(ctx, new_key: str):
     if update_key(new_key):
         add_to_history(new_key)
         auto_rotate_key.restart()
-        await announce_key(new_key, expires_at=datetime.now() + timedelta(hours=12))
+        await announce_key(new_key, expires_at=datetime.now() + timedelta(hours=ROTATION_HOURS))
     else:
         try:
             await ctx.author.send(f"Failed to update key to `{new_key}`.")
@@ -226,12 +246,66 @@ async def rotatenow(ctx):
     if update_key(new_key):
         add_to_history(new_key)
         auto_rotate_key.restart()
-        await announce_key(new_key, expires_at=datetime.now() + timedelta(hours=12))
+        await announce_key(new_key, expires_at=datetime.now() + timedelta(hours=ROTATION_HOURS))
     else:
         try:
             await ctx.author.send("Failed to rotate key.")
         except:
             pass
+
+@bot.command()
+async def announce(ctx):
+    if not owner_only(ctx):
+        return
+    await delete_cmd(ctx)
+    key, _ = gh_get(KEY_FILE)
+    if not key:
+        await ctx.author.send("No key set yet.")
+        return
+    next_run = auto_rotate_key.next_iteration
+    expires_at = next_run.replace(tzinfo=None) if next_run else datetime.now() + timedelta(hours=ROTATION_HOURS)
+    await announce_key(key, expires_at=expires_at)
+
+@bot.command()
+async def setinterval(ctx, hours: float):
+    if not owner_only(ctx):
+        return
+    await delete_cmd(ctx)
+    global ROTATION_HOURS
+    ROTATION_HOURS = max(1.0, hours)
+    try:
+        if auto_rotate_key.is_running():
+            auto_rotate_key.change_interval(hours=ROTATION_HOURS)
+        else:
+            auto_rotate_key.start()
+            auto_rotate_key.change_interval(hours=ROTATION_HOURS)
+    except:
+        pass
+    next_ts = int((datetime.now() + timedelta(hours=ROTATION_HOURS)).timestamp())
+    await ctx.author.send(f"Rotation interval set to `{ROTATION_HOURS}h`. Next rotation <t:{next_ts}:R>.")
+
+@bot.command()
+async def pauserotation(ctx):
+    if not owner_only(ctx):
+        return
+    await delete_cmd(ctx)
+    if auto_rotate_key.is_running():
+        auto_rotate_key.stop()
+        await ctx.author.send("Auto-rotation paused.")
+    else:
+        await ctx.author.send("Auto-rotation is already paused.")
+
+@bot.command()
+async def resumerotation(ctx):
+    if not owner_only(ctx):
+        return
+    await delete_cmd(ctx)
+    if not auto_rotate_key.is_running():
+        auto_rotate_key.start()
+        next_ts = int((datetime.now() + timedelta(hours=ROTATION_HOURS)).timestamp())
+        await ctx.author.send(f"Auto-rotation resumed. Next rotation <t:{next_ts}:R>.")
+    else:
+        await ctx.author.send("Auto-rotation is already running.")
 
 @bot.command()
 async def getkey(ctx):
@@ -268,6 +342,14 @@ async def keyhistory(ctx):
     await ctx.author.send(embed=embed)
 
 @bot.command()
+async def clearhistory(ctx):
+    if not owner_only(ctx):
+        return
+    await delete_cmd(ctx)
+    gh_delete(HISTORY_FILE)
+    await ctx.author.send("Key history cleared.")
+
+@bot.command()
 async def status(ctx):
     if not owner_only(ctx):
         return
@@ -279,12 +361,23 @@ async def status(ctx):
     embed = discord.Embed(title="pympleHUB Bot Status", color=0x3C6EDC)
     embed.add_field(name="Current Key", value=f"`{key or 'Unknown'}`", inline=False)
     embed.add_field(name="Uptime", value=f"{hours}h {minutes}m", inline=True)
+    embed.add_field(name="Rotation Interval", value=f"{ROTATION_HOURS}h", inline=True)
+    rotation_state = "Running" if auto_rotate_key.is_running() else "Paused"
+    embed.add_field(name="Auto-Rotation", value=rotation_state, inline=True)
     next_run = auto_rotate_key.next_iteration
     if next_run:
         ts = int(next_run.timestamp())
-        embed.add_field(name="Next Auto-Rotation", value=f"<t:{ts}:R>", inline=True)
+        embed.add_field(name="Next Rotation", value=f"<t:{ts}:R>", inline=True)
+    embed.add_field(name="Latency", value=f"{round(bot.latency * 1000)}ms", inline=True)
     embed.set_footer(text=f"pympleHUB • {datetime.now().strftime('%d %B %Y')}")
     await ctx.author.send(embed=embed)
+
+@bot.command()
+async def ping(ctx):
+    if not owner_only(ctx):
+        return
+    await delete_cmd(ctx)
+    await ctx.author.send(f"Pong! `{round(bot.latency * 1000)}ms`")
 
 @bot.command(name="bothelp")
 async def bothelp(ctx):
@@ -294,9 +387,15 @@ async def bothelp(ctx):
     embed = discord.Embed(title="pympleHUB Commands", color=0xDC3C3C)
     embed.add_field(name="!setkey <key>", value="Set a specific key manually", inline=False)
     embed.add_field(name="!rotatenow", value="Instantly rotate to a new generated key", inline=False)
+    embed.add_field(name="!announce", value="Re-post the current key without rotating", inline=False)
+    embed.add_field(name="!setinterval <hours>", value="Change the auto-rotation interval", inline=False)
+    embed.add_field(name="!pauserotation", value="Pause auto-rotation", inline=False)
+    embed.add_field(name="!resumerotation", value="Resume auto-rotation", inline=False)
     embed.add_field(name="!getkey", value="Get the current key via DM", inline=False)
     embed.add_field(name="!keyhistory", value="View last 5 keys with timestamps via DM", inline=False)
-    embed.add_field(name="!status", value="Bot uptime, current key, next auto-rotation via DM", inline=False)
+    embed.add_field(name="!clearhistory", value="Wipe the key history", inline=False)
+    embed.add_field(name="!status", value="Bot uptime, key, rotation state, latency via DM", inline=False)
+    embed.add_field(name="!ping", value="Check bot latency via DM", inline=False)
     embed.add_field(name="!bothelp", value="Shows this message", inline=False)
     embed.set_footer(text="All commands auto-delete and respond via DM")
     await ctx.author.send(embed=embed)
@@ -312,6 +411,7 @@ async def on_ready():
         THUMBNAIL_URL = get_roblox_avatar()
     bot.add_view(CopyKeyView())
     auto_rotate_key.start()
+    clean_key_channel.start()
     print(f"Bot is online as {bot.user}")
 
 bot.run(DISCORD_TOKEN)
