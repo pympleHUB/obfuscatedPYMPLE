@@ -263,10 +263,9 @@ async def announce_key(new_key, expires_at=None):
     else:
         desc += "Key will be resetting soon! Please check out <#1183563684828688446> for all of my projects!\n\nALL script-related videos are found on my YouTube Channel, linked below! Please Subscribe, Comment, and Like!"
 
-    today = datetime.now().strftime("%d %B %Y")
+    today = datetime.now().strftime("%B %d, %Y")
     embed = discord.Embed(title=greeting, description=desc, color=color)
-    embed.set_author(name=f"Key #{rotation_count}")
-    embed.set_footer(text=f"pympleHUB • {today}")
+    embed.set_footer(text=f"pympleHUB • Key #{rotation_count} • {today}")
 
     thumb = THUMBNAIL_URL or bot.user.display_avatar.url
     embed.set_thumbnail(url=thumb)
@@ -420,7 +419,7 @@ async def broadcast(ctx, *, message: str):
     if not channel:
         return
     thumb = THUMBNAIL_URL or bot.user.display_avatar.url
-    today = datetime.now().strftime("%d %B %Y")
+    today = datetime.now().strftime("%B %d, %Y")
     embed = discord.Embed(description=message, color=random.choice(COLORS), timestamp=datetime.now())
     embed.set_author(name="pympleHUB Announcement", icon_url=thumb)
     embed.set_footer(text=f"pympleHUB • {today}")
