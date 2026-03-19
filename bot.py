@@ -47,6 +47,18 @@ GREETINGS = [
     "Time to Update Your Key!",
 ]
 
+class CopyKeyView(discord.ui.View):
+    def __init__(self, key):
+        super().__init__(timeout=None)
+        self.key = key
+
+    @discord.ui.button(label="Copy Key", style=discord.ButtonStyle.secondary, emoji="📋")
+    async def copy_key(self, interaction: discord.Interaction, button: discord.ui.Button):
+        await interaction.response.send_message(
+            f"`{self.key}`",
+            ephemeral=True
+        )
+
 def generate_key():
     return "PYMPLE-" + "".join(random.choices(string.ascii_uppercase + string.digits, k=6))
 
@@ -112,7 +124,7 @@ async def announce_key(new_key, expires_at=None):
     embed = discord.Embed(title=greeting, description=desc, color=color)
     embed.set_footer(text=f"pympleHUB • {today}")
 
-    msg = await channel.send(embed=embed)
+    msg = await channel.send(embed=embed, view=CopyKeyView(new_key))
     last_announce_msg_id = msg.id
 
 @tasks.loop(hours=12)
