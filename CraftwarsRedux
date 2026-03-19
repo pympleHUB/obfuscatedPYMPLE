@@ -576,14 +576,18 @@ end
 
 local function GetWeapon()
 	local t = tick()
-	if CachedWeapon and (t - LastWeaponCheck) < CACHE_DURATION and CachedWeapon.Parent == LocalPlayer.Backpack then
+	if CachedWeapon and (t - LastWeaponCheck) < CACHE_DURATION and CachedWeapon.Parent then
 		return CachedWeapon
 	end
 	LastWeaponCheck, CachedWeapon = t, nil
-	for _, c in ipairs(LocalPlayer.Backpack:GetChildren()) do
-		if c:FindFirstChild("SwordControl") and c:FindFirstChild("RemoteFunction") then
-			CachedWeapon = c
-			return c
+	local containers = { LocalPlayer.Backpack }
+	if LocalPlayer.Character then table.insert(containers, LocalPlayer.Character) end
+	for _, container in ipairs(containers) do
+		for _, c in ipairs(container:GetChildren()) do
+			if c:FindFirstChild("SwordControl") and c:FindFirstChild("RemoteFunction") then
+				CachedWeapon = c
+				return c
+			end
 		end
 	end
 	return nil
@@ -7617,6 +7621,7 @@ local pimpleHUB = (function()
 			return Args
 		end
 
+		Args._Root = Parent
 		return Args
 	end
 
@@ -7996,6 +8001,25 @@ local pimpleHUB = (function()
 
 		UICorner_3.CornerRadius = UDim.new(1, 0)
 		UICorner_3.Parent = SelectionFrame
+
+		do
+			local glowData = { {10, 0.65}, {18, 0.82}, {28, 0.92} }
+			for _, gd in ipairs(glowData) do
+				local gf = Instance.new("Frame")
+				gf.AnchorPoint = Vector2.new(0.5, 0.5)
+				gf.BackgroundColor3 = _lib.Colors.Highlight
+				gf.BackgroundTransparency = gd[2]
+				gf.BorderSizePixel = 0
+				gf.Position = UDim2.new(0.5, 0, 0.5, 0)
+				gf.Size = UDim2.new(1, gd[1], 1, gd[1])
+				gf.ZIndex = SelectionFrame.ZIndex - 1
+				gf.Parent = SelectionFrame
+				local gc = Instance.new("UICorner")
+				gc.CornerRadius = UDim.new(1, 0)
+				gc.Parent = gf
+				table.insert(_lib.Elements.Highlight, { Element = gf, Property = "BackgroundColor3" })
+			end
+		end
 
 		TabButtonScrollingFrame.Name = _lib:_RandomString()
 		TabButtonScrollingFrame.Parent = TabButtons
@@ -13390,6 +13414,90 @@ ThSec:AddDropdown({
 })
 local CfgUI = Window:DrawConfig({ Name = "Config", Icon = "folder", Config = ConfigManager })
 CfgUI:Init()
+task.defer(function()
+	for _, lbl in ipairs(Window.Root:GetDescendants()) do
+		if lbl:IsA("TextLabel") and lbl.Text == "Add Config" then
+			local btn = lbl.Parent
+			if btn and btn:IsA("Frame") and btn.BackgroundColor3 == pimpleHUB.Colors.Highlight then
+				local Button = btn.Parent
+				local AddConfig = Button and Button.Parent
+				if Button and Button:IsA("Frame") then
+					Button.Size = UDim2.new(1, -7, 0, 38)
+				end
+				if AddConfig and AddConfig:IsA("Frame") then
+					AddConfig.Size = UDim2.new(1, -10, 0, 108)
+					for _, child in ipairs(AddConfig:GetChildren()) do
+						if child:IsA("Frame") and child.Size.Y.Offset == 1 then
+							child.Position = UDim2.new(0.5, 0, 0, 58)
+						end
+					end
+				end
+				btn.Size = UDim2.new(1, -8, 1, -6)
+				local corner = btn:FindFirstChildOfClass("UICorner")
+				if corner then corner.CornerRadius = UDim.new(0, 4) end
+				local cfgStroke = btn:FindFirstChildOfClass("UIStroke")
+				if not cfgStroke then
+					cfgStroke = Instance.new("UIStroke")
+					cfgStroke.Parent = btn
+				end
+				cfgStroke.Color = pimpleHUB.Colors.Highlight
+				cfgStroke.Thickness = 1.5
+				cfgStroke.Transparency = 0.1
+				local cfgGradient = Instance.new("UIGradient")
+				cfgGradient.Transparency = NumberSequence.new({
+					NumberSequenceKeypoint.new(0,    0.85),
+					NumberSequenceKeypoint.new(0.12, 0),
+					NumberSequenceKeypoint.new(0.38, 0.75),
+					NumberSequenceKeypoint.new(0.62, 0.75),
+					NumberSequenceKeypoint.new(0.88, 0),
+					NumberSequenceKeypoint.new(1,    0.85),
+				})
+				cfgGradient.Parent = cfgStroke
+				task.spawn(function()
+					local ts = game:GetService("TweenService")
+					while btn and btn.Parent do
+						ts:Create(cfgGradient, TweenInfo.new(3, Enum.EasingStyle.Linear), { Rotation = 360 }):Play()
+						task.wait(3.05)
+						if cfgGradient and cfgGradient.Parent then cfgGradient.Rotation = 0 end
+					end
+				end)
+				local cfgScale = btn:FindFirstChildOfClass("UIScale")
+				if not cfgScale then
+					cfgScale = Instance.new("UIScale")
+					cfgScale.Scale = 1
+					cfgScale.Parent = btn
+				end
+				pimpleHUB:_Hover(btn, function()
+					pimpleHUB:_Animation(cfgScale,  TweenInfo.new(0.18, Enum.EasingStyle.Quint), { Scale = 1.04 })
+					pimpleHUB:_Animation(cfgStroke, TweenInfo.new(0.18), { Transparency = 0.0 })
+					pimpleHUB:_Animation(btn,       TweenInfo.new(0.18), { BackgroundTransparency = 0 })
+				end, function()
+					pimpleHUB:_Animation(cfgScale,  TweenInfo.new(0.18, Enum.EasingStyle.Quint), { Scale = 1.0 })
+					pimpleHUB:_Animation(cfgStroke, TweenInfo.new(0.18), { Transparency = 0.1 })
+					pimpleHUB:_Animation(btn,       TweenInfo.new(0.18), { BackgroundTransparency = 0.1 })
+				end)
+				break
+			end
+		end
+	end
+end)
+
+do
+	local function _applyStroke(inst)
+		if inst:IsA("TextLabel") or inst:IsA("TextButton") or inst:IsA("TextBox") then
+			inst.TextStrokeColor3 = Color3.fromRGB(0, 0, 0)
+			inst.TextStrokeTransparency = 0.5
+		end
+	end
+	task.defer(function()
+		for _, desc in ipairs(Window.Root:GetDescendants()) do
+			pcall(_applyStroke, desc)
+		end
+		Window.Root.DescendantAdded:Connect(function(desc)
+			task.defer(function() pcall(_applyStroke, desc) end)
+		end)
+	end)
+end
 
 do
 	task.defer(function()
