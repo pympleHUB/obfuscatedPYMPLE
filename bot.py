@@ -13,16 +13,20 @@ GITHUB_REPO = "pympleHUB/obfuscatedPYMPLE"
 KEY_FILE = "pympleKeyBot"
 HISTORY_FILE = "pympleKeyHistory"
 ANNOUNCE_CHANNEL_ID = int(os.environ["ANNOUNCE_CHANNEL_ID"])
+LOG_CHANNEL_ID = 1239788452623417405
+ANNOUNCE_ROLE_ID = int(os.environ.get("ANNOUNCE_ROLE_ID", 0))
 THUMBNAIL_URL = os.environ.get("THUMBNAIL_URL", "")
 ROBLOX_USER_ID = 583572860
 OWNER_ID = 431103247478947850
 
 intents = discord.Intents.default()
 intents.message_content = True
+intents.members = True
 bot = commands.Bot(command_prefix="!", intents=intents)
 
 last_announce_msg_id = None
 bot_start_time = None
+last_rotation_time = None
 ROTATION_HOURS = 12.0
 
 COLORS = [
@@ -155,6 +159,30 @@ def add_to_history(new_key):
     gh_put(HISTORY_FILE, "\n".join(lines[:10]), "Update key history")
 
 
+# --- Logging ---
+
+async def log_rotation(new_key, triggered_by="Auto-rotation"):
+    global last_rotation_time
+    last_rotation_time = datetime.now()
+    try:
+        log_channel = bot.get_channel(LOG_CHANNEL_ID)
+        if not log_channel:
+            return
+        ts = int(last_rotation_time.timestamp())
+        embed = discord.Embed(title="🔑 Key Rotated", color=0x2ECC71)
+        embed.add_field(name="New Key", value=f"`{new_key}`", inline=False)
+        embed.add_field(name="Triggered By", value=triggered_by, inline=True)
+        embed.add_field(name="Time", value=f"<t:{ts}:F>", inline=True)
+        next_run = auto_rotate_key.next_iteration
+        if next_run:
+            next_ts = int(next_run.timestamp())
+            embed.add_field(name="Next Rotation", value=f"<t:{next_ts}:R>", inline=True)
+        embed.set_footer(text=f"pympleHUB • {last_rotation_time.strftime('%d %B %Y')}")
+        await log_channel.send(embed=embed)
+    except:
+        pass
+
+
 # --- Core logic ---
 
 async def expire_last_message():
@@ -203,7 +231,9 @@ async def announce_key(new_key, expires_at=None):
     thumb = THUMBNAIL_URL or bot.user.display_avatar.url
     embed.set_thumbnail(url=thumb)
 
-    msg = await channel.send(embed=embed, view=CopyKeyView())
+    # Ping role if set
+    role_mention = f"<@&{ANNOUNCE_ROLE_ID}>" if ANNOUNCE_ROLE_ID else None
+    msg = await channel.send(content=role_mention, embed=embed, view=CopyKeyView())
     last_announce_msg_id = msg.id
 
 
@@ -228,6 +258,7 @@ async def auto_rotate_key():
     new_key = generate_key()
     if update_key(new_key):
         add_to_history(new_key)
+        await log_rotation(new_key, triggered_by="Auto-rotation")
         await announce_key(new_key, expires_at=datetime.now() + timedelta(hours=ROTATION_HOURS))
 
 @tasks.loop(minutes=30)
@@ -242,6 +273,25 @@ async def clean_key_channel():
     except:
         pass
 
+@tasks.loop(hours=1)
+async def missed_rotation_check():
+    if missed_rotation_check.current_loop == 0:
+        return
+    if not last_rotation_time:
+        return
+    hours_since = (datetime.now() - last_rotation_time).total_seconds() / 3600
+    if hours_since >= ROTATION_HOURS + 1:
+        try:
+            owner = await bot.fetch_user(OWNER_ID)
+            ts = int(last_rotation_time.timestamp())
+            await owner.send(
+                f"⚠️ **Missed Rotation Alert**\n"
+                f"Last rotation was <t:{ts}:R> — over `{ROTATION_HOURS}h` ago.\n"
+                f"Auto-rotation may have failed. Use `!rotatenow` to fix it."
+            )
+        except:
+            pass
+
 
 # --- Commands ---
 
@@ -253,6 +303,7 @@ async def setkey(ctx, new_key: str):
     if update_key(new_key):
         add_to_history(new_key)
         auto_rotate_key.restart()
+        await log_rotation(new_key, triggered_by=f"Manual — {ctx.author}")
         await announce_key(new_key, expires_at=datetime.now() + timedelta(hours=ROTATION_HOURS))
     else:
         try:
@@ -269,6 +320,7 @@ async def rotatenow(ctx):
     if update_key(new_key):
         add_to_history(new_key)
         auto_rotate_key.restart()
+        await log_rotation(new_key, triggered_by=f"Manual — {ctx.author}")
         await announce_key(new_key, expires_at=datetime.now() + timedelta(hours=ROTATION_HOURS))
     else:
         try:
@@ -391,6 +443,9 @@ async def status(ctx):
     if next_run:
         ts = int(next_run.timestamp())
         embed.add_field(name="Next Rotation", value=f"<t:{ts}:R>", inline=True)
+    if last_rotation_time:
+        ts = int(last_rotation_time.timestamp())
+        embed.add_field(name="Last Rotation", value=f"<t:{ts}:R>", inline=True)
     embed.add_field(name="Latency", value=f"{round(bot.latency * 1000)}ms", inline=True)
     embed.set_footer(text=f"pympleHUB • {datetime.now().strftime('%d %B %Y')}")
     await ctx.author.send(embed=embed)
@@ -427,6 +482,26 @@ async def bothelp(ctx):
 # --- Events ---
 
 @bot.event
+async def on_member_join(member: discord.Member):
+    try:
+        embed = discord.Embed(
+            title=f"Welcome to pympleHUB, {member.name}!",
+            description=(
+                f"Hey {member.mention}! Thanks for joining.\n\n"
+                f"Head over to <#{ANNOUNCE_CHANNEL_ID}> to grab the latest key for our scripts.\n\n"
+                f"ALL script-related videos are on my YouTube Channel — please Subscribe, Comment, and Like!\n"
+                f"📌 https://www.youtube.com/@scriptsHUB/featured"
+            ),
+            color=random.choice(COLORS)
+        )
+        thumb = THUMBNAIL_URL or bot.user.display_avatar.url
+        embed.set_thumbnail(url=thumb)
+        embed.set_footer(text=f"pympleHUB • {datetime.now().strftime('%d %B %Y')}")
+        await member.send(embed=embed)
+    except:
+        pass
+
+@bot.event
 async def on_ready():
     global bot_start_time, THUMBNAIL_URL
     bot_start_time = datetime.now()
@@ -435,6 +510,7 @@ async def on_ready():
     bot.add_view(CopyKeyView())
     auto_rotate_key.start()
     clean_key_channel.start()
+    missed_rotation_check.start()
     print(f"Bot is online as {bot.user}")
 
 bot.run(DISCORD_TOKEN)
