@@ -120,8 +120,12 @@ async def auto_rotate_key():
     if update_key(new_key):
         await announce_key(new_key, expires_at=datetime.now() + timedelta(hours=12))
 
+OWNER_ID = 431103247478947850
+
 @bot.command()
 async def setkey(ctx, new_key: str):
+    if ctx.author.id != OWNER_ID:
+        return
     if update_key(new_key):
         auto_rotate_key.restart()
         await ctx.send(f"Key updated to: `{new_key}`")
@@ -131,6 +135,8 @@ async def setkey(ctx, new_key: str):
 
 @bot.command()
 async def getkey(ctx):
+    if ctx.author.id != OWNER_ID:
+        return
     url = f"https://api.github.com/repos/{GITHUB_REPO}/contents/{KEY_FILE}"
     headers = {"Authorization": f"token {GITHUB_TOKEN}"}
     r = requests.get(url, headers=headers)
