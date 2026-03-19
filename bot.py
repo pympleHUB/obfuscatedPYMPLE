@@ -198,11 +198,6 @@ async def announce_key(new_key, expires_at=None):
 
     today = datetime.now().strftime("%d %B %Y")
     embed = discord.Embed(title=greeting, description=desc, color=color)
-    embed.add_field(
-        name="ℹ️ How to Use",
-        value="1. Press **Copy Key** below\n2. Open the game and wait for the key prompt\n3. Paste the key and press confirm\n4. Enjoy!",
-        inline=False
-    )
     embed.set_footer(text=f"pympleHUB • {today}")
 
     thumb = THUMBNAIL_URL or bot.user.display_avatar.url
