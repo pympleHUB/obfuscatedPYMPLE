@@ -25,14 +25,14 @@ COLORS = [
 ]
 
 GREETINGS = [
-    "🔑 Key Drop!",
-    "🚨 New Key Alert!",
-    "⚡ Key Update!",
-    "🎯 Fresh Key Just Dropped!",
-    "🔥 Key Rotation!",
-    "💎 New Key Available!",
-    "🎮 PYMPLE Key Update!",
-    "👀 New Key Who Dis?",
+    "Key Drop!",
+    "New Key Alert!",
+    "Key Update!",
+    "Fresh Key Just Dropped!",
+    "Key Rotation!",
+    "New Key Available!",
+    "PYMPLE Key Update!",
+    "New Key Just Dropped!",
 ]
 
 def generate_key():
@@ -87,15 +87,15 @@ async def announce_key(new_key, expires_at=None):
     color = random.choice(COLORS)
     greeting = random.choice(GREETINGS)
 
-    desc = f"**`{new_key}`**\n\n"
+    desc = f"## `{new_key}`\n\n"
     if expires_at:
         ts = int(expires_at.timestamp())
-        desc += f"The key will change <t:{ts}:R>!"
+        desc += f"Key will reset <t:{ts}:R>!"
     else:
-        desc += "The key will change in 24 hours!"
+        desc += "Key will reset in 24 hours!"
 
     embed = discord.Embed(title=greeting, description=desc, color=color)
-    embed.set_footer(text=f"Key set on {today} • PYMPLE")
+    embed.set_footer(text=f"PYMPLE • {today}")
 
     msg = await channel.send(embed=embed)
     last_announce_msg_id = msg.id
