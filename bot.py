@@ -4,7 +4,7 @@ import base64
 import os
 import random
 import string
-from datetime import datetime
+from datetime import datetime, timedelta
 from discord.ext import commands, tasks
 
 DISCORD_TOKEN = os.environ["DISCORD_TOKEN"]
@@ -16,6 +16,24 @@ ANNOUNCE_CHANNEL_ID = int(os.environ["ANNOUNCE_CHANNEL_ID"])
 intents = discord.Intents.default()
 intents.message_content = True
 bot = commands.Bot(command_prefix="!", intents=intents)
+
+last_announce_msg_id = None
+
+COLORS = [
+    0xDC3C3C, 0x3C6EDC, 0x8C3CDC,
+    0xDC8C3C, 0x3CDC8C, 0xDC3C8C, 0x3CDCDC,
+]
+
+GREETINGS = [
+    "🔑 Key Drop!",
+    "🚨 New Key Alert!",
+    "⚡ Key Update!",
+    "🎯 Fresh Key Just Dropped!",
+    "🔥 Key Rotation!",
+    "💎 New Key Available!",
+    "🎮 PYMPLE Key Update!",
+    "👀 New Key Who Dis?",
+]
 
 def generate_key():
     return "PYMPLE-" + "".join(random.choices(string.ascii_uppercase + string.digits, k=6))
@@ -39,26 +57,63 @@ def update_key(new_key):
     r = requests.put(url, json=data, headers=headers)
     return r.status_code in (200, 201)
 
-async def announce_key(new_key):
+async def expire_last_message():
+    global last_announce_msg_id
+    if not last_announce_msg_id:
+        return
+    try:
+        channel = bot.get_channel(ANNOUNCE_CHANNEL_ID)
+        old_msg = await channel.fetch_message(last_announce_msg_id)
+        old_embed = old_msg.embeds[0]
+        expired = discord.Embed(
+            title=old_embed.title,
+            description=old_embed.description.split("\n\n")[0] + "\n\n~~This key has been rotated.~~",
+            color=0x555555,
+        )
+        expired.set_footer(text=old_embed.footer.text + " • Expired")
+        await old_msg.edit(embed=expired)
+    except:
+        pass
+
+async def announce_key(new_key, expires_at=None):
+    global last_announce_msg_id
+    await expire_last_message()
+
     channel = bot.get_channel(ANNOUNCE_CHANNEL_ID)
-    if channel:
-        today = datetime.now().strftime("%d/%m/%Y")
-        await channel.send(f"{new_key} is the key as of {today}!")
+    if not channel:
+        return
+
+    today = datetime.now().strftime("%d/%m/%Y")
+    color = random.choice(COLORS)
+    greeting = random.choice(GREETINGS)
+
+    desc = f"**`{new_key}`**\n\n"
+    if expires_at:
+        ts = int(expires_at.timestamp())
+        desc += f"The key will change <t:{ts}:R>!"
+    else:
+        desc += "The key will change in 24 hours!"
+
+    embed = discord.Embed(title=greeting, description=desc, color=color)
+    embed.set_footer(text=f"Key set on {today} • PYMPLE")
+
+    msg = await channel.send(embed=embed)
+    last_announce_msg_id = msg.id
 
 @tasks.loop(hours=24)
 async def auto_rotate_key():
     if auto_rotate_key.current_loop == 0:
-        return  # skip the immediate first run on startup
+        return
     new_key = generate_key()
     if update_key(new_key):
-        await announce_key(new_key)
+        await announce_key(new_key, expires_at=datetime.now() + timedelta(hours=24))
 
 @bot.command()
 async def setkey(ctx, new_key: str):
     if update_key(new_key):
         auto_rotate_key.restart()
         await ctx.send(f"Key updated to: `{new_key}`")
-        await announce_key(new_key)
+        await announce_key(new_key, expires_at=datetime.now() + timedelta(hours=24))
     else:
         await ctx.send("Failed to update key.")
 
