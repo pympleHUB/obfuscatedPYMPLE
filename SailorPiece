@@ -11275,6 +11275,47 @@ S.Hub.Colors.Highlight=Color3.fromRGB(220,60,60)
 S.Hub.Colors.Toggle=Color3.fromRGB(220,60,60)
 S.Hub:Loader(S.ICON,2).yield()
 S.Win=S.Hub.new({Name="PIMPLE v7.5",Keybind="LeftAlt",Logo=S.ICON,TextSize=18,Font=Enum.Font.GothamBold})
+do
+	local _ts=game:GetService("TweenService")
+	local _pg=S.Win.Root
+	local _mf=nil
+	for _,_c in ipairs(_pg:GetChildren()) do
+		if _c:IsA("Frame") and _c.ZIndex==4 then _mf=_c break end
+	end
+	if _mf then
+		local _gw=Instance.new("Frame")
+		_gw.BackgroundTransparency=1
+		_gw.AnchorPoint=_mf.AnchorPoint
+		_gw.Position=_mf.Position
+		_gw.Size=UDim2.new(_mf.Size.X.Scale,_mf.Size.X.Offset+2,_mf.Size.Y.Scale,_mf.Size.Y.Offset+2)
+		_gw.ZIndex=3
+		_gw.Parent=_pg
+		Instance.new("UICorner",_gw).CornerRadius=UDim.new(0,18)
+		local _gs=Instance.new("UIStroke",_gw)
+		_gs.Color=Color3.fromRGB(255,255,255) _gs.Thickness=2.5
+		local _gg=Instance.new("UIGradient",_gs)
+		_gg.Transparency=NumberSequence.new{
+			NumberSequenceKeypoint.new(0,0.97),NumberSequenceKeypoint.new(0.12,0),
+			NumberSequenceKeypoint.new(0.38,0.75),NumberSequenceKeypoint.new(0.62,0.75),
+			NumberSequenceKeypoint.new(0.88,0),NumberSequenceKeypoint.new(1,0.97),
+		}
+		local function _sync()
+			_gw.AnchorPoint=_mf.AnchorPoint _gw.Position=_mf.Position
+			_gw.Size=UDim2.new(_mf.Size.X.Scale,_mf.Size.X.Offset+2,_mf.Size.Y.Scale,_mf.Size.Y.Offset+2)
+			_gw.Visible=_mf.Visible
+		end
+		_mf:GetPropertyChangedSignal("Position"):Connect(_sync)
+		_mf:GetPropertyChangedSignal("Size"):Connect(_sync)
+		_mf:GetPropertyChangedSignal("Visible"):Connect(_sync)
+		task.spawn(function()
+			while _gw and _gw.Parent do
+				_ts:Create(_gg,TweenInfo.new(3,Enum.EasingStyle.Linear),{Rotation=360}):Play()
+				task.wait(3.05)
+				if _gg and _gg.Parent then _gg.Rotation=0 end
+			end
+		end)
+	end
+end
 S.Win.OnToggle=function() end
 S.Notify.new({Title="pimpleHUB v7.5",Content="Left Alt = UI | V = Farm | B = Boss | N = Summon | M = Skills",Duration=5,Icon=S.ICON})
 local WM=S.Win:Watermark()
