@@ -7711,7 +7711,7 @@ function PYMPLE.new(Config : Window)
 				ContainerTab.Visible = false;
 			end;
 
-			if PYMPLE.PerformanceMode then
+			if _lib.PerformanceMode then
 				if ContainerTab.Visible then
 					_lib:_SetNilP(ContainerTab , TabMainFrame);
 				else
@@ -8480,7 +8480,7 @@ function PYMPLE.new(Config : Window)
 				TabConfig.Visible = false;
 			end;
 
-			if PYMPLE.PerformanceMode then
+			if _lib.PerformanceMode then
 				if TabConfig.Visible then
 					_lib:_SetNilP(TabConfig , TabMainFrame);
 				else
@@ -9365,7 +9365,7 @@ function PYMPLE.new(Config : Window)
 					TabContent.Visible = false;
 				end;
 
-				if PYMPLE.PerformanceMode then
+				if _lib.PerformanceMode then
 					if TabContent.Visible then
 						_lib:_SetNilP(TabContent , Internal.Parent);
 					else
@@ -9392,7 +9392,7 @@ function PYMPLE.new(Config : Window)
 				TabContent.Visible = true;
 			end;
 
-			if PYMPLE.PerformanceMode then
+			if _lib.PerformanceMode then
 				if TabContent.Visible then
 					_lib:_SetNilP(TabContent , Internal.Parent);
 				else
@@ -9569,7 +9569,7 @@ function PYMPLE.new(Config : Window)
 					TabContent.Visible = false;
 				end;
 
-				if PYMPLE.PerformanceMode then
+				if _lib.PerformanceMode then
 					if TabContent.Visible then
 						_lib:_SetNilP(TabContent , TabMainFrame);
 					else
@@ -10323,7 +10323,7 @@ function PYMPLE.new(Config : Window)
 					Icon.Visible = v;
 					TextLabel.Visible = v;
 
-					if PYMPLE.PerformanceMode then
+					if _lib.PerformanceMode then
 						if v then
 							_lib:_SetNilP(Icon , WaternarkList);
 							_lib:_SetNilP(TextLabel , WaternarkList);
@@ -10429,7 +10429,7 @@ function PYMPLE.new(Config : Window)
 		config.WindowName = config.WindowName or Config.Name;
 		config.UserProfile = config.UserProfile or WindowArgs.Profile or string.format("rbxthumb://type=AvatarHeadShot&id=%s&w=150&h=150",tostring(LocalPlayer.UserId));
 
-		if PYMPLE.SecureMode and string.find(config.UserProfile, "rbxassetid://",1,true) then
+		if _lib.SecureMode and string.find(config.UserProfile, "rbxassetid://",1,true) then
 			config.UserProfile = _lib:_GetIcon("user");
 		end;
 
@@ -10914,7 +10914,7 @@ function PYMPLE:Loader(IconId,Duration)
 				task.wait(0.2)
 
 				task.delay(3,function()
-					_lib:Destroy();
+					PYMPLE:Destroy();
 				end)
 			end)
 
