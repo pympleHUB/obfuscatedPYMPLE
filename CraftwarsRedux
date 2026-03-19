@@ -175,6 +175,7 @@ local Flags = {
 	AimAssist = false,
 	AimSmoothness = 0.15,
 	RadiusESP = false,
+	AutoEquipWeapon = false,
 }
 
 local SaveableKeys = {
@@ -227,10 +228,12 @@ local SaveableKeys = {
 	"AimAssist",
 	"AimSmoothness",
 	"RadiusESP",
+	"AutoEquipWeapon",
 }
 
 local TOTAL_BIOMES = 41
 local RadiusESPFolder = nil
+local LastEquippedWeaponName = nil
 
 local CooldownTimer, BiomeCheckTimer, CutsceneCheckTimer, MeteorTimer, SwingTimer, AbilityTimer, GodTimer, BossAlertTimer, MovementTimer =
 	0, 0, 0, 0, 0, 0, 0, 0, 0
@@ -368,12 +371,41 @@ local function UpdateJumpPower(p)
 	end
 end
 
-LocalPlayer.CharacterAdded:Connect(function(c)
+local function TrackAndEquipOnSpawn(c)
 	local h = c:WaitForChild("Humanoid")
 	if h then
 		h.WalkSpeed, h.JumpPower = Flags.WalkSpeed, Flags.JumpPower
 	end
-end)
+	c.ChildAdded:Connect(function(child)
+		if child:IsA("Tool") then
+			LastEquippedWeaponName = child.Name
+		end
+	end)
+	if Flags.AutoEquipWeapon and LastEquippedWeaponName then
+		task.wait(1.5)
+		if not Flags.AutoEquipWeapon then return end
+		local hm = c:FindFirstChildOfClass("Humanoid")
+		if not hm then return end
+		for _, item in ipairs(LocalPlayer.Backpack:GetChildren()) do
+			if item:IsA("Tool") and item.Name == LastEquippedWeaponName then
+				pcall(function() hm:EquipTool(item) end)
+				return
+			end
+		end
+		for _, item in ipairs(LocalPlayer.Backpack:GetChildren()) do
+			if item:IsA("Tool") and item:FindFirstChild("SwordControl") then
+				pcall(function() hm:EquipTool(item) end)
+				return
+			end
+		end
+	end
+end
+LocalPlayer.CharacterAdded:Connect(TrackAndEquipOnSpawn)
+if LocalPlayer.Character then
+	task.spawn(function()
+		TrackAndEquipOnSpawn(LocalPlayer.Character)
+	end)
+end
 
 local function GetRemote(name, cache)
 	if not cache then
@@ -12629,6 +12661,15 @@ local AntiSitToggle = PlayerSection:AddToggle({
 	end,
 })
 AntiSitToggle.Link:AddHelper({ Text = "Auto jump when forced to sit" })
+local AutoEquipToggle = PlayerSection:AddToggle({
+	Name = "Auto Equip Weapon",
+	Flag = "AutoEquipWeapon",
+	Default = Flags.AutoEquipWeapon,
+	Callback = function(v)
+		Flags.AutoEquipWeapon = v
+	end,
+})
+AutoEquipToggle.Link:AddHelper({ Text = "Re-equip last weapon on respawn" })
 PlayerSection:AddButton({
 	Name = "Reset Movement",
 	Callback = function()
@@ -13142,6 +13183,71 @@ NameSpoofSection:AddButton({
 	end,
 })
 
+local function _glowButton(parentOrSection, labelText, callback)
+	local sRoot = (type(parentOrSection) == "table" and parentOrSection._Root) or parentOrSection
+	local Container = Instance.new("Frame")
+	Container.Name = pimpleHUB:_RandomString()
+	Container.Parent = sRoot
+	Container.BackgroundTransparency = 1
+	Container.BorderSizePixel = 0
+	Container.Size = UDim2.new(1, -6, 0, 38)
+	Container.ZIndex = sRoot.ZIndex + 5
+	local Btn = Instance.new("Frame")
+	Btn.AnchorPoint = Vector2.new(0.5, 0.5)
+	Btn.BackgroundColor3 = pimpleHUB.Colors.Highlight
+	Btn.BackgroundTransparency = 0.1
+	Btn.BorderSizePixel = 0
+	Btn.Position = UDim2.new(0.5, 0, 0.5, 0)
+	Btn.Size = UDim2.new(1, -8, 1, -6)
+	Btn.ZIndex = Container.ZIndex + 1
+	Btn.Parent = Container
+	local BtnCorner = Instance.new("UICorner")
+	BtnCorner.CornerRadius = UDim.new(0, 4)
+	BtnCorner.Parent = Btn
+	local BtnStroke = Instance.new("UIStroke")
+	BtnStroke.Color = pimpleHUB.Colors.Highlight
+	BtnStroke.Thickness = 1.5
+	BtnStroke.Transparency = 0.1
+	BtnStroke.Parent = Btn
+	local ShimmerGradient = Instance.new("UIGradient")
+	ShimmerGradient.Transparency = NumberSequence.new({
+		NumberSequenceKeypoint.new(0,    0.85),
+		NumberSequenceKeypoint.new(0.12, 0),
+		NumberSequenceKeypoint.new(0.38, 0.75),
+		NumberSequenceKeypoint.new(0.62, 0.75),
+		NumberSequenceKeypoint.new(0.88, 0),
+		NumberSequenceKeypoint.new(1,    0.85),
+	})
+	ShimmerGradient.Parent = BtnStroke
+	task.spawn(function()
+		while Btn and Btn.Parent do
+			TweenService:Create(ShimmerGradient, TweenInfo.new(3, Enum.EasingStyle.Linear), { Rotation = 360 }):Play()
+			task.wait(3.05)
+			if ShimmerGradient and ShimmerGradient.Parent then ShimmerGradient.Rotation = 0 end
+		end
+	end)
+	local Label = Instance.new("TextLabel")
+	Label.AnchorPoint = Vector2.new(0.5, 0.5)
+	Label.BackgroundTransparency = 1
+	Label.Position = UDim2.new(0.5, 0, 0.5, 0)
+	Label.Size = UDim2.new(1, 0, 1, 0)
+	Label.ZIndex = Btn.ZIndex + 1
+	Label.Font = Enum.Font.GothamMedium
+	Label.Text = labelText
+	Label.TextColor3 = Color3.fromRGB(255, 255, 255)
+	Label.TextSize = 12
+	Label.TextStrokeTransparency = 0.9
+	Label.Parent = Btn
+	pimpleHUB:_Input(Btn, callback)
+	pimpleHUB:_Hover(Btn, function()
+		pimpleHUB:_Animation(BtnStroke, TweenInfo.new(0.18), { Transparency = 0.0 })
+		pimpleHUB:_Animation(Btn, TweenInfo.new(0.18), { BackgroundTransparency = 0 })
+	end, function()
+		pimpleHUB:_Animation(BtnStroke, TweenInfo.new(0.18), { Transparency = 0.1 })
+		pimpleHUB:_Animation(Btn, TweenInfo.new(0.18), { BackgroundTransparency = 0.1 })
+	end)
+end
+
 -- ==================== SETTINGS TAB ====================
 Window:DrawCategory({ Name = "SETTINGS" })
 local SetTab = Window:DrawTab({ Name = "Settings", Icon = "settings-3", Type = "Single", EnableScrolling = true })
@@ -13243,75 +13349,44 @@ UISec:AddSlider({
 		_applyGlowIntensity(v / 100)
 	end,
 })
-UISec:AddButton({
-	Name = "Copy Discord",
-	Callback = function()
-		pcall(function()
-			setclipboard(DISCORD_INVITE)
-		end)
-		Notifier.new({ Title = "Copied", Content = "Discord link copied!", Duration = 2, Icon = AVATAR_ICON })
-	end,
-})
-UISec:AddButton({
-	Name = "Destroy GUI",
-	Callback = function()
-		Flags.Enabled = false
-		Flags.AutoSwing = false
-		Flags.AutoAbilities = false
-		Flags.AutoMeteor = false
-		Flags.AutoBiomeLock = false
-		Flags.AutoSkipCutscene = false
-		Flags.AutoGodSelf = false
-		Flags.NameSpoofEnabled = false
-		if NameSpoofEnabled then
-			StopNameSpoof()
-		end
-		pcall(function()
-			local c = LocalPlayer.Character
-			if c then
-				local hm = c:FindFirstChildOfClass("Humanoid")
-				if hm then
-					hm.PlatformStand = false
-				end
-			end
-		end)
-		task.delay(0.1, function()
+_glowButton(UISec, "Copy Discord", function()
+	pcall(function() setclipboard(DISCORD_INVITE) end)
+	Notifier.new({ Title = "Copied", Content = "Discord link copied!", Duration = 2, Icon = AVATAR_ICON })
+end)
+_glowButton(UISec, "Destroy GUI", function()
+	Flags.Enabled = false
+	Flags.AutoSwing = false
+	Flags.AutoAbilities = false
+	Flags.AutoMeteor = false
+	Flags.AutoBiomeLock = false
+	Flags.AutoSkipCutscene = false
+	Flags.AutoGodSelf = false
+	Flags.NameSpoofEnabled = false
+	if NameSpoofEnabled then StopNameSpoof() end
+	DestroyRadiusESP()
+	pcall(function()
+		workspace.CurrentCamera.CameraType = Enum.CameraType.Custom
+	end)
+	task.delay(0.1, function()
+		pcall(function() Window:Destroy() end)
+		pcall(function() pimpleHUB:Destroy() end)
+		local function nukeGuis(parent)
 			pcall(function()
-				Window:Destroy()
-			end)
-			pcall(function()
-				pimpleHUB:Destroy()
-			end)
-			local function nukeGuis(parent)
-				pcall(function()
-					for _, gui in ipairs(parent:GetChildren()) do
-						if gui:IsA("ScreenGui") then
-							local n = gui.Name:lower()
-							if
-								n:find("pimple")
-								or n:find("pymple")
-								or n:find("notify")
-								or n:find("loader")
-								or n:find("watermark")
-							then
-								gui:Destroy()
-							end
+				for _, gui in ipairs(parent:GetChildren()) do
+					if gui:IsA("ScreenGui") then
+						local n = gui.Name:lower()
+						if n:find("pimple") or n:find("pymple") or n:find("notify") or n:find("loader") or n:find("watermark") then
+							gui:Destroy()
 						end
 					end
-				end)
-			end
-			nukeGuis(LocalPlayer.PlayerGui)
-			pcall(function()
-				nukeGuis(game:GetService("CoreGui"))
-			end)
-			pcall(function()
-				if gethui then
-					nukeGuis(gethui())
 				end
 			end)
-		end)
-	end,
-})
+		end
+		nukeGuis(LocalPlayer.PlayerGui)
+		pcall(function() nukeGuis(game:GetService("CoreGui")) end)
+		pcall(function() if gethui then nukeGuis(gethui()) end end)
+	end)
+end)
 local InfoSec = SetTab:DrawSection({ Name = "Info", Position = "right" })
 InfoSec:AddParagraph({
 	Title = "PYMPLE v6.0",
