@@ -14,7 +14,6 @@ KEY_FILE = "pympleKeyBot"
 HISTORY_FILE = "pympleKeyHistory"
 ANNOUNCE_CHANNEL_ID = int(os.environ["ANNOUNCE_CHANNEL_ID"])
 LOG_CHANNEL_ID = 1239788452623417405
-ANNOUNCE_ROLE_ID = int(os.environ.get("ANNOUNCE_ROLE_ID", 0))
 THUMBNAIL_URL = os.environ.get("THUMBNAIL_URL", "")
 ROBLOX_USER_ID = 583572860
 OWNER_ID = 431103247478947850
@@ -97,6 +96,10 @@ class CopyKeyView(discord.ui.View):
             )
         except:
             pass
+        await log("🚨 Issue Reported", 0xE74C3C, [
+            ("Reported By", f"{interaction.user} (`{interaction.user.id}`)", False),
+            ("Key at Report", f"`{key}`", True),
+        ])
         await interaction.response.send_message("Your report has been sent. Thank you!", ephemeral=True)
 
 
@@ -161,26 +164,30 @@ def add_to_history(new_key):
 
 # --- Logging ---
 
-async def log_rotation(new_key, triggered_by="Auto-rotation"):
-    global last_rotation_time
-    last_rotation_time = datetime.now()
+async def log(title, color, fields: list):
     try:
         log_channel = bot.get_channel(LOG_CHANNEL_ID)
         if not log_channel:
             return
-        ts = int(last_rotation_time.timestamp())
-        embed = discord.Embed(title="🔑 Key Rotated", color=0x2ECC71)
-        embed.add_field(name="New Key", value=f"`{new_key}`", inline=False)
-        embed.add_field(name="Triggered By", value=triggered_by, inline=True)
-        embed.add_field(name="Time", value=f"<t:{ts}:F>", inline=True)
-        next_run = auto_rotate_key.next_iteration
-        if next_run:
-            next_ts = int(next_run.timestamp())
-            embed.add_field(name="Next Rotation", value=f"<t:{next_ts}:R>", inline=True)
-        embed.set_footer(text=f"pympleHUB • {last_rotation_time.strftime('%d %B %Y')}")
+        embed = discord.Embed(title=title, color=color, timestamp=datetime.now())
+        for name, value, inline in fields:
+            embed.add_field(name=name, value=value, inline=inline)
+        embed.set_footer(text="pympleHUB logs")
         await log_channel.send(embed=embed)
     except:
         pass
+
+async def log_rotation(new_key, triggered_by="Auto-rotation"):
+    global last_rotation_time
+    last_rotation_time = datetime.now()
+    fields = [
+        ("New Key", f"`{new_key}`", False),
+        ("Triggered By", triggered_by, True),
+    ]
+    next_run = auto_rotate_key.next_iteration
+    if next_run:
+        fields.append(("Next Rotation", f"<t:{int(next_run.timestamp())}:R>", True))
+    await log("🔑 Key Rotated", 0x2ECC71, fields)
 
 
 # --- Core logic ---
@@ -231,9 +238,7 @@ async def announce_key(new_key, expires_at=None):
     thumb = THUMBNAIL_URL or bot.user.display_avatar.url
     embed.set_thumbnail(url=thumb)
 
-    # Ping role if set
-    role_mention = f"<@&{ANNOUNCE_ROLE_ID}>" if ANNOUNCE_ROLE_ID else None
-    msg = await channel.send(content=role_mention, embed=embed, view=CopyKeyView())
+    msg = await channel.send(embed=embed, view=CopyKeyView())
     last_announce_msg_id = msg.id
 
 
@@ -247,6 +252,20 @@ async def delete_cmd(ctx):
         await ctx.message.delete()
     except:
         pass
+
+async def log_cmd(ctx):
+    await log("⌨️ Command Used", 0x3C6EDC, [
+        ("Command", f"`{ctx.message.content}`", False),
+        ("User", f"{ctx.author} (`{ctx.author.id}`)", True),
+        ("Channel", f"<#{ctx.channel.id}>", True),
+    ])
+
+async def log_unauthorized(ctx):
+    await log("🚫 Unauthorized Attempt", 0xE67E22, [
+        ("Command", f"`{ctx.message.content}`", False),
+        ("User", f"{ctx.author} (`{ctx.author.id}`)", True),
+        ("Channel", f"<#{ctx.channel.id}>", True),
+    ])
 
 
 # --- Tasks ---
@@ -269,7 +288,12 @@ async def clean_key_channel():
     if not channel:
         return
     try:
-        await channel.purge(limit=50, check=lambda m: m.id != last_announce_msg_id)
+        deleted = await channel.purge(limit=50, check=lambda m: m.id != last_announce_msg_id)
+        if deleted:
+            await log("🧹 Channel Cleaned", 0x95A5A6, [
+                ("Messages Deleted", str(len(deleted)), True),
+                ("Channel", f"<#{ANNOUNCE_CHANNEL_ID}>", True),
+            ])
     except:
         pass
 
@@ -298,7 +322,9 @@ async def missed_rotation_check():
 @bot.command()
 async def setkey(ctx, new_key: str):
     if not owner_only(ctx):
+        await log_unauthorized(ctx)
         return
+    await log_cmd(ctx)
     await delete_cmd(ctx)
     if update_key(new_key):
         add_to_history(new_key)
@@ -314,7 +340,9 @@ async def setkey(ctx, new_key: str):
 @bot.command()
 async def rotatenow(ctx):
     if not owner_only(ctx):
+        await log_unauthorized(ctx)
         return
+    await log_cmd(ctx)
     await delete_cmd(ctx)
     new_key = generate_key()
     if update_key(new_key):
@@ -331,7 +359,9 @@ async def rotatenow(ctx):
 @bot.command()
 async def announce(ctx):
     if not owner_only(ctx):
+        await log_unauthorized(ctx)
         return
+    await log_cmd(ctx)
     await delete_cmd(ctx)
     key, _ = gh_get(KEY_FILE)
     if not key:
@@ -344,7 +374,9 @@ async def announce(ctx):
 @bot.command()
 async def setinterval(ctx, hours: float):
     if not owner_only(ctx):
+        await log_unauthorized(ctx)
         return
+    await log_cmd(ctx)
     await delete_cmd(ctx)
     global ROTATION_HOURS
     ROTATION_HOURS = max(1.0, hours)
@@ -362,7 +394,9 @@ async def setinterval(ctx, hours: float):
 @bot.command()
 async def pauserotation(ctx):
     if not owner_only(ctx):
+        await log_unauthorized(ctx)
         return
+    await log_cmd(ctx)
     await delete_cmd(ctx)
     if auto_rotate_key.is_running():
         auto_rotate_key.stop()
@@ -373,7 +407,9 @@ async def pauserotation(ctx):
 @bot.command()
 async def resumerotation(ctx):
     if not owner_only(ctx):
+        await log_unauthorized(ctx)
         return
+    await log_cmd(ctx)
     await delete_cmd(ctx)
     if not auto_rotate_key.is_running():
         auto_rotate_key.start()
@@ -385,7 +421,9 @@ async def resumerotation(ctx):
 @bot.command()
 async def getkey(ctx):
     if not owner_only(ctx):
+        await log_unauthorized(ctx)
         return
+    await log_cmd(ctx)
     await delete_cmd(ctx)
     key, _ = gh_get(KEY_FILE)
     if key:
@@ -396,7 +434,9 @@ async def getkey(ctx):
 @bot.command()
 async def keyhistory(ctx):
     if not owner_only(ctx):
+        await log_unauthorized(ctx)
         return
+    await log_cmd(ctx)
     await delete_cmd(ctx)
     history, _ = gh_get(HISTORY_FILE)
     if not history:
@@ -419,7 +459,9 @@ async def keyhistory(ctx):
 @bot.command()
 async def clearhistory(ctx):
     if not owner_only(ctx):
+        await log_unauthorized(ctx)
         return
+    await log_cmd(ctx)
     await delete_cmd(ctx)
     gh_delete(HISTORY_FILE)
     await ctx.author.send("Key history cleared.")
@@ -427,7 +469,9 @@ async def clearhistory(ctx):
 @bot.command()
 async def status(ctx):
     if not owner_only(ctx):
+        await log_unauthorized(ctx)
         return
+    await log_cmd(ctx)
     await delete_cmd(ctx)
     key, _ = gh_get(KEY_FILE)
     uptime = datetime.now() - bot_start_time
@@ -453,7 +497,9 @@ async def status(ctx):
 @bot.command()
 async def ping(ctx):
     if not owner_only(ctx):
+        await log_unauthorized(ctx)
         return
+    await log_cmd(ctx)
     await delete_cmd(ctx)
     await ctx.author.send(f"Pong! `{round(bot.latency * 1000)}ms`")
 
@@ -511,6 +557,10 @@ async def on_ready():
     auto_rotate_key.start()
     clean_key_channel.start()
     missed_rotation_check.start()
+    await log("✅ Bot Online", 0x2ECC71, [
+        ("Bot", str(bot.user), True),
+        ("Started At", f"<t:{int(bot_start_time.timestamp())}:F>", True),
+    ])
     print(f"Bot is online as {bot.user}")
 
 bot.run(DISCORD_TOKEN)
