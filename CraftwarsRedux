@@ -171,6 +171,7 @@ local Flags = {
 	MovementOffset = 5,
 	MovementInterval = 0.3,
 	TweenSpeed = 0.5,
+	AntiSit = false,
 }
 
 local SaveableKeys = {
@@ -219,6 +220,7 @@ local SaveableKeys = {
 	"MovementOffset",
 	"MovementInterval",
 	"TweenSpeed",
+	"AntiSit",
 }
 
 local TOTAL_BIOMES = 41
@@ -12500,6 +12502,15 @@ local SpeedLockToggle = PlayerSection:AddToggle({
 	end,
 })
 SpeedLockToggle.Link:AddHelper({ Text = "Maintain speed every frame" })
+local AntiSitToggle = PlayerSection:AddToggle({
+	Name = "Anti Sit",
+	Flag = "AntiSit",
+	Default = Flags.AntiSit,
+	Callback = function(v)
+		Flags.AntiSit = v
+	end,
+})
+AntiSitToggle.Link:AddHelper({ Text = "Auto jump when forced to sit" })
 PlayerSection:AddButton({
 	Name = "Reset Movement",
 	Callback = function()
@@ -13243,6 +13254,13 @@ RunService.RenderStepped:Connect(function(dt)
 	if Flags.SpeedLock then
 		UpdateWalkSpeed(Flags.WalkSpeed)
 		UpdateJumpPower(Flags.JumpPower)
+	end
+	if Flags.AntiSit then
+		local c = LocalPlayer.Character
+		local h = c and c:FindFirstChildOfClass("Humanoid")
+		if h and h.Sit then
+			h.Jump = true
+		end
 	end
 	if Flags.AutoBossAlert and BossAlertTimer >= Flags.BossAlertInterval then
 		BossAlertTimer = 0
