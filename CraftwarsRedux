@@ -11203,6 +11203,125 @@ local Window = pimpleHUB.new({Name="PIMPLE v6.0 - Craftwars Redux",Keybind="Left
 
 Window.OnToggle = function(visible) UIOpen = visible end
 
+do
+	-- White rotating shimmer outline + red multi-layer bloom around the main window
+	local _glowEnabled = true
+	task.defer(function()
+		local _ts = game:GetService("TweenService")
+		local _pg = Window.Root
+		local _mf = nil
+		for _, _c in ipairs(_pg:GetChildren()) do
+			if _c:IsA("Frame") and _c.ZIndex == 4 then _mf = _c break end
+		end
+		if not _mf then return end
+
+		-- Find sidebar TabFrame (AnchorPoint.X == 1)
+		local _tf = nil
+		for _, _c in ipairs(_mf:GetChildren()) do
+			if _c:IsA("Frame") and _c.AnchorPoint.X == 1 then _tf = _c break end
+		end
+
+		local _rgStrokes = {}
+
+		-- WHITE SHIMMER: mirrors MainFrame position/size, rotates gradient for ray effect
+		local _gwhub = Instance.new("Frame")
+		_gwhub.BackgroundTransparency = 1
+		_gwhub.BorderSizePixel        = 0
+		_gwhub.ZIndex                 = 3
+		_gwhub.Parent                 = _pg
+		local _gw = Instance.new("Frame")
+		_gw.BackgroundTransparency = 1
+		_gw.BorderSizePixel        = 0
+		_gw.AnchorPoint            = Vector2.new(0.5, 0.5)
+		_gw.Position               = UDim2.fromScale(0.5, 0.5)
+		_gw.Size                   = UDim2.new(1, 2, 1, 2)
+		_gw.ZIndex                 = 3
+		_gw.Parent                 = _gwhub
+		Instance.new("UICorner", _gw).CornerRadius = UDim.new(0, 18)
+		local _gs = Instance.new("UIStroke", _gw)
+		_gs.Color     = Color3.fromRGB(255, 255, 255)
+		_gs.Thickness = 2.5
+		local _gg = Instance.new("UIGradient", _gs)
+		_gg.Transparency = NumberSequence.new({
+			NumberSequenceKeypoint.new(0,    0.97),
+			NumberSequenceKeypoint.new(0.12, 0),
+			NumberSequenceKeypoint.new(0.38, 0.75),
+			NumberSequenceKeypoint.new(0.62, 0.75),
+			NumberSequenceKeypoint.new(0.88, 0),
+			NumberSequenceKeypoint.new(1,    0.97),
+		})
+
+		local function _syncHub()
+			_gwhub.AnchorPoint = _mf.AnchorPoint
+			_gwhub.Position    = _mf.Position
+			_gwhub.Size        = _mf.Size
+			_gwhub.Visible     = _mf.Visible and _glowEnabled
+		end
+		_syncHub()
+		_mf:GetPropertyChangedSignal("AnchorPoint"):Connect(_syncHub)
+		_mf:GetPropertyChangedSignal("Position"):Connect(_syncHub)
+		_mf:GetPropertyChangedSignal("Size"):Connect(_syncHub)
+		_mf:GetPropertyChangedSignal("Visible"):Connect(_syncHub)
+
+		-- RED BLOOM: covers MainFrame + sidebar protrusion, 4 layered UIStrokes
+		local _gwrap = Instance.new("Frame")
+		_gwrap.BackgroundTransparency = 1
+		_gwrap.BorderSizePixel        = 0
+		_gwrap.AnchorPoint            = Vector2.new(0, 0)
+		_gwrap.ZIndex                 = 3
+		_gwrap.Parent                 = _pg
+
+		local _glowBaseTransp = {0.82, 0.91, 0.95, 0.98}
+		local function _mkRG(thick, transp)
+			local f = Instance.new("Frame")
+			f.BackgroundTransparency = 1
+			f.BorderSizePixel        = 0
+			f.AnchorPoint            = Vector2.new(0.5, 0.5)
+			f.Position               = UDim2.fromScale(0.5, 0.5)
+			f.Size                   = UDim2.fromScale(1, 1)
+			f.ZIndex                 = 3
+			f.Parent                 = _gwrap
+			Instance.new("UICorner", f).CornerRadius = UDim.new(0, 10)
+			local s = Instance.new("UIStroke", f)
+			s.Color        = Color3.fromRGB(220, 60, 60)
+			s.Thickness    = thick
+			s.Transparency = transp
+			table.insert(_rgStrokes, s)
+		end
+		_mkRG(1.5, _glowBaseTransp[1])
+		_mkRG(4,   _glowBaseTransp[2])
+		_mkRG(8,   _glowBaseTransp[3])
+		_mkRG(14,  _glowBaseTransp[4])
+
+		local function _sync()
+			local pgAP     = _pg.AbsolutePosition
+			local mfAP     = _mf.AbsolutePosition
+			local mfAS     = _mf.AbsoluteSize
+			local protrude = (_tf and math.max(0, _tf.Size.X.Offset - 25)) or 0
+			_gwrap.Position = UDim2.fromOffset(mfAP.X - pgAP.X - protrude, mfAP.Y - pgAP.Y)
+			_gwrap.Size     = UDim2.fromOffset(mfAS.X + protrude, mfAS.Y)
+			_gwrap.Visible  = _mf.Visible and _glowEnabled
+		end
+		RunService.Heartbeat:Wait()
+		_sync()
+		_mf:GetPropertyChangedSignal("AbsolutePosition"):Connect(_sync)
+		_mf:GetPropertyChangedSignal("AbsoluteSize"):Connect(_sync)
+		_mf:GetPropertyChangedSignal("Visible"):Connect(_sync)
+		if _tf then
+			_tf:GetPropertyChangedSignal("Size"):Connect(_sync)
+		end
+
+		-- Spin the white shimmer gradient continuously
+		task.spawn(function()
+			while _gwhub and _gwhub.Parent do
+				_ts:Create(_gg, TweenInfo.new(3, Enum.EasingStyle.Linear), {Rotation = 360}):Play()
+				task.wait(3.05)
+				if _gg and _gg.Parent then _gg.Rotation = 0 end
+			end
+		end)
+	end)
+end
+
 Notifier.new({Title="pimpleHUB Loaded",Content="Press Left Alt to toggle UI\nX = Auto Swing | T = Auto Abilities",Duration=5,Icon=AVATAR_ICON})
 
 -- Watermark with live time
