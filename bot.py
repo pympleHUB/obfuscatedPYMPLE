@@ -56,7 +56,7 @@ class CopyKeyView(discord.ui.View):
         key = "Key not found"
         if interaction.message and interaction.message.embeds:
             first_line = (interaction.message.embeds[0].description or "").split("\n")[0]
-            key = first_line.replace("# ", "").strip()
+            key = first_line.replace("# ", "").replace("`", "").strip()
         await interaction.response.send_message(key, ephemeral=True)
 
 def generate_key():
