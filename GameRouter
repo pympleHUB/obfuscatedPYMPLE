@@ -1,6 +1,7 @@
 local S = ...
 local GAMES = {
 	[77747658251236] = "https://raw.githubusercontent.com/pympleHUB/obfuscatedPYMPLE/refs/heads/main/SailorPiece",
+	[107457593564828] = "https://raw.githubusercontent.com/pympleHUB/obfuscatedPYMPLE/refs/heads/main/CraftwarsRedux",
 }
 local featuresUrl = GAMES[game.PlaceId]
 if featuresUrl then
