@@ -1,3 +1,4 @@
+import collections
 import discord
 import requests
 import base64
@@ -12,6 +13,7 @@ GITHUB_TOKEN = os.environ["GITHUB_TOKEN"]
 GITHUB_REPO = "pympleHUB/obfuscatedPYMPLE"
 KEY_FILE = "pympleKeyBot"
 HISTORY_FILE = "pympleKeyHistory"
+ROTATION_COUNT_FILE = "pympleKeyCount"
 ANNOUNCE_CHANNEL_ID = int(os.environ["ANNOUNCE_CHANNEL_ID"])
 LOG_CHANNEL_ID = 1239788452623417405
 THUMBNAIL_URL = os.environ.get("THUMBNAIL_URL", "")
@@ -27,6 +29,8 @@ last_announce_msg_id = None
 bot_start_time = None
 last_rotation_time = None
 ROTATION_HOURS = 12.0
+total_reports = 0
+recent_key_channel_msgs = collections.deque(maxlen=20)
 
 COLORS = [
     0xDC3C3C, 0x3C6EDC, 0x8C3CDC,
@@ -84,6 +88,8 @@ class CopyKeyView(discord.ui.View):
         await interaction.response.send_message(key, ephemeral=True)
 
     async def _report_issue(self, interaction: discord.Interaction):
+        global total_reports
+        total_reports += 1
         key = "Unknown"
         if interaction.message and interaction.message.embeds:
             first_line = (interaction.message.embeds[0].description or "").split("\n")[0]
@@ -99,6 +105,7 @@ class CopyKeyView(discord.ui.View):
         await log("🚨 Issue Reported", 0xE74C3C, [
             ("Reported By", f"{interaction.user} (`{interaction.user.id}`)", False),
             ("Key at Report", f"`{key}`", True),
+            ("Total Reports", str(total_reports), True),
         ])
         await interaction.response.send_message("Your report has been sent. Thank you!", ephemeral=True)
 
@@ -161,6 +168,30 @@ def add_to_history(new_key):
     lines.insert(0, f"{timestamp}|{new_key}")
     gh_put(HISTORY_FILE, "\n".join(lines[:10]), "Update key history")
 
+def increment_rotation_count():
+    content, sha = gh_get(ROTATION_COUNT_FILE)
+    try:
+        count = int(content or 0) + 1
+    except:
+        count = 1
+    url = f"https://api.github.com/repos/{GITHUB_REPO}/contents/{ROTATION_COUNT_FILE}"
+    headers = {"Authorization": f"token {GITHUB_TOKEN}"}
+    data = {
+        "message": "Update rotation count",
+        "content": base64.b64encode(str(count).encode()).decode()
+    }
+    if sha:
+        data["sha"] = sha
+    requests.put(url, json=data, headers=headers)
+    return count
+
+def get_rotation_count():
+    content, _ = gh_get(ROTATION_COUNT_FILE)
+    try:
+        return int(content or 0)
+    except:
+        return 0
+
 
 # --- Logging ---
 
@@ -171,7 +202,7 @@ async def log(title, color, fields: list):
             return
         embed = discord.Embed(title=title, color=color, timestamp=datetime.now())
         for name, value, inline in fields:
-            embed.add_field(name=name, value=value, inline=inline)
+            embed.add_field(name=name, value=str(value)[:1024], inline=inline)
         embed.set_footer(text="pympleHUB logs")
         await log_channel.send(embed=embed)
     except:
@@ -223,6 +254,8 @@ async def announce_key(new_key, expires_at=None):
 
     color = random.choice(COLORS)
     greeting = random.choice(GREETINGS)
+    rotation_count = get_rotation_count()
+    member_count = channel.guild.member_count if channel.guild else 0
 
     desc = f"# `{new_key}`\n\n"
     if expires_at:
@@ -231,9 +264,12 @@ async def announce_key(new_key, expires_at=None):
     else:
         desc += "Key will be resetting soon! Please check out <#1183563684828688446> for all of my projects!\n\nALL script-related videos are found on my YouTube Channel, linked below! Please Subscribe, Comment, and Like!"
 
+    if member_count:
+        desc += f"\n\n👥 **{member_count:,}** members in the server!"
+
     today = datetime.now().strftime("%d %B %Y")
     embed = discord.Embed(title=greeting, description=desc, color=color)
-    embed.set_footer(text=f"pympleHUB • {today}")
+    embed.set_footer(text=f"pympleHUB • Key #{rotation_count} • {today}")
 
     thumb = THUMBNAIL_URL or bot.user.display_avatar.url
     embed.set_thumbnail(url=thumb)
@@ -242,7 +278,7 @@ async def announce_key(new_key, expires_at=None):
     last_announce_msg_id = msg.id
 
 
-# --- Owner check helper ---
+# --- Owner check helpers ---
 
 def owner_only(ctx):
     return ctx.author.id == OWNER_ID
@@ -277,6 +313,7 @@ async def auto_rotate_key():
     new_key = generate_key()
     if update_key(new_key):
         add_to_history(new_key)
+        increment_rotation_count()
         await log_rotation(new_key, triggered_by="Auto-rotation")
         await announce_key(new_key, expires_at=datetime.now() + timedelta(hours=ROTATION_HOURS))
 
@@ -320,41 +357,17 @@ async def missed_rotation_check():
 # --- Commands ---
 
 @bot.command()
-async def setkey(ctx, new_key: str):
+async def addnote(ctx, *, text: str):
     if not owner_only(ctx):
         await log_unauthorized(ctx)
         return
     await log_cmd(ctx)
     await delete_cmd(ctx)
-    if update_key(new_key):
-        add_to_history(new_key)
-        auto_rotate_key.restart()
-        await log_rotation(new_key, triggered_by=f"Manual — {ctx.author}")
-        await announce_key(new_key, expires_at=datetime.now() + timedelta(hours=ROTATION_HOURS))
-    else:
-        try:
-            await ctx.author.send(f"Failed to update key to `{new_key}`.")
-        except:
-            pass
-
-@bot.command()
-async def rotatenow(ctx):
-    if not owner_only(ctx):
-        await log_unauthorized(ctx)
-        return
-    await log_cmd(ctx)
-    await delete_cmd(ctx)
-    new_key = generate_key()
-    if update_key(new_key):
-        add_to_history(new_key)
-        auto_rotate_key.restart()
-        await log_rotation(new_key, triggered_by=f"Manual — {ctx.author}")
-        await announce_key(new_key, expires_at=datetime.now() + timedelta(hours=ROTATION_HOURS))
-    else:
-        try:
-            await ctx.author.send("Failed to rotate key.")
-        except:
-            pass
+    await log("📝 Note", 0xF39C12, [
+        ("Note", text, False),
+        ("Added By", str(ctx.author), True),
+    ])
+    await ctx.author.send("Note logged to the log channel.")
 
 @bot.command()
 async def announce(ctx):
@@ -371,52 +384,60 @@ async def announce(ctx):
     expires_at = next_run.replace(tzinfo=None) if next_run else datetime.now() + timedelta(hours=ROTATION_HOURS)
     await announce_key(key, expires_at=expires_at)
 
-@bot.command()
-async def setinterval(ctx, hours: float):
+@bot.command(name="bothelp")
+async def bothelp(ctx):
     if not owner_only(ctx):
         await log_unauthorized(ctx)
         return
     await log_cmd(ctx)
     await delete_cmd(ctx)
-    global ROTATION_HOURS
-    ROTATION_HOURS = max(1.0, hours)
-    try:
-        if auto_rotate_key.is_running():
-            auto_rotate_key.change_interval(hours=ROTATION_HOURS)
-        else:
-            auto_rotate_key.start()
-            auto_rotate_key.change_interval(hours=ROTATION_HOURS)
-    except:
-        pass
-    next_ts = int((datetime.now() + timedelta(hours=ROTATION_HOURS)).timestamp())
-    await ctx.author.send(f"Rotation interval set to `{ROTATION_HOURS}h`. Next rotation <t:{next_ts}:R>.")
+    embed = discord.Embed(title="pympleHUB Commands", color=0xDC3C3C)
+    embed.add_field(name="!addnote <text>", value="Log a timestamped note to the log channel", inline=False)
+    embed.add_field(name="!announce", value="Re-post the current key without rotating", inline=False)
+    embed.add_field(name="!bothelp", value="Shows this message", inline=False)
+    embed.add_field(name="!broadcast <message>", value="Post a custom announcement embed to the key channel", inline=False)
+    embed.add_field(name="!clearhistory", value="Wipe the key history", inline=False)
+    embed.add_field(name="!getkey", value="Get the current key via DM", inline=False)
+    embed.add_field(name="!keyhistory", value="View last 5 keys with timestamps via DM", inline=False)
+    embed.add_field(name="!lockdown [seconds]", value="Enable slow mode on the key channel (default 30s)", inline=False)
+    embed.add_field(name="!pauserotation", value="Pause auto-rotation", inline=False)
+    embed.add_field(name="!ping", value="Check bot latency via DM", inline=False)
+    embed.add_field(name="!resumerotation", value="Resume auto-rotation", inline=False)
+    embed.add_field(name="!rotatenow", value="Instantly rotate to a new generated key", inline=False)
+    embed.add_field(name="!setinterval <hours>", value="Change the auto-rotation interval", inline=False)
+    embed.add_field(name="!setkey <key>", value="Set a specific key manually", inline=False)
+    embed.add_field(name="!stats", value="Total rotations, reports, member count via DM", inline=False)
+    embed.add_field(name="!status", value="Bot uptime, key, rotation state, latency via DM", inline=False)
+    embed.add_field(name="!unlock", value="Remove slow mode from the key channel", inline=False)
+    embed.set_footer(text="All commands auto-delete and respond via DM")
+    await ctx.author.send(embed=embed)
 
 @bot.command()
-async def pauserotation(ctx):
+async def broadcast(ctx, *, message: str):
     if not owner_only(ctx):
         await log_unauthorized(ctx)
         return
     await log_cmd(ctx)
     await delete_cmd(ctx)
-    if auto_rotate_key.is_running():
-        auto_rotate_key.stop()
-        await ctx.author.send("Auto-rotation paused.")
-    else:
-        await ctx.author.send("Auto-rotation is already paused.")
+    channel = bot.get_channel(ANNOUNCE_CHANNEL_ID)
+    if not channel:
+        return
+    thumb = THUMBNAIL_URL or bot.user.display_avatar.url
+    today = datetime.now().strftime("%d %B %Y")
+    embed = discord.Embed(description=message, color=random.choice(COLORS), timestamp=datetime.now())
+    embed.set_author(name="pympleHUB Announcement", icon_url=thumb)
+    embed.set_footer(text=f"pympleHUB • {today}")
+    await channel.send(embed=embed)
 
 @bot.command()
-async def resumerotation(ctx):
+async def clearhistory(ctx):
     if not owner_only(ctx):
         await log_unauthorized(ctx)
         return
     await log_cmd(ctx)
     await delete_cmd(ctx)
-    if not auto_rotate_key.is_running():
-        auto_rotate_key.start()
-        next_ts = int((datetime.now() + timedelta(hours=ROTATION_HOURS)).timestamp())
-        await ctx.author.send(f"Auto-rotation resumed. Next rotation <t:{next_ts}:R>.")
-    else:
-        await ctx.author.send("Auto-rotation is already running.")
+    gh_delete(HISTORY_FILE)
+    await ctx.author.send("Key history cleared.")
 
 @bot.command()
 async def getkey(ctx):
@@ -457,14 +478,136 @@ async def keyhistory(ctx):
     await ctx.author.send(embed=embed)
 
 @bot.command()
-async def clearhistory(ctx):
+async def lockdown(ctx, seconds: int = 30):
     if not owner_only(ctx):
         await log_unauthorized(ctx)
         return
     await log_cmd(ctx)
     await delete_cmd(ctx)
-    gh_delete(HISTORY_FILE)
-    await ctx.author.send("Key history cleared.")
+    channel = bot.get_channel(ANNOUNCE_CHANNEL_ID)
+    if channel:
+        await channel.edit(slowmode_delay=seconds)
+        await log("🔒 Channel Locked", 0xE74C3C, [
+            ("Channel", f"<#{ANNOUNCE_CHANNEL_ID}>", True),
+            ("Slow Mode", f"{seconds}s", True),
+            ("By", str(ctx.author), True),
+        ])
+        await ctx.author.send(f"Slow mode set to `{seconds}s` in <#{ANNOUNCE_CHANNEL_ID}>.")
+
+@bot.command()
+async def pauserotation(ctx):
+    if not owner_only(ctx):
+        await log_unauthorized(ctx)
+        return
+    await log_cmd(ctx)
+    await delete_cmd(ctx)
+    if auto_rotate_key.is_running():
+        auto_rotate_key.stop()
+        await ctx.author.send("Auto-rotation paused.")
+    else:
+        await ctx.author.send("Auto-rotation is already paused.")
+
+@bot.command()
+async def ping(ctx):
+    if not owner_only(ctx):
+        await log_unauthorized(ctx)
+        return
+    await log_cmd(ctx)
+    await delete_cmd(ctx)
+    await ctx.author.send(f"Pong! `{round(bot.latency * 1000)}ms`")
+
+@bot.command()
+async def resumerotation(ctx):
+    if not owner_only(ctx):
+        await log_unauthorized(ctx)
+        return
+    await log_cmd(ctx)
+    await delete_cmd(ctx)
+    if not auto_rotate_key.is_running():
+        auto_rotate_key.start()
+        next_ts = int((datetime.now() + timedelta(hours=ROTATION_HOURS)).timestamp())
+        await ctx.author.send(f"Auto-rotation resumed. Next rotation <t:{next_ts}:R>.")
+    else:
+        await ctx.author.send("Auto-rotation is already running.")
+
+@bot.command()
+async def rotatenow(ctx):
+    if not owner_only(ctx):
+        await log_unauthorized(ctx)
+        return
+    await log_cmd(ctx)
+    await delete_cmd(ctx)
+    new_key = generate_key()
+    if update_key(new_key):
+        add_to_history(new_key)
+        increment_rotation_count()
+        auto_rotate_key.restart()
+        await log_rotation(new_key, triggered_by=f"Manual — {ctx.author}")
+        await announce_key(new_key, expires_at=datetime.now() + timedelta(hours=ROTATION_HOURS))
+    else:
+        try:
+            await ctx.author.send("Failed to rotate key.")
+        except:
+            pass
+
+@bot.command()
+async def setinterval(ctx, hours: float):
+    if not owner_only(ctx):
+        await log_unauthorized(ctx)
+        return
+    await log_cmd(ctx)
+    await delete_cmd(ctx)
+    global ROTATION_HOURS
+    ROTATION_HOURS = max(1.0, hours)
+    try:
+        if auto_rotate_key.is_running():
+            auto_rotate_key.change_interval(hours=ROTATION_HOURS)
+        else:
+            auto_rotate_key.start()
+            auto_rotate_key.change_interval(hours=ROTATION_HOURS)
+    except:
+        pass
+    next_ts = int((datetime.now() + timedelta(hours=ROTATION_HOURS)).timestamp())
+    await ctx.author.send(f"Rotation interval set to `{ROTATION_HOURS}h`. Next rotation <t:{next_ts}:R>.")
+
+@bot.command()
+async def setkey(ctx, new_key: str):
+    if not owner_only(ctx):
+        await log_unauthorized(ctx)
+        return
+    await log_cmd(ctx)
+    await delete_cmd(ctx)
+    if update_key(new_key):
+        add_to_history(new_key)
+        increment_rotation_count()
+        auto_rotate_key.restart()
+        await log_rotation(new_key, triggered_by=f"Manual — {ctx.author}")
+        await announce_key(new_key, expires_at=datetime.now() + timedelta(hours=ROTATION_HOURS))
+    else:
+        try:
+            await ctx.author.send(f"Failed to update key to `{new_key}`.")
+        except:
+            pass
+
+@bot.command()
+async def stats(ctx):
+    if not owner_only(ctx):
+        await log_unauthorized(ctx)
+        return
+    await log_cmd(ctx)
+    await delete_cmd(ctx)
+    count = get_rotation_count()
+    uptime = datetime.now() - bot_start_time
+    hours, rem = divmod(int(uptime.total_seconds()), 3600)
+    minutes = rem // 60
+    embed = discord.Embed(title="pympleHUB Stats", color=0x8C3CDC)
+    embed.add_field(name="Total Rotations", value=str(count), inline=True)
+    embed.add_field(name="Reports This Session", value=str(total_reports), inline=True)
+    embed.add_field(name="Uptime", value=f"{hours}h {minutes}m", inline=True)
+    if ctx.guild:
+        embed.add_field(name="Server Members", value=f"{ctx.guild.member_count:,}", inline=True)
+    embed.set_footer(text=f"pympleHUB • {datetime.now().strftime('%d %B %Y')}")
+    await ctx.author.send(embed=embed)
 
 @bot.command()
 async def status(ctx):
@@ -495,41 +638,40 @@ async def status(ctx):
     await ctx.author.send(embed=embed)
 
 @bot.command()
-async def ping(ctx):
+async def unlock(ctx):
     if not owner_only(ctx):
         await log_unauthorized(ctx)
         return
     await log_cmd(ctx)
     await delete_cmd(ctx)
-    await ctx.author.send(f"Pong! `{round(bot.latency * 1000)}ms`")
-
-@bot.command(name="bothelp")
-async def bothelp(ctx):
-    if not owner_only(ctx):
-        return
-    await delete_cmd(ctx)
-    embed = discord.Embed(title="pympleHUB Commands", color=0xDC3C3C)
-    embed.add_field(name="!setkey <key>", value="Set a specific key manually", inline=False)
-    embed.add_field(name="!rotatenow", value="Instantly rotate to a new generated key", inline=False)
-    embed.add_field(name="!announce", value="Re-post the current key without rotating", inline=False)
-    embed.add_field(name="!setinterval <hours>", value="Change the auto-rotation interval", inline=False)
-    embed.add_field(name="!pauserotation", value="Pause auto-rotation", inline=False)
-    embed.add_field(name="!resumerotation", value="Resume auto-rotation", inline=False)
-    embed.add_field(name="!getkey", value="Get the current key via DM", inline=False)
-    embed.add_field(name="!keyhistory", value="View last 5 keys with timestamps via DM", inline=False)
-    embed.add_field(name="!clearhistory", value="Wipe the key history", inline=False)
-    embed.add_field(name="!status", value="Bot uptime, key, rotation state, latency via DM", inline=False)
-    embed.add_field(name="!ping", value="Check bot latency via DM", inline=False)
-    embed.add_field(name="!bothelp", value="Shows this message", inline=False)
-    embed.set_footer(text="All commands auto-delete and respond via DM")
-    await ctx.author.send(embed=embed)
+    channel = bot.get_channel(ANNOUNCE_CHANNEL_ID)
+    if channel:
+        await channel.edit(slowmode_delay=0)
+        await log("🔓 Channel Unlocked", 0x2ECC71, [
+            ("Channel", f"<#{ANNOUNCE_CHANNEL_ID}>", True),
+            ("By", str(ctx.author), True),
+        ])
+        await ctx.author.send(f"Slow mode removed from <#{ANNOUNCE_CHANNEL_ID}>.")
 
 
 # --- Events ---
 
 @bot.event
 async def on_member_join(member: discord.Member):
+    account_age = datetime.now() - member.created_at.replace(tzinfo=None)
+    is_new = account_age.days < 30
+    fields = [
+        ("User", f"{member} (`{member.id}`)", False),
+        ("Account Created", f"<t:{int(member.created_at.timestamp())}:R>", True),
+        ("Account Age", f"{account_age.days} days old", True),
+    ]
+    if is_new:
+        fields.append(("⚠️ Warning", "Account is less than 30 days old", False))
+    title = "⚠️ Suspicious Member Joined" if is_new else "👋 Member Joined"
+    color = 0xE74C3C if is_new else 0x2ECC71
+    await log(title, color, fields)
     try:
+        thumb = THUMBNAIL_URL or bot.user.display_avatar.url
         embed = discord.Embed(
             title=f"Welcome to pympleHUB, {member.name}!",
             description=(
@@ -540,12 +682,68 @@ async def on_member_join(member: discord.Member):
             ),
             color=random.choice(COLORS)
         )
-        thumb = THUMBNAIL_URL or bot.user.display_avatar.url
         embed.set_thumbnail(url=thumb)
         embed.set_footer(text=f"pympleHUB • {datetime.now().strftime('%d %B %Y')}")
         await member.send(embed=embed)
     except:
         pass
+
+@bot.event
+async def on_member_remove(member: discord.Member):
+    joined_at = member.joined_at
+    if joined_at:
+        duration = datetime.now() - joined_at.replace(tzinfo=None)
+        days = duration.days
+        duration_str = f"{days} day{'s' if days != 1 else ''}" if days > 0 else "Less than a day"
+    else:
+        duration_str = "Unknown"
+    await log("🚪 Member Left", 0x95A5A6, [
+        ("User", f"{member} (`{member.id}`)", False),
+        ("Time in Server", duration_str, True),
+        ("Joined At", f"<t:{int(joined_at.timestamp())}:f>" if joined_at else "Unknown", True),
+    ])
+
+@bot.event
+async def on_message_delete(message: discord.Message):
+    if message.channel.id != ANNOUNCE_CHANNEL_ID or message.author.bot:
+        return
+    await log("🗑️ Message Deleted", 0xE74C3C, [
+        ("Author", f"{message.author} (`{message.author.id}`)", False),
+        ("Content", message.content[:900] or "*[no text content]*", False),
+    ])
+
+@bot.event
+async def on_message_edit(before: discord.Message, after: discord.Message):
+    if before.channel.id != ANNOUNCE_CHANNEL_ID or before.author.bot:
+        return
+    if before.content == after.content:
+        return
+    await log("✏️ Message Edited", 0xF39C12, [
+        ("Author", f"{before.author} (`{before.author.id}`)", False),
+        ("Before", before.content[:400] or "*[no content]*", False),
+        ("After", after.content[:400] or "*[no content]*", False),
+    ])
+
+@bot.event
+async def on_message(message: discord.Message):
+    if message.author.bot or message.channel.id != ANNOUNCE_CHANNEL_ID:
+        await bot.process_commands(message)
+        return
+    now = datetime.now()
+    recent_key_channel_msgs.append(now)
+    cutoff = now - timedelta(seconds=30)
+    recent_in_window = [t for t in recent_key_channel_msgs if t > cutoff]
+    if len(recent_in_window) >= 5:
+        try:
+            await message.channel.edit(slowmode_delay=60)
+            await log("⚡ Auto Slow-Mode Triggered", 0xE67E22, [
+                ("Reason", "5+ messages in 30 seconds", False),
+                ("Channel", f"<#{ANNOUNCE_CHANNEL_ID}>", True),
+                ("Slow Mode Applied", "60s", True),
+            ])
+        except:
+            pass
+    await bot.process_commands(message)
 
 @bot.event
 async def on_ready():
