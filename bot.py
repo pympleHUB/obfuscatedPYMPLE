@@ -129,25 +129,35 @@ OWNER_ID = 431103247478947850
 async def setkey(ctx, new_key: str):
     if ctx.author.id != OWNER_ID:
         return
+    try:
+        await ctx.message.delete()
+    except:
+        pass
     if update_key(new_key):
         auto_rotate_key.restart()
-        await ctx.send(f"Key updated to: `{new_key}`")
         await announce_key(new_key, expires_at=datetime.now() + timedelta(hours=12))
     else:
-        await ctx.send("Failed to update key.")
+        try:
+            await ctx.author.send(f"Failed to update key to `{new_key}`.")
+        except:
+            pass
 
 @bot.command()
 async def getkey(ctx):
     if ctx.author.id != OWNER_ID:
         return
+    try:
+        await ctx.message.delete()
+    except:
+        pass
     url = f"https://api.github.com/repos/{GITHUB_REPO}/contents/{KEY_FILE}"
     headers = {"Authorization": f"token {GITHUB_TOKEN}"}
     r = requests.get(url, headers=headers)
     if r.status_code == 200:
         key = base64.b64decode(r.json()["content"]).decode().strip()
-        await ctx.send(f"Current key: `{key}`")
+        await ctx.author.send(f"Current key: `{key}`")
     else:
-        await ctx.send("No key set yet.")
+        await ctx.author.send("No key set yet.")
 
 @bot.event
 async def on_ready():
