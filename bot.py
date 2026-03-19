@@ -11,13 +11,17 @@ DISCORD_TOKEN = os.environ["DISCORD_TOKEN"]
 GITHUB_TOKEN = os.environ["GITHUB_TOKEN"]
 GITHUB_REPO = "pympleHUB/obfuscatedPYMPLE"
 KEY_FILE = "pympleKeyBot"
+HISTORY_FILE = "pympleKeyHistory"
 ANNOUNCE_CHANNEL_ID = int(os.environ["ANNOUNCE_CHANNEL_ID"])
+THUMBNAIL_URL = os.environ.get("THUMBNAIL_URL", "")
+OWNER_ID = 431103247478947850
 
 intents = discord.Intents.default()
 intents.message_content = True
 bot = commands.Bot(command_prefix="!", intents=intents)
 
 last_announce_msg_id = None
+bot_start_time = None
 
 COLORS = [
     0xDC3C3C, 0x3C6EDC, 0x8C3CDC,
@@ -47,9 +51,16 @@ GREETINGS = [
     "Time to Update Your Key!",
 ]
 
+
 class CopyKeyView(discord.ui.View):
     def __init__(self):
         super().__init__(timeout=None)
+        self.add_item(discord.ui.Button(
+            label="Watch on YouTube",
+            style=discord.ButtonStyle.link,
+            url="https://www.youtube.com/@scriptsHUB/featured",
+            emoji="▶️"
+        ))
 
     @discord.ui.button(label="Copy Key", style=discord.ButtonStyle.secondary, emoji="📋", custom_id="pymple_copy_key")
     async def copy_key(self, interaction: discord.Interaction, button: discord.ui.Button):
@@ -59,27 +70,46 @@ class CopyKeyView(discord.ui.View):
             key = first_line.replace("# ", "").replace("`", "").strip()
         await interaction.response.send_message(key, ephemeral=True)
 
-def generate_key():
-    return "PYMPLE-" + "".join(random.choices(string.ascii_uppercase + string.digits, k=6))
 
-def get_file_sha():
-    url = f"https://api.github.com/repos/{GITHUB_REPO}/contents/{KEY_FILE}"
+# --- GitHub helpers ---
+
+def gh_get(filename):
+    url = f"https://api.github.com/repos/{GITHUB_REPO}/contents/{filename}"
     headers = {"Authorization": f"token {GITHUB_TOKEN}"}
     r = requests.get(url, headers=headers)
     if r.status_code == 200:
-        return r.json()["sha"]
-    return None
+        data = r.json()
+        return base64.b64decode(data["content"]).decode().strip(), data["sha"]
+    return None, None
 
-def update_key(new_key):
-    url = f"https://api.github.com/repos/{GITHUB_REPO}/contents/{KEY_FILE}"
+def gh_put(filename, content_str, commit_msg="Update"):
+    url = f"https://api.github.com/repos/{GITHUB_REPO}/contents/{filename}"
     headers = {"Authorization": f"token {GITHUB_TOKEN}"}
-    sha = get_file_sha()
-    content = base64.b64encode(new_key.encode()).decode()
-    data = {"message": "Update key", "content": content}
+    _, sha = gh_get(filename)
+    data = {
+        "message": commit_msg,
+        "content": base64.b64encode(content_str.encode()).decode()
+    }
     if sha:
         data["sha"] = sha
     r = requests.put(url, json=data, headers=headers)
     return r.status_code in (200, 201)
+
+def generate_key():
+    return "PYMPLE-" + "".join(random.choices(string.ascii_uppercase + string.digits, k=6))
+
+def update_key(new_key):
+    return gh_put(KEY_FILE, new_key, "Update key")
+
+def add_to_history(new_key):
+    existing, _ = gh_get(HISTORY_FILE)
+    lines = [l for l in (existing or "").split("\n") if l.strip()]
+    timestamp = datetime.now().strftime("%Y-%m-%dT%H:%M:%S")
+    lines.insert(0, f"{timestamp}|{new_key}")
+    gh_put(HISTORY_FILE, "\n".join(lines[:10]), "Update key history")
+
+
+# --- Core logic ---
 
 async def expire_last_message():
     global last_announce_msg_id
@@ -124,8 +154,26 @@ async def announce_key(new_key, expires_at=None):
     embed = discord.Embed(title=greeting, description=desc, color=color)
     embed.set_footer(text=f"pympleHUB • {today}")
 
+    thumb = THUMBNAIL_URL or bot.user.display_avatar.url
+    embed.set_thumbnail(url=thumb)
+
     msg = await channel.send(embed=embed, view=CopyKeyView())
     last_announce_msg_id = msg.id
+
+
+# --- Owner check helper ---
+
+def owner_only(ctx):
+    return ctx.author.id == OWNER_ID
+
+async def delete_cmd(ctx):
+    try:
+        await ctx.message.delete()
+    except:
+        pass
+
+
+# --- Tasks ---
 
 @tasks.loop(hours=12)
 async def auto_rotate_key():
@@ -133,19 +181,19 @@ async def auto_rotate_key():
         return
     new_key = generate_key()
     if update_key(new_key):
+        add_to_history(new_key)
         await announce_key(new_key, expires_at=datetime.now() + timedelta(hours=12))
 
-OWNER_ID = 431103247478947850
+
+# --- Commands ---
 
 @bot.command()
 async def setkey(ctx, new_key: str):
-    if ctx.author.id != OWNER_ID:
+    if not owner_only(ctx):
         return
-    try:
-        await ctx.message.delete()
-    except:
-        pass
+    await delete_cmd(ctx)
     if update_key(new_key):
+        add_to_history(new_key)
         auto_rotate_key.restart()
         await announce_key(new_key, expires_at=datetime.now() + timedelta(hours=12))
     else:
@@ -155,24 +203,96 @@ async def setkey(ctx, new_key: str):
             pass
 
 @bot.command()
-async def getkey(ctx):
-    if ctx.author.id != OWNER_ID:
+async def rotatenow(ctx):
+    if not owner_only(ctx):
         return
-    try:
-        await ctx.message.delete()
-    except:
-        pass
-    url = f"https://api.github.com/repos/{GITHUB_REPO}/contents/{KEY_FILE}"
-    headers = {"Authorization": f"token {GITHUB_TOKEN}"}
-    r = requests.get(url, headers=headers)
-    if r.status_code == 200:
-        key = base64.b64decode(r.json()["content"]).decode().strip()
+    await delete_cmd(ctx)
+    new_key = generate_key()
+    if update_key(new_key):
+        add_to_history(new_key)
+        auto_rotate_key.restart()
+        await announce_key(new_key, expires_at=datetime.now() + timedelta(hours=12))
+    else:
+        try:
+            await ctx.author.send("Failed to rotate key.")
+        except:
+            pass
+
+@bot.command()
+async def getkey(ctx):
+    if not owner_only(ctx):
+        return
+    await delete_cmd(ctx)
+    key, _ = gh_get(KEY_FILE)
+    if key:
         await ctx.author.send(f"Current key: `{key}`")
     else:
         await ctx.author.send("No key set yet.")
 
+@bot.command()
+async def keyhistory(ctx):
+    if not owner_only(ctx):
+        return
+    await delete_cmd(ctx)
+    history, _ = gh_get(HISTORY_FILE)
+    if not history:
+        await ctx.author.send("No key history yet.")
+        return
+    lines = [l for l in history.split("\n") if l.strip()][:5]
+    embed = discord.Embed(title="Key History", color=0x8C3CDC)
+    for i, line in enumerate(lines, 1):
+        parts = line.split("|")
+        if len(parts) == 2:
+            ts_str, key = parts
+            try:
+                ts = int(datetime.strptime(ts_str, "%Y-%m-%dT%H:%M:%S").timestamp())
+                embed.add_field(name=f"#{i}", value=f"`{key}` — <t:{ts}:f>", inline=False)
+            except:
+                embed.add_field(name=f"#{i}", value=f"`{key}`", inline=False)
+    embed.set_footer(text="pympleHUB • Last 5 keys")
+    await ctx.author.send(embed=embed)
+
+@bot.command()
+async def status(ctx):
+    if not owner_only(ctx):
+        return
+    await delete_cmd(ctx)
+    key, _ = gh_get(KEY_FILE)
+    uptime = datetime.now() - bot_start_time
+    hours, rem = divmod(int(uptime.total_seconds()), 3600)
+    minutes = rem // 60
+    embed = discord.Embed(title="pympleHUB Bot Status", color=0x3C6EDC)
+    embed.add_field(name="Current Key", value=f"`{key or 'Unknown'}`", inline=False)
+    embed.add_field(name="Uptime", value=f"{hours}h {minutes}m", inline=True)
+    next_run = auto_rotate_key.next_iteration
+    if next_run:
+        ts = int(next_run.timestamp())
+        embed.add_field(name="Next Auto-Rotation", value=f"<t:{ts}:R>", inline=True)
+    embed.set_footer(text=f"pympleHUB • {datetime.now().strftime('%d %B %Y')}")
+    await ctx.author.send(embed=embed)
+
+@bot.command(name="bothelp")
+async def bothelp(ctx):
+    if not owner_only(ctx):
+        return
+    await delete_cmd(ctx)
+    embed = discord.Embed(title="pympleHUB Commands", color=0xDC3C3C)
+    embed.add_field(name="!setkey <key>", value="Set a specific key manually", inline=False)
+    embed.add_field(name="!rotatenow", value="Instantly rotate to a new generated key", inline=False)
+    embed.add_field(name="!getkey", value="Get the current key via DM", inline=False)
+    embed.add_field(name="!keyhistory", value="View last 5 keys with timestamps via DM", inline=False)
+    embed.add_field(name="!status", value="Bot uptime, current key, next auto-rotation via DM", inline=False)
+    embed.add_field(name="!bothelp", value="Shows this message", inline=False)
+    embed.set_footer(text="All commands auto-delete and respond via DM")
+    await ctx.author.send(embed=embed)
+
+
+# --- Events ---
+
 @bot.event
 async def on_ready():
+    global bot_start_time
+    bot_start_time = datetime.now()
     bot.add_view(CopyKeyView())
     auto_rotate_key.start()
     print(f"Bot is online as {bot.user}")
