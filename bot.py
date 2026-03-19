@@ -14,6 +14,7 @@ KEY_FILE = "pympleKeyBot"
 HISTORY_FILE = "pympleKeyHistory"
 ANNOUNCE_CHANNEL_ID = int(os.environ["ANNOUNCE_CHANNEL_ID"])
 THUMBNAIL_URL = os.environ.get("THUMBNAIL_URL", "")
+ROBLOX_USER_ID = 583572860
 OWNER_ID = 431103247478947850
 
 intents = discord.Intents.default()
@@ -94,6 +95,20 @@ def gh_put(filename, content_str, commit_msg="Update"):
         data["sha"] = sha
     r = requests.put(url, json=data, headers=headers)
     return r.status_code in (200, 201)
+
+def get_roblox_avatar():
+    try:
+        r = requests.get(
+            f"https://thumbnails.roblox.com/v1/users/avatar-headshot"
+            f"?userIds={ROBLOX_USER_ID}&size=420x420&format=Png&isCircular=false"
+        )
+        if r.status_code == 200:
+            data = r.json().get("data", [])
+            if data:
+                return data[0].get("imageUrl", "")
+    except:
+        pass
+    return ""
 
 def generate_key():
     return "PYMPLE-" + "".join(random.choices(string.ascii_uppercase + string.digits, k=6))
@@ -291,8 +306,10 @@ async def bothelp(ctx):
 
 @bot.event
 async def on_ready():
-    global bot_start_time
+    global bot_start_time, THUMBNAIL_URL
     bot_start_time = datetime.now()
+    if not THUMBNAIL_URL:
+        THUMBNAIL_URL = get_roblox_avatar()
     bot.add_view(CopyKeyView())
     auto_rotate_key.start()
     print(f"Bot is online as {bot.user}")
