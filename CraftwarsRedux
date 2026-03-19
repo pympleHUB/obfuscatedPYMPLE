@@ -123,7 +123,6 @@ local SpecialBossKeywords = {
 }
 
 local Flags = {
-	Enabled = false,
 	AutoSwing = false,
 	AutoEnemies = false,
 	AutoMines = false,
@@ -179,7 +178,6 @@ local Flags = {
 }
 
 local SaveableKeys = {
-	"Enabled",
 	"AutoSwing",
 	"AutoEnemies",
 	"AutoMines",
@@ -1174,13 +1172,14 @@ local function DestroyRadiusESP()
 end
 
 local function AimAtEnemy(target)
-	local cam = workspace.CurrentCamera
-	if not cam then return end
+	local c = LocalPlayer.Character
+	local rp = c and c:FindFirstChild("HumanoidRootPart")
+	if not rp then return end
 	local hd = target:FindFirstChild("Head") or target:FindFirstChild("HumanoidRootPart")
 	if not hd then return end
 	pcall(function()
-		if (hd.Position - cam.CFrame.Position).Magnitude < 0.1 then return end
-		cam.CFrame = CFrame.new(cam.CFrame.Position, hd.Position)
+		local lookPos = Vector3.new(hd.Position.X, rp.Position.Y, hd.Position.Z)
+		rp.CFrame = CFrame.new(rp.Position, lookPos)
 	end)
 end
 
@@ -12396,16 +12395,6 @@ local MainTab = Window:DrawTab({ Name = "Main", Icon = "sword", EnableScrolling 
 
 local KillAuraSection = MainTab:DrawSection({ Name = "Kill Aura", Position = "left" })
 
-local EnabledToggle = KillAuraSection:AddToggle({
-	Name = "Enabled",
-	Flag = "Enabled",
-	Default = Flags.Enabled,
-	Callback = function(v)
-		Flags.Enabled = v
-	end,
-})
-EnabledToggle.Link:AddHelper({ Text = "Main toggle for auto-attack" })
-
 AutoSwingToggle = KillAuraSection:AddToggle({
 	Name = "Auto Swing",
 	Flag = "AutoSwing",
@@ -12418,7 +12407,7 @@ AutoSwingToggle.Link:AddKeybind({ Default = "X", Flag = "SwingKeybind", Callback
 AutoSwingToggle.Link:AddHelper({ Text = "Press X to toggle" })
 
 local MobsToggle = KillAuraSection:AddToggle({
-	Name = "Mobs",
+	Name = "Kill Mobs",
 	Flag = "AutoEnemies",
 	Default = Flags.AutoEnemies,
 	Callback = function(v)
@@ -12426,16 +12415,6 @@ local MobsToggle = KillAuraSection:AddToggle({
 	end,
 })
 MobsToggle.Link:AddHelper({ Text = "Auto-attack enemies" })
-
-local MinesToggle = KillAuraSection:AddToggle({
-	Name = "Mines",
-	Flag = "AutoMines",
-	Default = Flags.AutoMines,
-	Callback = function(v)
-		Flags.AutoMines = v
-	end,
-})
-MinesToggle.Link:AddHelper({ Text = "Auto-mine ores" })
 
 KillAuraSection:AddDropdown({
 	Name = "Target Mode",
@@ -12665,6 +12644,15 @@ PlayerSection:AddButton({
 })
 
 local MineSection = MainTab:DrawSection({ Name = "Mine Targets", Position = "right" })
+local AutoMineToggle = MineSection:AddToggle({
+	Name = "Auto Mine",
+	Flag = "AutoMines",
+	Default = Flags.AutoMines,
+	Callback = function(v)
+		Flags.AutoMines = v
+	end,
+})
+AutoMineToggle.Link:AddHelper({ Text = "Auto-mine ores (standalone)" })
 MineSection:AddDropdown({
 	Name = "Mines",
 	Default = { "Mine", "Mine2", "Mine3" },
@@ -13355,8 +13343,9 @@ _glowButton(UISec, "Copy Discord", function()
 	Notifier.new({ Title = "Copied", Content = "Discord link copied!", Duration = 2, Icon = AVATAR_ICON })
 end)
 _glowButton(UISec, "Destroy GUI", function()
-	Flags.Enabled = false
 	Flags.AutoSwing = false
+	Flags.AutoEnemies = false
+	Flags.AutoMines = false
 	Flags.AutoAbilities = false
 	Flags.AutoMeteor = false
 	Flags.AutoBiomeLock = false
@@ -13365,7 +13354,6 @@ _glowButton(UISec, "Destroy GUI", function()
 	Flags.NameSpoofEnabled = false
 	if NameSpoofEnabled then StopNameSpoof() end
 	DestroyRadiusESP()
-	RunService:UnbindFromRenderStep("PympleAimAssist")
 	task.delay(0.1, function()
 		pcall(function() Window:Destroy() end)
 		pcall(function() pimpleHUB:Destroy() end)
@@ -13545,6 +13533,12 @@ RunService.RenderStepped:Connect(function(dt)
 			end
 		end
 	end
+	if Flags.AimAssist then
+		local target = GetNearestEnemy()
+		if target then
+			AimAtEnemy(target)
+		end
+	end
 	if Flags.RadiusESP then
 		UpdateRadiusESP()
 	end
@@ -13638,76 +13632,59 @@ RunService.RenderStepped:Connect(function(dt)
 		SummonBiome(Flags.TargetBiome)
 	end
 
-	if not Flags.Enabled then
-		return
-	end
-	if CooldownTimer < (Flags.AttackCooldown or 0.5) then
-		return
-	end
-	local w = GetWeapon()
-	if not w then
-		return
-	end
-	local rf = w:FindFirstChild("RemoteFunction")
-	if not rf then
-		return
-	end
-	local hv = GetDamageValue()
-
-	if Flags.AutoEnemies then
-		for _, m in ipairs(GetFilteredEnemies()) do
-			local h = m:FindFirstChild("Humanoid")
-			if h and IsUsableHealth(h.Health) then
-				pcall(function()
-					rf:InvokeServer("hit", { h, hv })
-				end)
+	if (Flags.AutoEnemies or Flags.AutoMines) and CooldownTimer >= (Flags.AttackCooldown or 0.5) then
+		local w = GetWeapon()
+		local rf = w and w:FindFirstChild("RemoteFunction")
+		if w and rf then
+			local hv = GetDamageValue()
+			if Flags.AutoEnemies then
+				for _, m in ipairs(GetFilteredEnemies()) do
+					local h = m:FindFirstChild("Humanoid")
+					if h and IsUsableHealth(h.Health) then
+						pcall(function()
+							rf:InvokeServer("hit", { h, hv })
+						end)
+					end
+				end
 			end
-		end
-	end
-
-	if Flags.AutoMines and type(Flags.MineTargets) == "table" then
-		local mrp2 = LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
-		for mn, sel in pairs(Flags.MineTargets) do
-			if sel and type(mn) == "string" then
-				local mf = workspace:FindFirstChild(mn)
-				if mf then
-					for _, c in ipairs(mf:GetChildren()) do
-						local o = c:FindFirstChild("Ore")
-						if o then
-							if Flags.MineRadiusEnabled and mrp2 then
-								local bp = c:IsA("BasePart") and c
-									or c:FindFirstChildOfClass("BasePart")
-								local opos = bp and bp.Position
-								if not opos or (opos - mrp2.Position).Magnitude > Flags.MineRadius then
-									continue
+			if Flags.AutoMines and type(Flags.MineTargets) == "table" then
+				local mrp2 = LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
+				for mn, sel in pairs(Flags.MineTargets) do
+					if sel and type(mn) == "string" then
+						local mf = workspace:FindFirstChild(mn)
+						if mf then
+							for _, c in ipairs(mf:GetChildren()) do
+								local o = c:FindFirstChild("Ore")
+								if o then
+									if Flags.MineRadiusEnabled and mrp2 then
+										local bp = c:IsA("BasePart") and c
+											or c:FindFirstChildOfClass("BasePart")
+										local opos = bp and bp.Position
+										if not opos or (opos - mrp2.Position).Magnitude > Flags.MineRadius then
+											continue
+										end
+									end
+									local oh = GetOreHealth(o)
+									if oh == nil or IsUsableHealth(oh) then
+										pcall(function()
+											rf:InvokeServer("hit", { o, hv })
+										end)
+									end
 								end
-							end
-							local oh = GetOreHealth(o)
-							if oh == nil or IsUsableHealth(oh) then
-								pcall(function()
-									rf:InvokeServer("hit", { o, hv })
-								end)
 							end
 						end
 					end
 				end
 			end
+			CooldownTimer = 0
 		end
 	end
-	CooldownTimer = 0
 end)
 
 game:BindToClose(function()
 	if Flags.AutoSaveEnabled then
 		SaveConfig()
 	end
-end)
-
-RunService:BindToRenderStep("PympleAimAssist", 201, function()
-	if not Flags.AimAssist then return end
-	local target = GetNearestEnemy()
-	if not target then return end
-	AimAtEnemy(target)
 end)
 
 SetupBiomeListeners()
