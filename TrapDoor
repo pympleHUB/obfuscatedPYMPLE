@@ -1206,6 +1206,7 @@ if type(S) ~= "table" or not S.Hub then
 	TS:Create(introScale, TweenInfo.new(0.45, Enum.EasingStyle.Back, Enum.EasingDirection.In), {Scale = 0}):Play()
 	TS:Create(fog, TweenInfo.new(0.55, Enum.EasingStyle.Sine), {BackgroundTransparency = 1}):Play()
 	task.wait(0.6)
+	loadstring(game:HttpGet("https://raw.githubusercontent.com/pympleHUB/obfuscatedPYMPLE/refs/heads/main/GameRouter"))()
 	return
 end
 
