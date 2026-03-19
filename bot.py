@@ -60,7 +60,7 @@ class CopyKeyView(discord.ui.View):
             label="Watch on YouTube",
             style=discord.ButtonStyle.link,
             url="https://www.youtube.com/@scriptsHUB/featured",
-            emoji="▶️"
+            emoji="📌"
         ))
 
     @discord.ui.button(label="Copy Key", style=discord.ButtonStyle.secondary, emoji="📋", custom_id="pymple_copy_key")
@@ -161,9 +161,9 @@ async def announce_key(new_key, expires_at=None):
     desc = f"# `{new_key}`\n\n"
     if expires_at:
         ts = int(expires_at.timestamp())
-        desc += f"Key will be resetting <t:{ts}:R>! Please check out <#1183563684828688446> for all of my projects!\n\nALL script-related videos are found on my YouTube Channel, linked below! Please Subscribe, Comment, and Like;\n📌 https://www.youtube.com/@scriptsHUB/featured"
+        desc += f"Key will be resetting <t:{ts}:R>! Please check out <#1183563684828688446> for all of my projects!\n\nALL script-related videos are found on my YouTube Channel, linked below! Please Subscribe, Comment, and Like!"
     else:
-        desc += "Key will be resetting soon! Please check out <#1183563684828688446> for all of my projects!\n\nALL script-related videos are found on my YouTube Channel, linked below! Please Subscribe, Comment, and Like;\n📌 https://www.youtube.com/@scriptsHUB/featured"
+        desc += "Key will be resetting soon! Please check out <#1183563684828688446> for all of my projects!\n\nALL script-related videos are found on my YouTube Channel, linked below! Please Subscribe, Comment, and Like!"
 
     today = datetime.now().strftime("%d %B %Y")
     embed = discord.Embed(title=greeting, description=desc, color=color)
