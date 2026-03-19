@@ -232,7 +232,7 @@ local SaveableKeys = {
 }
 
 local TOTAL_BIOMES = 41
-local RadiusESPFolder = nil
+local RadiusESPCircle = nil
 local LastEquippedWeaponName = nil
 
 local CooldownTimer, BiomeCheckTimer, CutsceneCheckTimer, MeteorTimer, SwingTimer, AbilityTimer, GodTimer, BossAlertTimer, MovementTimer =
@@ -1120,59 +1120,56 @@ local function WalkToTarget(target)
 	local c = LocalPlayer.Character
 	if not c then return end
 	local h = c:FindFirstChildOfClass("Humanoid")
+	local rp = c:FindFirstChild("HumanoidRootPart")
 	local hd = target:FindFirstChild("Head") or target:FindFirstChild("HumanoidRootPart")
 	if not h or not hd then return end
 	pcall(function()
-		h:MoveTo(hd.Position)
+		h:MoveTo(GetTargetOffset(rp, hd))
 	end)
 end
 
-local ESP_SEGMENTS = 64
 local function BuildRadiusESP()
-	if RadiusESPFolder then
-		pcall(function() RadiusESPFolder:Destroy() end)
+	if RadiusESPCircle then
+		pcall(function() RadiusESPCircle:Remove() end)
 	end
-	RadiusESPFolder = Instance.new("Folder")
-	RadiusESPFolder.Name = "PympleRadiusESP"
-	RadiusESPFolder.Parent = workspace
-	for _ = 1, ESP_SEGMENTS do
-		local p = Instance.new("Part")
-		p.Anchored = true
-		p.CanCollide = false
-		p.CanQuery = false
-		p.CanTouch = false
-		p.CastShadow = false
-		p.Material = Enum.Material.Neon
-		p.Color = Color3.fromRGB(220, 50, 50)
-		p.Transparency = 0.25
-		p.Parent = RadiusESPFolder
-	end
+	RadiusESPCircle = Drawing.new("Circle")
+	RadiusESPCircle.Visible = false
+	RadiusESPCircle.Color = Color3.fromRGB(220, 50, 50)
+	RadiusESPCircle.Thickness = 2
+	RadiusESPCircle.Filled = false
+	RadiusESPCircle.NumSides = 64
+	RadiusESPCircle.Transparency = 1
 end
 
 local function UpdateRadiusESP()
-	if not RadiusESPFolder or not RadiusESPFolder.Parent then return end
+	if not RadiusESPCircle then return end
 	local c = LocalPlayer.Character
 	local rp = c and c:FindFirstChild("HumanoidRootPart")
-	if not rp then return end
-	local center = rp.Position
-	local radius = Flags.KillAuraRadius
-	local y = center.Y - 2.5
-	local parts = RadiusESPFolder:GetChildren()
-	local n = #parts
-	local segLen = (2 * math.pi * radius) / n + 0.05
-	for i, p in ipairs(parts) do
-		local a = ((i - 0.5) / n) * 2 * math.pi
-		local x = center.X + radius * math.cos(a)
-		local z = center.Z + radius * math.sin(a)
-		p.Size = Vector3.new(0.2, 0.2, segLen)
-		p.CFrame = CFrame.new(x, y, z) * CFrame.Angles(0, -a - math.pi / 2, 0)
+	if not rp then
+		RadiusESPCircle.Visible = false
+		return
 	end
+	local cam = workspace.CurrentCamera
+	if not cam then return end
+	local origin = rp.Position
+	local screenCenter, onScreen = cam:WorldToViewportPoint(origin)
+	if not onScreen then
+		RadiusESPCircle.Visible = false
+		return
+	end
+	local camRight = cam.CFrame.RightVector
+	local edgeWorld = origin + camRight * Flags.KillAuraRadius
+	local edgeScreen = cam:WorldToViewportPoint(edgeWorld)
+	local screenRadius = (Vector2.new(edgeScreen.X, edgeScreen.Y) - Vector2.new(screenCenter.X, screenCenter.Y)).Magnitude
+	RadiusESPCircle.Position = Vector2.new(screenCenter.X, screenCenter.Y)
+	RadiusESPCircle.Radius = math.max(1, screenRadius)
+	RadiusESPCircle.Visible = true
 end
 
 local function DestroyRadiusESP()
-	if RadiusESPFolder then
-		pcall(function() RadiusESPFolder:Destroy() end)
-		RadiusESPFolder = nil
+	if RadiusESPCircle then
+		pcall(function() RadiusESPCircle:Remove() end)
+		RadiusESPCircle = nil
 	end
 end
 
@@ -1182,8 +1179,8 @@ local function AimAtEnemy(target)
 	local hd = target:FindFirstChild("Head") or target:FindFirstChild("HumanoidRootPart")
 	if not hd then return end
 	pcall(function()
-		local lookCF = CFrame.new(cam.CFrame.Position, hd.Position)
-		cam.CFrame = cam.CFrame:Lerp(lookCF, math.clamp(Flags.AimSmoothness, 0.01, 1))
+		if (hd.Position - cam.CFrame.Position).Magnitude < 0.1 then return end
+		cam.CFrame = CFrame.new(cam.CFrame.Position, hd.Position)
 	end)
 end
 
@@ -12590,19 +12587,6 @@ local AimAssistToggle = MovementSection:AddToggle({
 	Default = Flags.AimAssist,
 	Callback = function(v)
 		Flags.AimAssist = v
-		if not v then
-			pcall(function()
-				workspace.CurrentCamera.CameraType = Enum.CameraType.Custom
-				local c = LocalPlayer.Character
-				if c then
-					workspace.CurrentCamera.CameraSubject = c:FindFirstChildOfClass("Humanoid")
-				end
-			end)
-		else
-			pcall(function()
-				workspace.CurrentCamera.CameraType = Enum.CameraType.Scriptable
-			end)
-		end
 	end,
 })
 AimAssistToggle.Link:AddHelper({ Text = "Camera tracks nearest enemy" })
@@ -13183,6 +13167,23 @@ NameSpoofSection:AddButton({
 	end,
 })
 
+-- ==================== GLOW EFFECTS ====================
+local _glowEnabled = true
+local _glowMF, _gwhub, _gwrap, _gs
+local _rgStrokes = {}
+local _glowBaseTransp = { 0.82, 0.91, 0.95, 0.98 }
+local function _applyGlowIntensity(intensity)
+	for i, s in ipairs(_rgStrokes) do
+		local base = _glowBaseTransp[i] or 0.9
+		s.Transparency = 1 - (1 - base) * intensity
+	end
+end
+local function _applyWhiteIntensity(intensity)
+	if _gs then
+		_gs.Transparency = 1 - intensity
+	end
+end
+
 local function _glowButton(parentOrSection, labelText, callback)
 	local sRoot = (type(parentOrSection) == "table" and parentOrSection._Root) or parentOrSection
 	local Container = Instance.new("Frame")
@@ -13364,9 +13365,7 @@ _glowButton(UISec, "Destroy GUI", function()
 	Flags.NameSpoofEnabled = false
 	if NameSpoofEnabled then StopNameSpoof() end
 	DestroyRadiusESP()
-	pcall(function()
-		workspace.CurrentCamera.CameraType = Enum.CameraType.Custom
-	end)
+	RunService:UnbindFromRenderStep("PympleAimAssist")
 	task.delay(0.1, function()
 		pcall(function() Window:Destroy() end)
 		pcall(function() pimpleHUB:Destroy() end)
@@ -13403,6 +13402,108 @@ ThSec:AddDropdown({
 })
 local CfgUI = Window:DrawConfig({ Name = "Config", Icon = "folder", Config = ConfigManager })
 CfgUI:Init()
+
+do
+	task.defer(function()
+		local _ts = game:GetService("TweenService")
+		local _pg = Window.Root
+		local _mf = nil
+		for _, _c in ipairs(_pg:GetChildren()) do
+			if _c:IsA("Frame") and _c.ZIndex == 4 then _mf = _c break end
+		end
+		if not _mf then return end
+		_glowMF = _mf
+		local _tf = nil
+		for _, _c in ipairs(_mf:GetChildren()) do
+			if _c:IsA("Frame") and _c.AnchorPoint.X == 1 then _tf = _c break end
+		end
+		_gwhub = Instance.new("Frame")
+		_gwhub.BackgroundTransparency = 1
+		_gwhub.BorderSizePixel = 0
+		_gwhub.ZIndex = 3
+		_gwhub.Parent = _pg
+		local _gw = Instance.new("Frame")
+		_gw.BackgroundTransparency = 1
+		_gw.BorderSizePixel = 0
+		_gw.AnchorPoint = Vector2.new(0.5, 0.5)
+		_gw.Position = UDim2.fromScale(0.5, 0.5)
+		_gw.Size = UDim2.new(1, 2, 1, 2)
+		_gw.ZIndex = 3
+		_gw.Parent = _gwhub
+		Instance.new("UICorner", _gw).CornerRadius = UDim.new(0, 18)
+		_gs = Instance.new("UIStroke", _gw)
+		_gs.Color = Color3.fromRGB(255, 255, 255)
+		_gs.Thickness = 2.5
+		local _gg = Instance.new("UIGradient", _gs)
+		_gg.Transparency = NumberSequence.new({
+			NumberSequenceKeypoint.new(0,    0.97),
+			NumberSequenceKeypoint.new(0.12, 0),
+			NumberSequenceKeypoint.new(0.38, 0.75),
+			NumberSequenceKeypoint.new(0.62, 0.75),
+			NumberSequenceKeypoint.new(0.88, 0),
+			NumberSequenceKeypoint.new(1,    0.97),
+		})
+		local function _syncHub()
+			_gwhub.AnchorPoint = _mf.AnchorPoint
+			_gwhub.Position    = _mf.Position
+			_gwhub.Size        = _mf.Size
+			_gwhub.Visible     = _mf.Visible and _glowEnabled
+		end
+		_syncHub()
+		_mf:GetPropertyChangedSignal("AnchorPoint"):Connect(_syncHub)
+		_mf:GetPropertyChangedSignal("Position"):Connect(_syncHub)
+		_mf:GetPropertyChangedSignal("Size"):Connect(_syncHub)
+		_mf:GetPropertyChangedSignal("Visible"):Connect(_syncHub)
+		_gwrap = Instance.new("Frame")
+		_gwrap.BackgroundTransparency = 1
+		_gwrap.BorderSizePixel = 0
+		_gwrap.AnchorPoint = Vector2.new(0, 0)
+		_gwrap.ZIndex = 3
+		_gwrap.Parent = _pg
+		local function _mkRG(thick, transp)
+			local f = Instance.new("Frame")
+			f.BackgroundTransparency = 1
+			f.BorderSizePixel = 0
+			f.AnchorPoint = Vector2.new(0.5, 0.5)
+			f.Position = UDim2.fromScale(0.5, 0.5)
+			f.Size = UDim2.fromScale(1, 1)
+			f.ZIndex = 3
+			f.Parent = _gwrap
+			Instance.new("UICorner", f).CornerRadius = UDim.new(0, 10)
+			local s = Instance.new("UIStroke", f)
+			s.Color = Color3.fromRGB(220, 60, 60)
+			s.Thickness = thick
+			s.Transparency = transp
+			table.insert(_rgStrokes, s)
+		end
+		_mkRG(1.5, _glowBaseTransp[1])
+		_mkRG(4,   _glowBaseTransp[2])
+		_mkRG(8,   _glowBaseTransp[3])
+		_mkRG(14,  _glowBaseTransp[4])
+		local function _sync()
+			local pgAP     = _pg.AbsolutePosition
+			local mfAP     = _mf.AbsolutePosition
+			local mfAS     = _mf.AbsoluteSize
+			local protrude = (_tf and math.max(0, _tf.Size.X.Offset - 25)) or 0
+			_gwrap.Position = UDim2.fromOffset(mfAP.X - pgAP.X - protrude, mfAP.Y - pgAP.Y)
+			_gwrap.Size     = UDim2.fromOffset(mfAS.X + protrude, mfAS.Y)
+			_gwrap.Visible  = _mf.Visible and _glowEnabled
+		end
+		RunService.Heartbeat:Wait()
+		_sync()
+		_mf:GetPropertyChangedSignal("AbsolutePosition"):Connect(_sync)
+		_mf:GetPropertyChangedSignal("AbsoluteSize"):Connect(_sync)
+		_mf:GetPropertyChangedSignal("Visible"):Connect(_sync)
+		if _tf then _tf:GetPropertyChangedSignal("Size"):Connect(_sync) end
+		task.spawn(function()
+			while _gwhub and _gwhub.Parent do
+				_ts:Create(_gg, TweenInfo.new(3, Enum.EasingStyle.Linear), { Rotation = 360 }):Play()
+				task.wait(3.05)
+				if _gg and _gg.Parent then _gg.Rotation = 0 end
+			end
+		end)
+	end)
+end
 
 -- ==================== INPUT HANDLER ====================
 UserInputService.InputBegan:Connect(function(i, gp)
@@ -13444,12 +13545,6 @@ RunService.RenderStepped:Connect(function(dt)
 			end
 		end
 	end
-	if Flags.AimAssist then
-		local target = GetNearestEnemy()
-		if target then
-			AimAtEnemy(target)
-		end
-	end
 	if Flags.RadiusESP then
 		UpdateRadiusESP()
 	end
@@ -13460,8 +13555,13 @@ RunService.RenderStepped:Connect(function(dt)
 	if Flags.AntiSit then
 		local c = LocalPlayer.Character
 		local h = c and c:FindFirstChildOfClass("Humanoid")
-		if h and h.Sit then
-			h.Jump = true
+		if h then
+			if h.Sit then
+				pcall(function() h.Sit = false h.Jump = true end)
+			end
+			if h.PlatformStand then
+				pcall(function() h.PlatformStand = false end)
+			end
 		end
 	end
 	if Flags.AutoBossAlert and BossAlertTimer >= Flags.BossAlertInterval then
@@ -13601,6 +13701,13 @@ game:BindToClose(function()
 	if Flags.AutoSaveEnabled then
 		SaveConfig()
 	end
+end)
+
+RunService:BindToRenderStep("PympleAimAssist", 201, function()
+	if not Flags.AimAssist then return end
+	local target = GetNearestEnemy()
+	if not target then return end
+	AimAtEnemy(target)
 end)
 
 SetupBiomeListeners()
