@@ -72,6 +72,24 @@ class CopyKeyView(discord.ui.View):
             key = first_line.replace("# ", "").replace("`", "").strip()
         await interaction.response.send_message(key, ephemeral=True)
 
+    @discord.ui.button(label="Report Issue", style=discord.ButtonStyle.danger, emoji="🚨", custom_id="pymple_report_issue")
+    async def report_issue(self, interaction: discord.Interaction, button: discord.ui.Button):
+        key = "Unknown"
+        if interaction.message and interaction.message.embeds:
+            first_line = (interaction.message.embeds[0].description or "").split("\n")[0]
+            key = first_line.replace("# ", "").replace("`", "").strip()
+        try:
+            owner = await bot.fetch_user(OWNER_ID)
+            await owner.send(
+                f"🚨 **Issue reported** by {interaction.user} (`{interaction.user.id}`)\n"
+                f"Key at time of report: `{key}`"
+            )
+        except:
+            pass
+        await interaction.response.send_message(
+            "Your report has been sent. Thank you!", ephemeral=True
+        )
+
 
 # --- GitHub helpers ---
 
@@ -175,6 +193,11 @@ async def announce_key(new_key, expires_at=None):
 
     today = datetime.now().strftime("%d %B %Y")
     embed = discord.Embed(title=greeting, description=desc, color=color)
+    embed.add_field(
+        name="ℹ️ How to Use",
+        value="1. Press **Copy Key** below\n2. Open the game and wait for the key prompt\n3. Paste the key and press confirm\n4. Enjoy!",
+        inline=False
+    )
     embed.set_footer(text=f"pympleHUB • {today}")
 
     thumb = THUMBNAIL_URL or bot.user.display_avatar.url
