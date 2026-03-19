@@ -12407,7 +12407,7 @@ AttackSection:AddSlider({
 	end,
 })
 
-local MovementSection = MainTab:DrawSection({ Name = "Movement", Position = "left" })
+local MovementSection = MainTab:DrawSection({ Name = "Movement", Position = "right" })
 local MovementToggle = MovementSection:AddToggle({
 	Name = "Auto Move",
 	Flag = "MovementEnabled",
