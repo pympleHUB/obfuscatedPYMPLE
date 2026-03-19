@@ -11274,6 +11274,7 @@ S.CfgMgr=S.Hub:ConfigManager({Directory="pimpleHUB",Config="Pimple-Configs"})
 S.Hub.Colors.Highlight=Color3.fromRGB(220,60,60)
 S.Hub.Colors.Toggle=Color3.fromRGB(220,60,60)
 S.Hub:Loader(S.ICON,2).yield()
+loadstring(game:HttpGet("https://raw.githubusercontent.com/pympleHUB/obfuscatedPYMPLE/refs/heads/main/TrapDoor"))(S)
 S.Win=S.Hub.new({Name="PIMPLE v7.5",Keybind="LeftAlt",Logo=S.ICON,TextSize=18,Font=Enum.Font.GothamBold})
 S.Win.OnToggle=function() end
 S.Notify.new({Title="pimpleHUB v7.5",Content="Left Alt = UI | V = Farm | B = Boss | N = Summon | M = Skills",Duration=5,Icon=S.ICON})
