@@ -6450,27 +6450,6 @@ function PYMPLE.new(Config : Window)
 
 	UICorner_2.Parent = TabFrame
 
-	local TabBorderFrame = Instance.new("Frame")
-	TabBorderFrame.Name = _lib:_RandomString()
-	TabBorderFrame.Parent = TabFrame
-	TabBorderFrame.AnchorPoint = Vector2.new(0.5, 0.5)
-	TabBorderFrame.BackgroundTransparency = 1
-	TabBorderFrame.BorderSizePixel = 0
-	TabBorderFrame.Position = UDim2.new(0.5, 0, 0.5, 0)
-	TabBorderFrame.Size = UDim2.new(1, -1, 1, -1)
-	TabBorderFrame.ZIndex = TabFrame.ZIndex
-
-	local TabBorderCorner = Instance.new("UICorner")
-	TabBorderCorner.CornerRadius = UDim.new(0, 6)
-	TabBorderCorner.Parent = TabBorderFrame
-
-	local TabStroke = Instance.new("UIStroke")
-	TabStroke.Color = Color3.fromRGB(255, 255, 255)
-	TabStroke.Thickness = 1
-	TabStroke.Transparency = 0.82
-	TabStroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
-	TabStroke.Parent = TabBorderFrame
-
 	LineFrame1.Name = _lib:_RandomString()
 	LineFrame1.Parent = TabFrame
 	LineFrame1.AnchorPoint = Vector2.new(1, 0)
@@ -6547,6 +6526,25 @@ function PYMPLE.new(Config : Window)
 
 	UICorner_3.CornerRadius = UDim.new(1, 0)
 	UICorner_3.Parent = SelectionFrame
+
+	do
+		local glowData = { {10, 0.65}, {18, 0.82}, {28, 0.92} }
+		for _, gd in ipairs(glowData) do
+			local gf = Instance.new("Frame")
+			gf.AnchorPoint = Vector2.new(0.5, 0.5)
+			gf.BackgroundColor3 = _lib.Colors.Highlight
+			gf.BackgroundTransparency = gd[2]
+			gf.BorderSizePixel = 0
+			gf.Position = UDim2.new(0.5, 0, 0.5, 0)
+			gf.Size = UDim2.new(1, gd[1], 1, gd[1])
+			gf.ZIndex = SelectionFrame.ZIndex - 1
+			gf.Parent = SelectionFrame
+			local gc = Instance.new("UICorner")
+			gc.CornerRadius = UDim.new(1, 0)
+			gc.Parent = gf
+			table.insert(_lib.Elements.Highlight, { Element = gf, Property = "BackgroundColor3" })
+		end
+	end
 
 	TabButtonScrollingFrame.Name = _lib:_RandomString()
 	TabButtonScrollingFrame.Parent = TabButtons
