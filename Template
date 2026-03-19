@@ -6346,7 +6346,7 @@ function PYMPLE.new(Config : Window)
 		Tabs = {},
 		LastTab = nil,
 		IsOpen = true,
-		AlwayShowTab = false,
+		AlwayShowTab = true,
 		THREADS = {},
 		PerformanceMode = false,
 		Notify = PYMPLE.newNotify()
@@ -6426,6 +6426,7 @@ function PYMPLE.new(Config : Window)
 		Size = Config.Scale
 	});
 
+	UICorner.CornerRadius = UDim.new(0, 12)
 	UICorner.Parent = MainFrame
 
 	local TabFrameBaseTrans = 0.25;
@@ -6448,6 +6449,7 @@ function PYMPLE.new(Config : Window)
 	TabFrame.Position = UDim2.new(0, 25, 0, 0)
 	TabFrame.Size = UDim2.new(0, 85, 1, 0)
 
+	UICorner_2.CornerRadius = UDim.new(0, 12)
 	UICorner_2.Parent = TabFrame
 
 	LineFrame1.Name = _lib:_RandomString()
@@ -6512,12 +6514,12 @@ function PYMPLE.new(Config : Window)
 
 	SelectionFrame.Name = _lib:_RandomString()
 	SelectionFrame.Parent = TabButtons
-	SelectionFrame.AnchorPoint = Vector2.new(1, 0)
+	SelectionFrame.AnchorPoint = Vector2.new(0, 0)
 	SelectionFrame.BackgroundColor3 = _lib.Colors.Highlight
 	SelectionFrame.BorderColor3 = Color3.fromRGB(0, 0, 0)
 	SelectionFrame.BorderSizePixel = 0
-	SelectionFrame.Position = UDim2.new(1, 5, 0, 28)
-	SelectionFrame.Size = UDim2.new(0, 8, 0, 27)
+	SelectionFrame.Position = UDim2.new(0, 0, 0, 28)
+	SelectionFrame.Size = UDim2.new(0, 4, 0, 27)
 
 	table.insert(_lib.Elements.Highlight,{
 		Element = SelectionFrame,
@@ -9948,8 +9950,8 @@ function PYMPLE.new(Config : Window)
 
 		_lib:Drag(MovementFrame,MainFrame,0.1)
 
-		SelectionFrame.Position = UDim2.new(1, 5, 0, 28)
-		SelectionFrame.Size = UDim2.new(0, 8, 0, 22)
+		SelectionFrame.Position = UDim2.new(0, 0, 0, 28)
+		SelectionFrame.Size = UDim2.new(0, 4, 0, 22)
 
 		table.insert(_lib.Elements.Highlight,{
 			Element = SelectionFrame,
@@ -9976,11 +9978,11 @@ function PYMPLE.new(Config : Window)
 							BackgroundTransparency = 0
 						});
 
-						SelectionFrame.Position = UDim2.new(1,5,0,math.ceil(vili));
+						SelectionFrame.Position = UDim2.new(0,0,0,math.ceil(vili));
 					else
 						_lib:_Animation(SelectionFrame , TweenInfo.new(0.15) , {
 							BackgroundTransparency = 0,
-							Position = UDim2.new(1,5,0,math.ceil(vili))
+							Position = UDim2.new(0,0,0,math.ceil(vili))
 						});
 					end;
 				end;
