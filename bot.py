@@ -1,10 +1,11 @@
 import discord
 import requests
 import base64
+import os
 from discord.ext import commands
 
-DISCORD_TOKEN = "REDACTED"
-GITHUB_TOKEN = "REDACTED"
+DISCORD_TOKEN = os.environ["DISCORD_TOKEN"]
+GITHUB_TOKEN = os.environ["GITHUB_TOKEN"]
 GITHUB_REPO = "pympleHUB/obfuscatedPYMPLE"
 KEY_FILE = "pympleKeyBot"
 
