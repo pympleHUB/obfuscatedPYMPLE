@@ -6450,6 +6450,16 @@ function PYMPLE.new(Config : Window)
 
 	UICorner_2.Parent = TabFrame
 
+	local TabStroke = Instance.new("UIStroke")
+	TabStroke.Color = _lib.Colors.HighStrokeColor
+	TabStroke.Thickness = 1
+	TabStroke.Transparency = 0.35
+	TabStroke.Parent = TabFrame
+	table.insert(_lib.Elements.HighStrokeColor, {
+		Element = TabStroke,
+		Property = "Color"
+	})
+
 	LineFrame1.Name = _lib:_RandomString()
 	LineFrame1.Parent = TabFrame
 	LineFrame1.AnchorPoint = Vector2.new(1, 0)
@@ -9379,15 +9389,15 @@ function PYMPLE.new(Config : Window)
 
 					if (Section:GetAttribute('Height') and not _lib:_IsMobile() and FullScale <= RefPos) then
 						_lib:_Animation(Section,TweenInfo.new(0.4,Enum.EasingStyle.Quint),{
-							Size = UDim2.new(1, 0, 0, math.abs(Section:GetAttribute('Height')) + 5)
+							Size = UDim2.new(1, 0, 0, math.abs(Section:GetAttribute('Height')) + 15)
 						});
 					else
 						_lib:_Animation(Section,TweenInfo.new(0.4,Enum.EasingStyle.Quint),{
-							Size = UDim2.new(1, 0, 0, math.abs(UIListLayout.AbsoluteContentSize.Y) - 1)
+							Size = UDim2.new(1, 0, 0, math.abs(UIListLayout.AbsoluteContentSize.Y) + 9)
 						});
 
 						if Section:GetAttribute('Lasth') and UIListLayout.AbsoluteContentSize.Y > Section:GetAttribute('Lasth') then
-							Section:SetAttribute('Lasth',math.abs(UIListLayout.AbsoluteContentSize.Y) - 1);
+							Section:SetAttribute('Lasth',math.abs(UIListLayout.AbsoluteContentSize.Y) + 9);
 						end;
 					end;
 
