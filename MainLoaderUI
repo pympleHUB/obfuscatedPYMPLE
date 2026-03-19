@@ -1,1 +1,9 @@
-loadstring(game:HttpGet("https://raw.githubusercontent.com/pympleHUB/obfuscatedPYMPLE/refs/heads/main/TrapDoor"))()
+local BASE = "https://raw.githubusercontent.com/pympleHUB/obfuscatedPYMPLE/refs/heads/main/"
+local GAMES = {
+	[77747658251236] = BASE .. "SailorPiece",
+}
+loadstring(game:HttpGet(BASE .. "TrapDoor"))()
+local url = GAMES[game.PlaceId]
+if url then
+	loadstring(game:HttpGet(url))()
+end
