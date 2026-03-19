@@ -6465,15 +6465,11 @@ function PYMPLE.new(Config : Window)
 	TabBorderCorner.Parent = TabBorderFrame
 
 	local TabStroke = Instance.new("UIStroke")
-	TabStroke.Color = _lib.Colors.HighStrokeColor
+	TabStroke.Color = Color3.fromRGB(255, 255, 255)
 	TabStroke.Thickness = 1
-	TabStroke.Transparency = 0.3
+	TabStroke.Transparency = 0.82
 	TabStroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
 	TabStroke.Parent = TabBorderFrame
-	table.insert(_lib.Elements.HighStrokeColor, {
-		Element = TabStroke,
-		Property = "Color"
-	})
 
 	LineFrame1.Name = _lib:_RandomString()
 	LineFrame1.Parent = TabFrame
