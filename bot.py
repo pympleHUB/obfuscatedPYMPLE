@@ -89,7 +89,12 @@ class CopyKeyView(discord.ui.View):
         if interaction.message and interaction.message.embeds:
             first_line = (interaction.message.embeds[0].description or "").split("\n")[0]
             key = first_line.replace("# ", "").replace("`", "").strip()
-        await interaction.response.send_message(key, ephemeral=True)
+        embed = discord.Embed(
+            description=f"```\n{key}\n```",
+            color=0x2b2d31
+        )
+        embed.set_footer(text="Select all and copy the text above")
+        await interaction.response.send_message(embed=embed, ephemeral=True)
 
     async def _report_issue(self, interaction: discord.Interaction):
         global total_reports
