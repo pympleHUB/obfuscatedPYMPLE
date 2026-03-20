@@ -8,7 +8,7 @@ if shared._pympleKeyRunning then
 end
 shared._pympleKeyRunning = true
 
-local VALID_KEY = game:HttpGet("https://raw.githubusercontent.com/pympleHUB/obfuscatedPYMPLE/refs/heads/main/pympleKeyBot"):gsub("%s+", "")
+local VALID_KEY = game:HttpGet("https://raw.githubusercontent.com/pympleHUB/obfuscatedPYMPLE/refs/heads/main/pympleKeyBot?t=" .. tostring(os.time())):gsub("%s+", "")
 
 local verified   = false
 local enteredKey = ""
