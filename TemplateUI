@@ -6434,6 +6434,7 @@ function PYMPLE.new(Config : Window)
 	local UICorner = Instance.new("UICorner")
 	local TabFrame = Instance.new("Frame")
 	local UICorner_2 = Instance.new("UICorner")
+	local TabFrameStroke = Instance.new("UIStroke")
 	local LineFrame1 = Instance.new("Frame")
 	local CompLogo = Instance.new("ImageLabel")
 	local WindowLabel = Instance.new("TextLabel")
@@ -6515,10 +6516,20 @@ function PYMPLE.new(Config : Window)
 	TabFrame.BorderColor3 = Color3.fromRGB(0, 0, 0)
 	TabFrame.BorderSizePixel = 0
 	TabFrame.ClipsDescendants = true
-	TabFrame.Position = UDim2.new(0, 25, 0, 0)
-	TabFrame.Size = UDim2.new(0, 85, 1, 0)
+	TabFrame.Position = UDim2.new(0, 25, 0, 2)
+	TabFrame.Size = UDim2.new(0, 85, 1, -4)
 
 	UICorner_2.Parent = TabFrame
+
+	TabFrameStroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
+	TabFrameStroke.Color = _lib.Colors.HighStrokeColor
+	TabFrameStroke.Thickness = 2
+	TabFrameStroke.Parent = TabFrame
+
+	table.insert(_lib.Elements.HighStrokeColor, {
+		Element = TabFrameStroke,
+		Property = "Color"
+	});
 
 	LineFrame1.Name = _lib:_RandomString()
 	LineFrame1.Parent = TabFrame
@@ -6842,7 +6853,7 @@ function PYMPLE.new(Config : Window)
 
 		if value then
 			_lib:_Animation(TabFrame , Style , {
-				Size = UDim2.new(0, 185,1, 0)
+				Size = UDim2.new(0, 185,1, -4)
 			});
 
 			_lib:_Animation(WindowLabel , Style , {
@@ -6861,7 +6872,7 @@ function PYMPLE.new(Config : Window)
 			});
 		else
 			_lib:_Animation(TabFrame , (_lib.SidebarBounce and TweenInfo.new(0.5, Enum.EasingStyle.Elastic, Enum.EasingDirection.Out) or TweenInfo.new(0.45, Enum.EasingStyle.Quint)) , {
-				Size = UDim2.new(0, 85,1, 0)
+				Size = UDim2.new(0, 85,1, -4)
 			});
 
 			_lib:_Animation(WindowLabel , Style , {
@@ -9331,6 +9342,7 @@ function PYMPLE.new(Config : Window)
 			local Section = Instance.new("Frame")
 			local UICorner = Instance.new("UICorner")
 			local UIStroke = Instance.new("UIStroke")
+			local UIGradient = Instance.new("UIGradient")
 			local UIListLayout = Instance.new("UIListLayout")
 			local Header = Instance.new("Frame")
 			local SectionText = Instance.new("TextLabel")
@@ -9363,6 +9375,13 @@ function PYMPLE.new(Config : Window)
 
 			UICorner.CornerRadius = UDim.new(0, 6)
 			UICorner.Parent = Section
+
+			UIGradient.Color = ColorSequence.new({
+				ColorSequenceKeypoint.new(0, Color3.new(1, 1, 1)),
+				ColorSequenceKeypoint.new(1, Color3.new(0.62, 0.62, 0.62))
+			})
+			UIGradient.Rotation = 90
+			UIGradient.Parent = Section
 
 			UIStroke.Color = _lib.Colors.StrokeColor
 			UIStroke.Parent = Section
