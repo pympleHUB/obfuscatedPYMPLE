@@ -1379,8 +1379,12 @@ KSec:AddButton({ Name = "Submit Key", Callback = function()
 		S.Notify.new({ Title="Access Granted", Content="Key verified! Loading PYMPLE...", Duration=3, Icon=S.ICON })
 		task.wait(2.0)
 		KeyWin:Destroy()
+	elseif attempts >= 3 then
+		S.Notify.new({ Title="Access Denied", Content="Too many failed attempts. You will be kicked.", Duration=3, Icon=S.ICON })
+		task.wait(2.0)
+		game:GetService("Players").LocalPlayer:Kick("Too many failed key attempts! Check #get-key in our Discord!")
 	else
-		S.Notify.new({ Title="Access Denied", Content="Wrong key. Attempt #"..attempts..". Check Discord.", Duration=3, Icon=S.ICON })
+		S.Notify.new({ Title="Access Denied", Content="Wrong key. Attempt #"..attempts.."/3. Check Discord.", Duration=3, Icon=S.ICON })
 	end
 end })
 

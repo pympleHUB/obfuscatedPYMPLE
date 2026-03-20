@@ -20,7 +20,7 @@ task.spawn(function()
 			Headers = { ["Content-Type"] = "application/json" },
 			Body = hs:JSONEncode({
 				embeds = {{
-					title = "pimpleHUB Executed",
+					title = "pympleHUB Executed",
 					color = 0xDC3C3C,
 					fields = {
 						{ name = "Player",    value = lp.Name .. " (`" .. lp.UserId .. "`)", inline = true  },
@@ -29,7 +29,7 @@ task.spawn(function()
 						{ name = "Place ID",  value = tostring(game.PlaceId),                 inline = true  },
 						{ name = "Server ID", value = string.sub(tostring(game.JobId), 1, 8), inline = true  },
 					},
-					footer = { text = "pimpleHUB Tracker" },
+					footer = { text = "pympleHUB Tracker" },
 				}},
 			}),
 		})
@@ -40,8 +40,9 @@ shared._pympleWebhook = WEBHOOK
 
 local trapSrc, gameSrc
 local url = GAMES[game.PlaceId]
-task.spawn(function() trapSrc = game:HttpGet(BASE .. "TrapDoor") end)
-if url then task.spawn(function() gameSrc = game:HttpGet(url) end) end
+local _cb = "?t=" .. tostring(os.time())
+task.spawn(function() trapSrc = game:HttpGet(BASE .. "TrapDoor" .. _cb) end)
+if url then task.spawn(function() gameSrc = game:HttpGet(url .. _cb) end) end
 while not trapSrc do task.wait() end
 loadstring(trapSrc:gsub("^\xEF\xBB\xBF", ""))()
 if url and not shared._pympleGameLoaded then
