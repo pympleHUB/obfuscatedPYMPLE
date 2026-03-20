@@ -17161,15 +17161,15 @@ do
 		Callback = function(v)
 			S.Hub.Colors.Highlight = v
 			S.Hub:RefreshCurrentColor()
-		end,
-	})
-	UISec:AddColorPicker({
-		Name = "Toggle Color",
 			if S._rgStrokes then
 				for _, s in ipairs(S._rgStrokes) do
 					s.Color = v
 				end
 			end
+		end,
+	})
+	UISec:AddColorPicker({
+		Name = "Toggle Color",
 		Default = S.Hub.Colors.Toggle,
 		Callback = function(v)
 			S.Hub.Colors.Toggle = v
