@@ -6,15 +6,14 @@ local RS = game:GetService("ReplicatedStorage")
 local TweenService = game:GetService("TweenService")
 local LP = Players.LocalPlayer
 local HttpService = game:GetService("HttpService")
--- Capture real executor file functions BEFORE the embedded PYMPLE library
--- overrides them with its StringValue-based virtual filesystem via getgenv()
+
 local _writefile = writefile
 local _readfile  = readfile
 local CONFIG_FILE    = "pimple_sailorpiece.json"
 local CONFIG_VERSION = "1.0"
 local AutoSaveInterval, LastAutoSave = 10, 0
-local S = {} -- all state, data, constants
-local fn = {} -- all functions
+local S = {} 
+local fn = {} 
 local R = {
 	TP = { "Remotes", "TeleportToPortal" },
 	QuestAccept = { "RemoteEvents", "QuestAccept" },
@@ -2113,7 +2112,7 @@ fn.GetGoalForEnemy = function(enemy)
 		primary = -rightFlat
 	else
 		primary = -lookFlat
-	end -- Behind (default)
+	end 
 	local perp = Vector3.new(-primary.Z, 0, primary.X)
 	local dirs = { primary, perp, -perp, -primary }
 	for _, dir in ipairs(dirs) do
@@ -2264,7 +2263,7 @@ fn.TweenTo = function(enemy)
 			if dEnemy <= F.OffsetDist + 25 then
 				return
 			end
-			S.LockTarget = nil -- too far (stuck or enemy teleported) — re-approach
+			S.LockTarget = nil 
 		else
 			return
 		end
@@ -2736,7 +2735,7 @@ fn.Conn(RunService.Heartbeat:Connect(function()
 			elseif farmMode == "Right Side" then
 				baseDir = -enemyRight
 			else
-				baseDir = -enemyLook -- Behind (default)
+				baseDir = -enemyLook 
 			end
 			local style = (farmMode == "Behind") and (F.FollowStyle or "Dodge") or "Static"
 			local rightDir = Vector3.new(-baseDir.Z, 0, baseDir.X)
@@ -4441,7 +4440,7 @@ fn.DoHogyokuQuestTick = function()
 		end
 		if not npc then
 			S.Notify.new({ Title = "Hogyoku", Content = "NPC not found, retrying...", Duration = 2, Icon = S.ICON })
-			S.HogyokuStep = 0 -- retry from TP
+			S.HogyokuStep = 0 
 			return
 		end
 		local npcPos
@@ -4506,7 +4505,7 @@ fn.DoHogyokuQuestTick = function()
 		S.HogyokuStep = 1
 		S.HogyokuCollected = {}
 		F.HogyokuQuest = true
-		task.wait(1) -- give server time to spawn fragments
+		task.wait(1) 
 		S.Notify.new({
 			Title = "Hogyoku",
 			Content = "Quest accepted! Collecting fragments...",
@@ -5048,22 +5047,6 @@ fn.ScanHogyokuDebug = function()
 end
 do
 	S.Hub = (function()
-	--[[
-	    		PYMPLE Interface
-	
-	    Author: 4lpaca
-	    License: MIT
-	    Github: https://github.com/4lpaca-pin/PYMPLE
-	    Original: pymple.net
-	
-	        Version: 2.6
-	    - Improved Performance Mode
-	    	PYMPLE:OptimizeMode(< boolean >)
-	  	- Added Auto Color Logo
-			PYMPLE:CustomIconHighlight()
-	--]]
-	
-	--- Export Types ---
 	
 	export type cloneref = (target: Instance) -> Instance;
 	
@@ -5257,21 +5240,20 @@ do
 		Content: string
 	}
 	
-	pcall(function() -- for Luraph
+	pcall(function() 
 		local Constant = table.concat({"LP","H_NO"}).."_VI".."RTU".."AL".."IZE";
 		getfenv()[Constant] = getfenv()[Constant] or function(f) return f end; 
-		-- LPH_NO_VIRTUALIZE
+		
 	end);
 	
-	pcall(function() -- for IB1
+	pcall(function() 
 		local Constant = "IB".."_NO_VI".."RTU".."AL".."IZE";
 		getfenv()[Constant] = getfenv()[Constant] or function(f) return f end; 
-		-- IB_NO_VIRTUALIZE
+		
 	end);
 	
 	getgenv = getgenv or getfenv;
 	
-	-- Please ignore the ugly code. [Custom File System] --
 	if game:GetService('RunService'):IsStudio() then
 		local BaseWorkspace = Instance.new('Folder',game:GetService("ReplicatedFirst"));
 	
@@ -5392,7 +5374,6 @@ do
 		end;
 	end;
 	
-	--- Local Variables ---
 	local cloneref: cloneref = cloneref or function(f) return f end;
 	local TweenService: TweenService = cloneref(game:GetService('TweenService'));
 	local UserInputService: UserInputService = cloneref(game:GetService('UserInputService'));
@@ -6497,7 +6478,7 @@ do
 	end;
 	
 	function PYMPLE:SetAllText(flags : {[string] : string})
-		if not flags then -- reset to default
+		if not flags then 
 			for i,v in next , PYMPLE.Flags do
 				if v.SetText then
 					v:SetText(nil);
@@ -7229,7 +7210,6 @@ do
 			Keybind.ClipsDescendants = true
 			Keybind.LayoutOrder = -#LinkValues:GetChildren();
 	
-	
 			table.insert(PYMPLE.Elements.DropColor , {
 				Element = Keybind,
 				Property = "BackgroundColor3"
@@ -7710,7 +7690,7 @@ do
 		end;
 	end;
 	
-	function PYMPLE:Security(directory: string,Config: SecurityConfig) -- Security Mode
+	function PYMPLE:Security(directory: string,Config: SecurityConfig) 
 		directory = directory or "PYMPLE-Cache";
 	
 		if not isfolder(directory) then
@@ -8010,7 +7990,7 @@ do
 	
 			local MUL = Window.AbsoluteSize.Y / 2;
 	
-			if MainPosition.Y.Offset > MUL then -- go up
+			if MainPosition.Y.Offset > MUL then 
 				MainPosition = UDim2.fromOffset(Button.AbsolutePosition.X,Button.AbsolutePosition.Y + 45);
 				DropPosition = UDim2.fromOffset(MainPosition.X.Offset,MainPosition.Y.Offset - 25);
 	
@@ -8371,7 +8351,6 @@ do
 			Element = Keybinds,
 			Property = 'BackgroundColor3'
 		});
-	
 	
 		UICorner.CornerRadius = UDim.new(0, 3)
 		UICorner.Parent = Keybinds
@@ -8819,10 +8798,10 @@ do
 		};
 	
 		local ModeEnum = {
-			[1] = 'Off', -- disabled / off
+			[1] = 'Off', 
 			[2] = "Hold",
 			[3] = "Toggle",
-			[4] = "On", -- alway on
+			[4] = "On", 
 		};
 	
 		local e_m = {
@@ -8837,7 +8816,6 @@ do
 			APIRef.On = true;
 			APIRef.Keybind = nil;
 			APIRef.Mode = e_m.Off;
-	
 	
 		elseif ObjectType == "Number" then
 			APIRef.Off = 1;
@@ -9300,7 +9278,7 @@ do
 				local DropPosition = UDim2.fromOffset(MainPosition.X.Offset,MainPosition.Y.Offset + 15);
 				local MUL = Window.AbsoluteSize.Y / 2;
 	
-				if MainPosition.Y.Offset > MUL then -- go up
+				if MainPosition.Y.Offset > MUL then 
 					MainPosition = UDim2.fromOffset(Element.AbsolutePosition.X,Element.AbsolutePosition.Y + 45);
 					DropPosition = UDim2.fromOffset(MainPosition.X.Offset,MainPosition.Y.Offset - 25);
 					ExtractElement.AnchorPoint = Vector2.new(0,1)
@@ -9505,7 +9483,7 @@ do
 			local MainPosition = UDim2.fromOffset(BaseParent.AbsolutePosition.X + 1,BaseParent.AbsolutePosition.Y + 80);
 			local DropPosition = UDim2.fromOffset(MainPosition.X.Offset,MainPosition.Y.Offset + 25);
 	
-			if MainPosition.Y.Offset > MUL then -- go up
+			if MainPosition.Y.Offset > MUL then 
 				MainPosition = UDim2.fromOffset(BaseParent.AbsolutePosition.X + 1,BaseParent.AbsolutePosition.Y + 55);
 				DropPosition = UDim2.fromOffset(MainPosition.X.Offset,MainPosition.Y.Offset - 25);
 	
@@ -10542,7 +10520,7 @@ do
 			return Args;
 		end;
 	
-		function Args:AddParagraph(Config: Paragraph) -- request by Neptune
+		function Args:AddParagraph(Config: Paragraph) 
 			Config = PYMPLE.__CONFIG(Config, {
 				Title = "Paragraph",
 				Content = "",
@@ -11163,7 +11141,6 @@ do
 			function Args:SetText(str : string)
 				BlockText.Text = str or Config.Name
 			end;
-	
 	
 			function Args:GetText()
 				return BlockText.Text;
@@ -12199,8 +12176,6 @@ do
 				Tabs = {}
 			};
 	
-			-- Creating Button --
-	
 			local TabButton = Instance.new("Frame")
 			local Icon = Instance.new("ImageLabel")
 			local TabNameLabel = Instance.new("TextLabel")
@@ -12274,8 +12249,6 @@ do
 			UICorner.CornerRadius = UDim.new(0, 4)
 			UICorner.Parent = Highlight
 	
-			-- Creating Container --
-	
 			local ContainerTab = Instance.new("Frame")
 			local MainFrame = Instance.new("Frame")
 			local Top = Instance.new("Frame")
@@ -12316,7 +12289,6 @@ do
 			UIListLayout.VerticalAlignment = Enum.VerticalAlignment.Center
 			UIListLayout.Padding = UDim.new(0, 10)
 	
-			-- Functions --
 			Highlight:GetPropertyChangedSignal('BackgroundTransparency'):Connect(function()
 				if Highlight.BackgroundTransparency <= 0.99 then
 					ContainerTab.Visible = true;
@@ -12459,7 +12431,7 @@ do
 				end;
 			end);
 	
-			function TabArgs:DrawTab(TabConfig : TabConfig) -- Internal Tab
+			function TabArgs:DrawTab(TabConfig : TabConfig) 
 				TabConfig = _lib.__CONFIG(TabConfig,{
 					Name = "Tab",
 					Type = "Double",
@@ -12590,14 +12562,12 @@ do
 					end;
 				end;
 	
-	
 				local Id = {
 					Root = Frame,
 					Remote = InternalSignal
 				};
 	
 				InternalSignal:Connect(ToggleUI)
-	
 	
 				if not TabArgs.Tabs[1] then
 					TabArgs.__Current = Id;
@@ -12646,34 +12616,6 @@ do
 				end;
 			end)
 	
-			--[[local Parent: ScrollingFrame = UilistLayout.Parent;
-	
-			Parent = Parent or Scrolling;
-	
-			local Detection = function()
-				local Target = (UilistLayout.AbsoluteContentSize.Y);
-	
-				for i,v in next , Parent:GetChildren() do task.wait(0.1)
-					local UIList = v:FindFirstChildWhichIsA('UIListLayout');
-					if v:IsA('Frame') and UIList then
-						if (UIList.AbsoluteContentSize.Y >= Target) or (v.AbsoluteSize.Y >= Target) or (UilistLayout.AbsoluteContentSize.Y > Parent.AbsoluteSize.Y) then
-							UilistLayout.VerticalFlex = Enum.UIFlexAlignment.None;
-							Parent.ScrollingEnabled = true;
-						else
-							Parent.ScrollingEnabled = false;
-							UilistLayout.VerticalFlex = Enum.UIFlexAlignment.None;
-						end;
-					end
-				end;
-			end;
-	
-			local Executable = function()
-				while true do task.wait(0.15);
-					pcall(Detection);
-				end;
-			end;
-	
-			table.insert(WindowArgs.THREADS,task.spawn(Executable))]]
 		end;
 	
 		function WindowArgs:DrawConfig(Configuration : TabConfigManager , Internal)
@@ -12686,7 +12628,6 @@ do
 			local TabOpenSignal = _lib.__SIGNAL(false);
 			local TabArgs = {};
 	
-			-- Button --
 			local TabButton = Instance.new("Frame")
 			local Icon = Instance.new("ImageLabel")
 			local TabNameLabel = Instance.new("TextLabel")
@@ -12872,7 +12813,6 @@ do
 			SectionClose.ZIndex = 10
 			SectionClose.Image = _lib:CacheImage("rbxassetid://109535175596957")
 			SectionClose.ImageTransparency = 0.500
-	
 	
 			ScrollingFrame.Parent = ConfigList
 			ScrollingFrame.Active = true
@@ -13073,7 +13013,6 @@ do
 			UICorner_4.CornerRadius = UDim.new(0, 3)
 			UICorner_4.Parent = Frame_2
 	
-	
 			TextLabel.Parent = Frame_2
 			TextLabel.AnchorPoint = Vector2.new(0.5, 0.5)
 			TextLabel.BackgroundTransparency = 1.000
@@ -13131,8 +13070,6 @@ do
 						BackgroundTransparency = 0.925
 					});
 	
-					--
-	
 					_lib:_Animation(ConfigList,Tween,{
 						BackgroundTransparency = 0,
 					});
@@ -13169,7 +13106,6 @@ do
 					_lib:_Animation(Frame_2,Tween,{
 						BackgroundTransparency = 0,
 					});
-	
 	
 					_lib:_Animation(BlockLine,Tween,{
 						BackgroundTransparency = 1,
@@ -13244,7 +13180,6 @@ do
 					_lib:_Animation(Frame_2,Tween,{
 						BackgroundTransparency = 1,
 					});
-	
 	
 					_lib:_Animation(BlockLine,Tween,{
 						BackgroundTransparency = 1,
@@ -13916,7 +13851,7 @@ do
 				Left.BottomImage = ""
 				Left.ScrollBarThickness = 0
 				Left.TopImage = ""
-				--Left.AutomaticCanvasSize = Enum.AutomaticSize.Y;
+				
 				Left.CanvasSize = UDim2.new(0, 0, 0, 0)
 	
 				UIListLayout:GetPropertyChangedSignal('AbsoluteContentSize'):Connect(function()
@@ -13941,7 +13876,7 @@ do
 				Right.Size = UDim2.new(0.5, -3, 1, 0)
 				Right.ZIndex = 8
 				Right.BottomImage = ""
-				--Right.AutomaticCanvasSize = Enum.AutomaticSize.Y;
+				
 				Right.CanvasSize = UDim2.new(0, 0, 0, 0)
 				Right.ScrollBarThickness = 0
 				Right.TopImage = ""
@@ -14016,7 +13951,7 @@ do
 					_lib:_SetNilP(TabContent , Internal.Parent);
 				end;
 			else
-				-- Button --
+				
 				local TabButton = Instance.new("Frame")
 				local Icon = Instance.new("ImageLabel")
 				local TabNameLabel = Instance.new("TextLabel")
@@ -14116,9 +14051,8 @@ do
 				Left.BottomImage = ""
 				Left.ScrollBarThickness = 0
 				Left.TopImage = ""
-				--Left.AutomaticCanvasSize = Enum.AutomaticSize.Y;
+				
 				Left.CanvasSize = UDim2.new(0, 0, 0, 0)
-	
 	
 				UIListLayout:GetPropertyChangedSignal('AbsoluteContentSize'):Connect(function()
 					Left.CanvasSize = UDim2.fromOffset(0,UIListLayout.AbsoluteContentSize.Y)
@@ -14144,7 +14078,7 @@ do
 				Right.BottomImage = ""
 				Right.ScrollBarThickness = 0
 				Right.TopImage = ""
-				--Right.AutomaticCanvasSize = Enum.AutomaticSize.Y;
+				
 				Right.CanvasSize = UDim2.new(0, 0, 0, 0)
 	
 				Upvalue.Left = Left;
@@ -14385,9 +14319,6 @@ do
 					TabArgs:_UpdateScrolling(Upvalue.Right , Upvalue.RightLayout);
 				end;
 			end);
-	
-			--TabArgs.LeftThread();
-			--TabArgs.RightThread();
 	
 			function TabArgs:DrawSection(config: Section)
 				config = _lib.__CONFIG(config,{
@@ -15609,7 +15540,6 @@ do
 				BlockFrame.Size = UDim2.new(0, 200, 0, 0)
 				BlockFrame.LayoutOrder = LayoutREF;
 	
-	
 				NotifyFrame.Name = PYMPLE:_RandomString()
 				NotifyFrame.Parent = BlockFrame
 				NotifyFrame.BackgroundColor3 = PYMPLE.Colors.BGDBColor
@@ -15620,7 +15550,6 @@ do
 				NotifyFrame.Size = UDim2.new(1, 0, 1, -5)
 				NotifyFrame.ZIndex = 2
 				NotifyFrame.Position = UDim2.new(1,200,0,0)
-	
 	
 				UICorner.CornerRadius = UDim.new(0, 4)
 				UICorner.Parent = NotifyFrame
@@ -15818,12 +15747,7 @@ do
 	})
 	S.Win.OnToggle = function() end
 	do
-		-- Two separate glow wrappers:
-		--   _gwhub: white rotating shimmer, mirrors MainFrame only (no sidebar).
-		--   _gwrap: red multi-layer bloom, covers MainFrame + sidebar protrusion.
-		-- Both are siblings of MainFrame inside _pg (the ScreenGui root).
-		-- S._rgStrokes: red bloom UIStrokes → Glow Color setting controls them all.
-		-- S._glowEnabled: persists toggle state across hub open/close cycles.
+		
 		S._glowEnabled = true
 		task.defer(function()
 			local RS = game:GetService("RunService")
@@ -15841,7 +15765,6 @@ do
 			end
 			S._glowMF = _mf
 
-			-- Find sidebar TabFrame: AnchorPoint.X == 1 child of MainFrame
 			local _tf = nil
 			for _, _c in ipairs(_mf:GetChildren()) do
 				if _c:IsA("Frame") and _c.AnchorPoint.X == 1 then
@@ -15852,9 +15775,6 @@ do
 
 			S._rgStrokes = {}
 
-			-- ── WHITE SHIMMER wrapper (MainFrame only) ───────────────────────────
-			-- Mirrors _mf's AnchorPoint/Position/Size directly so it always aligns
-			-- perfectly regardless of how the hub is positioned or dragged.
 			local _gwhub = Instance.new("Frame")
 			_gwhub.BackgroundTransparency = 1
 			_gwhub.BorderSizePixel = 0
@@ -15897,10 +15817,6 @@ do
 			_mf:GetPropertyChangedSignal("Size"):Connect(_syncHub)
 			_mf:GetPropertyChangedSignal("Visible"):Connect(_syncHub)
 
-			-- ── RED BLOOM wrapper (MainFrame + sidebar protrusion) ────────────────
-			-- Uses AbsolutePosition to compute the combined bounding box. Subtracts
-			-- _pg.AbsolutePosition so the offset is relative to the ScreenGui root,
-			-- not screen-absolute (fixes the "too high" positioning).
 			local _gwrap = Instance.new("Frame")
 			_gwrap.BackgroundTransparency = 1
 			_gwrap.BorderSizePixel = 0
@@ -15956,7 +15872,7 @@ do
 				_gwrap.Size = UDim2.fromOffset(mfAS.X + protrude, mfAS.Y)
 				_gwrap.Visible = _mf.Visible and S._glowEnabled
 			end
-			-- Wait one heartbeat so AbsolutePosition is valid before first sync
+			
 			RS.Heartbeat:Wait()
 			_sync()
 			_mf:GetPropertyChangedSignal("AbsolutePosition"):Connect(_sync)
@@ -15978,7 +15894,7 @@ do
 			end)
 		end)
 	end
-	-- ==================== FOG OVERLAY ====================
+	
 	S._fogEnabled = false
 	do
 		task.defer(function()
@@ -17405,7 +17321,7 @@ end
 			return
 		end
 	end))
-end -- UI do block
+end 
 S.Win:Update({ Username = LP.DisplayName, ExpireDate = "Loading..." })
 task.spawn(function()
 	task.wait(0.2)
@@ -17695,4 +17611,4 @@ game.Players.LocalPlayer.AncestryChanged:Connect(function()
 			SaveConfig()
 		end
 	end
-end)
+end)

@@ -1,4 +1,4 @@
-﻿
+
 do
 	local _lp = game:GetService("Players").LocalPlayer
 	local _ok = shared._pympleVerified and shared._pympleAuth and shared._pympleTime and (tick() - shared._pympleTime) < 120

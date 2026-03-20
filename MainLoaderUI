@@ -1,4 +1,4 @@
-﻿local BASE = "https://raw.githubusercontent.com/pympleHUB/obfuscatedPYMPLE/refs/heads/main/"
+local BASE = "https://raw.githubusercontent.com/pympleHUB/obfuscatedPYMPLE/refs/heads/main/"
 local GAMES = {
 	[77747658251236] = BASE .. "SailorPiece",
 	[107457593564828] = BASE .. "CraftwarsRedux",
