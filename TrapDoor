@@ -578,7 +578,7 @@ if type(S) ~= "table" or not S.Hub then
 			hTxt.TextColor3      = C.Text
 			hTxt.TextTransparency = 0.15
 			hTxt.Font            = Enum.Font.GothamBold
-			hTxt.TextSize        = 17
+			hTxt.TextSize        = 20
 			hTxt.TextXAlignment  = Enum.TextXAlignment.Left
 			hTxt.ZIndex          = 10
 			hTxt.Parent          = hdr
@@ -755,7 +755,7 @@ if type(S) ~= "table" or not S.Hub then
 		hdrTxt.TextColor3       = C.Text
 		hdrTxt.TextTransparency = 0.15
 		hdrTxt.Font             = Enum.Font.GothamBold
-		hdrTxt.TextSize         = 17
+		hdrTxt.TextSize         = 20
 		hdrTxt.TextXAlignment   = Enum.TextXAlignment.Left
 		hdrTxt.ZIndex           = 11
 		mkTS(hdrTxt)
