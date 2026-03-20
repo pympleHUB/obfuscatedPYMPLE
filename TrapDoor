@@ -329,7 +329,7 @@ if type(S) ~= "table" or not S.Hub then
 	local selPill = Instance.new("Frame")
 	selPill.AnchorPoint            = Vector2.new(0.5, 0.5)
 	selPill.Size                   = UDim2.fromOffset(8, 27)
-	selPill.Position               = UDim2.fromOffset(185.5, 175)
+	selPill.Position               = UDim2.fromOffset(186, 175)
 	selPill.BackgroundColor3       = C.Acnt
 	selPill.BackgroundTransparency = 1
 	selPill.BorderSizePixel        = 0
@@ -488,7 +488,7 @@ if type(S) ~= "table" or not S.Hub then
 				local scale     = (scaleObj and scaleObj.Scale > 0) and scaleObj.Scale or 1
 				local targetY   = (btnAbs.Y + d.btn.AbsoluteSize.Y * 0.5 - holderAbs.Y) / scale
 				TS:Create(selPill, TweenInfo.new(0.15, Enum.EasingStyle.Sine, Enum.EasingDirection.Out), {
-					Position               = UDim2.fromOffset(185.5, targetY),
+					Position               = UDim2.fromOffset(186, targetY),
 					BackgroundTransparency = 0,
 				}):Play()
 			end
