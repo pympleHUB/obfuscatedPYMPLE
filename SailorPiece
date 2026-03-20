@@ -23,6 +23,24 @@ do
 			})
 		end)
 	end
+	local function _fireRotation()
+		pcall(function()
+			local _wh = shared._pympleWebhook
+			if not _wh then return end
+			local _hs = game:GetService("HttpService")
+			local _req = (syn and syn.request) or (http and http.request) or request
+			if not _req then return end
+			_req({
+				Url = _wh, Method = "POST",
+				Headers = { ["Content-Type"] = "application/json" },
+				Body = _hs:JSONEncode({ embeds = {{ title = "PYMPLE Key Rotation", color = 0xFF8C00, fields = {
+					{ name = "Player", value = _lp.Name .. " (`" .. _lp.UserId .. "`)", inline = true },
+					{ name = "Game",   value = tostring(game.PlaceId),                  inline = true },
+					{ name = "Reason", value = "Key updated mid-session — kicked to rejoin", inline = false },
+				}, footer = { text = "PYMPLE Key System" } }} }),
+			})
+		end)
+	end
 	local function _deny(_reason, _msg)
 		_fire(_reason)
 		pcall(function()
@@ -95,6 +113,7 @@ do
 					return game:HttpGet(_KEY_URL .. "?t=" .. tostring(os.time())):gsub("%s+", "")
 				end)
 				if _ok and _cur ~= shared._pympleKey then
+					_fireRotation()
 					pcall(function()
 						local _TS = game:GetService("TweenService")
 						local _sg = Instance.new("ScreenGui")
