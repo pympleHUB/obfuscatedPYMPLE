@@ -846,25 +846,26 @@ if type(S) ~= "table" or not S.Hub then
 			NumberSequenceKeypoint.new(0.82, 0.08),
 			NumberSequenceKeypoint.new(1,    0.65),
 		}
-		-- Red inner glow overlay
+		local tbPad = Instance.new("UIPadding", tbWrap)
+		tbPad.PaddingLeft = UDim.new(0, 12); tbPad.PaddingRight = UDim.new(0, 8)
+		-- Red inner glow overlay — offset by -12/+20 to escape UIPadding and fill full tbWrap
 		local tbGlowFrame = Instance.new("Frame")
-		tbGlowFrame.Size             = UDim2.fromScale(1, 1)
+		tbGlowFrame.Position         = UDim2.new(0, -12, 0, 0)
+		tbGlowFrame.Size             = UDim2.new(1, 20, 1, 0)
 		tbGlowFrame.BackgroundColor3 = C.Acnt
 		tbGlowFrame.BackgroundTransparency = 0
 		tbGlowFrame.BorderSizePixel  = 0
-		tbGlowFrame.ZIndex           = tbWrap.ZIndex
+		tbGlowFrame.ZIndex           = 9
 		tbGlowFrame.Parent           = tbWrap
 		Instance.new("UICorner", tbGlowFrame).CornerRadius = UDim.new(0, 6)
 		local tbGlowGrad = Instance.new("UIGradient", tbGlowFrame)
 		tbGlowGrad.Rotation = 90
 		tbGlowGrad.Transparency = NumberSequence.new{
-			NumberSequenceKeypoint.new(0,    0.70),
-			NumberSequenceKeypoint.new(0.28, 0.97),
-			NumberSequenceKeypoint.new(0.72, 0.97),
-			NumberSequenceKeypoint.new(1,    0.70),
+			NumberSequenceKeypoint.new(0,    0.65),
+			NumberSequenceKeypoint.new(0.42, 0.97),
+			NumberSequenceKeypoint.new(0.58, 0.97),
+			NumberSequenceKeypoint.new(1,    0.65),
 		}
-		local tbPad = Instance.new("UIPadding", tbWrap)
-		tbPad.PaddingLeft = UDim.new(0, 12); tbPad.PaddingRight = UDim.new(0, 8)
 		local tb = Instance.new("TextBox", tbWrap)
 		tb.Size                 = UDim2.fromScale(1, 1)
 		tb.BackgroundTransparency = 1
@@ -875,7 +876,7 @@ if type(S) ~= "table" or not S.Hub then
 		tb.Font                 = Enum.Font.GothamBold
 		tb.TextSize             = 15
 		tb.ClearTextOnFocus     = false
-		tb.ZIndex               = 12
+		tb.ZIndex               = 13
 		tb.Focused:Connect(function()  TS:Create(tbStroke, TweenInfo.new(0.15), {Thickness = 2.5}):Play() end)
 		tb.FocusLost:Connect(function() TS:Create(tbStroke, TweenInfo.new(0.15), {Thickness = 1.5}):Play() end)
 		tb:GetPropertyChangedSignal("Text"):Connect(function() enteredKey = tb.Text end)
