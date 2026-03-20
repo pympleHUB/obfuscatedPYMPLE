@@ -1,5 +1,4 @@
-﻿--[[ PYMPLE v1.0 - pimpleHUB UI Template ]]
-
+﻿
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
 local UserInputService = game:GetService("UserInputService")
@@ -16,22 +15,6 @@ do
 end
 
 local pimpleHUB = (function()
---[[
-    		PYMPLE Interface
-
-    Author: 4lpaca
-    License: MIT
-    Github: https://github.com/4lpaca-pin/PYMPLE
-    Original: pymple.net
-
-        Version: 2.6
-    - Improved Performance Mode
-    	PYMPLE:OptimizeMode(< boolean >)
-  	- Added Auto Color Logo
-		PYMPLE:CustomIconHighlight()
---]]
-
---- Export Types ---
 
 export type cloneref = (target: Instance) -> Instance;
 
@@ -225,21 +208,20 @@ export type Paragraph = {
 	Content: string
 }
 
-pcall(function() -- for Luraph
+pcall(function() 
 	local Constant = table.concat({"LP","H_NO"}).."_VI".."RTU".."AL".."IZE";
 	getfenv()[Constant] = getfenv()[Constant] or function(f) return f end; 
-	-- LPH_NO_VIRTUALIZE
+	
 end);
 
-pcall(function() -- for IB1
+pcall(function() 
 	local Constant = "IB".."_NO_VI".."RTU".."AL".."IZE";
 	getfenv()[Constant] = getfenv()[Constant] or function(f) return f end; 
-	-- IB_NO_VIRTUALIZE
+	
 end);
 
 getgenv = getgenv or getfenv;
 
--- Please ignore the ugly code. [Custom File System] --
 if game:GetService('RunService'):IsStudio() then
 	local BaseWorkspace = Instance.new('Folder',game:GetService("ReplicatedFirst"));
 
@@ -360,7 +342,6 @@ if game:GetService('RunService'):IsStudio() then
 	end;
 end;
 
---- Local Variables ---
 local cloneref: cloneref = cloneref or function(f) return f end;
 local TweenService: TweenService = cloneref(game:GetService('TweenService'));
 local UserInputService: UserInputService = cloneref(game:GetService('UserInputService'));
@@ -1465,7 +1446,7 @@ function PYMPLE:_SetNilP(Ins: Instance , Parent: Instance)
 end;
 
 function PYMPLE:SetAllText(flags : {[string] : string})
-	if not flags then -- reset to default
+	if not flags then 
 		for i,v in next , PYMPLE.Flags do
 			if v.SetText then
 				v:SetText(nil);
@@ -2197,7 +2178,6 @@ function PYMPLE:_AddLinkValue(Name , Default , GlobalBlock , LinkValues , rep , 
 		Keybind.ClipsDescendants = true
 		Keybind.LayoutOrder = -#LinkValues:GetChildren();
 
-
 		table.insert(PYMPLE.Elements.DropColor , {
 			Element = Keybind,
 			Property = "BackgroundColor3"
@@ -2678,7 +2658,7 @@ function PYMPLE:PreloadIcons()
 	end;
 end;
 
-function PYMPLE:Security(directory: string,Config: SecurityConfig) -- Security Mode
+function PYMPLE:Security(directory: string,Config: SecurityConfig) 
 	directory = directory or "PYMPLE-Cache";
 
 	if not isfolder(directory) then
@@ -2978,7 +2958,7 @@ function PYMPLE:_AddColorPickerPanel(Button: ImageButton , Callback: (Color: Col
 
 		local MUL = Window.AbsoluteSize.Y / 2;
 
-		if MainPosition.Y.Offset > MUL then -- go up
+		if MainPosition.Y.Offset > MUL then 
 			MainPosition = UDim2.fromOffset(Button.AbsolutePosition.X,Button.AbsolutePosition.Y + 45);
 			DropPosition = UDim2.fromOffset(MainPosition.X.Offset,MainPosition.Y.Offset - 25);
 
@@ -3339,7 +3319,6 @@ function PYMPLE:_DrawKeybinds(Window: ScreenGui)
 		Element = Keybinds,
 		Property = 'BackgroundColor3'
 	});
-
 
 	UICorner.CornerRadius = UDim.new(0, 3)
 	UICorner.Parent = Keybinds
@@ -3787,10 +3766,10 @@ function PYMPLE:_KeybindHandler(Parent: Frame , ObjectType: string , ElementAPI:
 	};
 
 	local ModeEnum = {
-		[1] = 'Off', -- disabled / off
+		[1] = 'Off', 
 		[2] = "Hold",
 		[3] = "Toggle",
-		[4] = "On", -- alway on
+		[4] = "On", 
 	};
 
 	local e_m = {
@@ -3805,7 +3784,6 @@ function PYMPLE:_KeybindHandler(Parent: Frame , ObjectType: string , ElementAPI:
 		APIRef.On = true;
 		APIRef.Keybind = nil;
 		APIRef.Mode = e_m.Off;
-
 
 	elseif ObjectType == "Number" then
 		APIRef.Off = 1;
@@ -4268,7 +4246,7 @@ function PYMPLE:_LoadOption(Value , TabSignal)
 			local DropPosition = UDim2.fromOffset(MainPosition.X.Offset,MainPosition.Y.Offset + 15);
 			local MUL = Window.AbsoluteSize.Y / 2;
 
-			if MainPosition.Y.Offset > MUL then -- go up
+			if MainPosition.Y.Offset > MUL then 
 				MainPosition = UDim2.fromOffset(Element.AbsolutePosition.X,Element.AbsolutePosition.Y + 45);
 				DropPosition = UDim2.fromOffset(MainPosition.X.Offset,MainPosition.Y.Offset - 25);
 				ExtractElement.AnchorPoint = Vector2.new(0,1)
@@ -4473,7 +4451,7 @@ function PYMPLE:_LoadDropdown(BaseParent: TextButton , Callback: () -> any)
 		local MainPosition = UDim2.fromOffset(BaseParent.AbsolutePosition.X + 1,BaseParent.AbsolutePosition.Y + 80);
 		local DropPosition = UDim2.fromOffset(MainPosition.X.Offset,MainPosition.Y.Offset + 25);
 
-		if MainPosition.Y.Offset > MUL then -- go up
+		if MainPosition.Y.Offset > MUL then 
 			MainPosition = UDim2.fromOffset(BaseParent.AbsolutePosition.X + 1,BaseParent.AbsolutePosition.Y + 55);
 			DropPosition = UDim2.fromOffset(MainPosition.X.Offset,MainPosition.Y.Offset - 25);
 
@@ -5070,7 +5048,6 @@ function PYMPLE:_LoadElement(Parent: Frame , EnabledLine: boolean , Signal , Dis
 		UICorner.CornerRadius = UDim.new(0, 3)
 		UICorner.Parent = Frame
 
-		-- Rotating glow border (TrapDoor Submit Key style)
 		local GlowWrap = Instance.new("Frame")
 		GlowWrap.AnchorPoint = Vector2.new(0.5, 0.5)
 		GlowWrap.Position = UDim2.new(0.5, 0, 0.5, 0)
@@ -5100,7 +5077,6 @@ function PYMPLE:_LoadElement(Parent: Frame , EnabledLine: boolean , Signal , Dis
 			end
 		end)
 
-		-- Inner gradient overlay (top-to-bottom fade matching TrapDoor tbGlowFrame style)
 		local BtnGlow = Instance.new("Frame")
 		BtnGlow.Name = PYMPLE:_RandomString()
 		BtnGlow.AnchorPoint = Vector2.new(0.5, 0.5)
@@ -5123,7 +5099,6 @@ function PYMPLE:_LoadElement(Parent: Frame , EnabledLine: boolean , Signal , Dis
 		}
 		BtnGlowGrad.Parent = BtnGlow
 
-		-- Star badge (TrapDoor Submit Key style)
 		local BadgeFrame = Instance.new("Frame")
 		BadgeFrame.AnchorPoint = Vector2.new(0, 0.5)
 		BadgeFrame.Position = UDim2.new(0, 10, 0.5, 0)
@@ -5578,7 +5553,7 @@ function PYMPLE:_LoadElement(Parent: Frame , EnabledLine: boolean , Signal , Dis
 		return Args;
 	end;
 
-	function Args:AddParagraph(Config: Paragraph) -- request by Neptune
+	function Args:AddParagraph(Config: Paragraph) 
 		Config = PYMPLE.__CONFIG(Config, {
 			Title = "Paragraph",
 			Content = "",
@@ -6199,7 +6174,6 @@ function PYMPLE:_LoadElement(Parent: Frame , EnabledLine: boolean , Signal , Dis
 		function Args:SetText(str : string)
 			BlockText.Text = str or Config.Name
 		end;
-
 
 		function Args:GetText()
 			return BlockText.Text;
@@ -7235,8 +7209,6 @@ function PYMPLE.new(Config : Window)
 			Tabs = {}
 		};
 
-		-- Creating Button --
-
 		local TabButton = Instance.new("Frame")
 		local Icon = Instance.new("ImageLabel")
 		local TabNameLabel = Instance.new("TextLabel")
@@ -7310,8 +7282,6 @@ function PYMPLE.new(Config : Window)
 		UICorner.CornerRadius = UDim.new(0, 4)
 		UICorner.Parent = Highlight
 
-		-- Creating Container --
-
 		local ContainerTab = Instance.new("Frame")
 		local MainFrame = Instance.new("Frame")
 		local Top = Instance.new("Frame")
@@ -7352,7 +7322,6 @@ function PYMPLE.new(Config : Window)
 		UIListLayout.VerticalAlignment = Enum.VerticalAlignment.Center
 		UIListLayout.Padding = UDim.new(0, 10)
 
-		-- Functions --
 		Highlight:GetPropertyChangedSignal('BackgroundTransparency'):Connect(function()
 			if Highlight.BackgroundTransparency <= 0.99 then
 				ContainerTab.Visible = true;
@@ -7495,7 +7464,7 @@ function PYMPLE.new(Config : Window)
 			end;
 		end);
 
-		function TabArgs:DrawTab(TabConfig : TabConfig) -- Internal Tab
+		function TabArgs:DrawTab(TabConfig : TabConfig) 
 			TabConfig = _lib.__CONFIG(TabConfig,{
 				Name = "Tab",
 				Type = "Double",
@@ -7626,14 +7595,12 @@ function PYMPLE.new(Config : Window)
 				end;
 			end;
 
-
 			local Id = {
 				Root = Frame,
 				Remote = InternalSignal
 			};
 
 			InternalSignal:Connect(ToggleUI)
-
 
 			if not TabArgs.Tabs[1] then
 				TabArgs.__Current = Id;
@@ -7682,34 +7649,6 @@ function PYMPLE.new(Config : Window)
 			end;
 		end)
 
-		--[[local Parent: ScrollingFrame = UilistLayout.Parent;
-
-		Parent = Parent or Scrolling;
-
-		local Detection = function()
-			local Target = (UilistLayout.AbsoluteContentSize.Y);
-
-			for i,v in next , Parent:GetChildren() do task.wait(0.1)
-				local UIList = v:FindFirstChildWhichIsA('UIListLayout');
-				if v:IsA('Frame') and UIList then
-					if (UIList.AbsoluteContentSize.Y >= Target) or (v.AbsoluteSize.Y >= Target) or (UilistLayout.AbsoluteContentSize.Y > Parent.AbsoluteSize.Y) then
-						UilistLayout.VerticalFlex = Enum.UIFlexAlignment.None;
-						Parent.ScrollingEnabled = true;
-					else
-						Parent.ScrollingEnabled = false;
-						UilistLayout.VerticalFlex = Enum.UIFlexAlignment.None;
-					end;
-				end
-			end;
-		end;
-
-		local Executable = function()
-			while true do task.wait(0.15);
-				pcall(Detection);
-			end;
-		end;
-
-		table.insert(WindowArgs.THREADS,task.spawn(Executable))]]
 	end;
 
 	function WindowArgs:DrawConfig(Configuration : TabConfigManager , Internal)
@@ -7722,7 +7661,6 @@ function PYMPLE.new(Config : Window)
 		local TabOpenSignal = _lib.__SIGNAL(false);
 		local TabArgs = {};
 
-		-- Button --
 		local TabButton = Instance.new("Frame")
 		local Icon = Instance.new("ImageLabel")
 		local TabNameLabel = Instance.new("TextLabel")
@@ -7908,7 +7846,6 @@ function PYMPLE.new(Config : Window)
 		SectionClose.ZIndex = 10
 		SectionClose.Image = _lib:CacheImage("rbxassetid://109535175596957")
 		SectionClose.ImageTransparency = 0.500
-
 
 		ScrollingFrame.Parent = ConfigList
 		ScrollingFrame.Active = true
@@ -8109,7 +8046,6 @@ function PYMPLE.new(Config : Window)
 		UICorner_4.CornerRadius = UDim.new(0, 3)
 		UICorner_4.Parent = Frame_2
 
-		-- Rotating glow border
 		local CfgGlowWrap = Instance.new("Frame")
 		CfgGlowWrap.AnchorPoint = Vector2.new(0.5, 0.5)
 		CfgGlowWrap.Position = UDim2.new(0.5, 0, 0.5, 0)
@@ -8139,7 +8075,6 @@ function PYMPLE.new(Config : Window)
 			end
 		end)
 
-		-- White shine overlay
 		local CfgBtnGlow = Instance.new("Frame")
 		CfgBtnGlow.AnchorPoint = Vector2.new(0.5, 0.5)
 		CfgBtnGlow.Position = UDim2.fromScale(0.5, 0.5)
@@ -8215,8 +8150,6 @@ function PYMPLE.new(Config : Window)
 				_lib:_Animation(Highlight,Tween,{
 					BackgroundTransparency = 0.925
 				});
-
-				--
 
 				_lib:_Animation(ConfigList,Tween,{
 					BackgroundTransparency = 0,
@@ -9007,7 +8940,7 @@ function PYMPLE.new(Config : Window)
 			Left.BottomImage = ""
 			Left.ScrollBarThickness = 0
 			Left.TopImage = ""
-			--Left.AutomaticCanvasSize = Enum.AutomaticSize.Y;
+			
 			Left.CanvasSize = UDim2.new(0, 0, 0, 0)
 
 			UIListLayout:GetPropertyChangedSignal('AbsoluteContentSize'):Connect(function()
@@ -9032,7 +8965,7 @@ function PYMPLE.new(Config : Window)
 			Right.Size = UDim2.new(0.5, -3, 1, 0)
 			Right.ZIndex = 8
 			Right.BottomImage = ""
-			--Right.AutomaticCanvasSize = Enum.AutomaticSize.Y;
+			
 			Right.CanvasSize = UDim2.new(0, 0, 0, 0)
 			Right.ScrollBarThickness = 0
 			Right.TopImage = ""
@@ -9107,7 +9040,7 @@ function PYMPLE.new(Config : Window)
 				_lib:_SetNilP(TabContent , Internal.Parent);
 			end;
 		else
-			-- Button --
+			
 			local TabButton = Instance.new("Frame")
 			local Icon = Instance.new("ImageLabel")
 			local TabNameLabel = Instance.new("TextLabel")
@@ -9207,9 +9140,8 @@ function PYMPLE.new(Config : Window)
 			Left.BottomImage = ""
 			Left.ScrollBarThickness = 0
 			Left.TopImage = ""
-			--Left.AutomaticCanvasSize = Enum.AutomaticSize.Y;
+			
 			Left.CanvasSize = UDim2.new(0, 0, 0, 0)
-
 
 			UIListLayout:GetPropertyChangedSignal('AbsoluteContentSize'):Connect(function()
 				Left.CanvasSize = UDim2.fromOffset(0,UIListLayout.AbsoluteContentSize.Y)
@@ -9235,7 +9167,7 @@ function PYMPLE.new(Config : Window)
 			Right.BottomImage = ""
 			Right.ScrollBarThickness = 0
 			Right.TopImage = ""
-			--Right.AutomaticCanvasSize = Enum.AutomaticSize.Y;
+			
 			Right.CanvasSize = UDim2.new(0, 0, 0, 0)
 
 			Upvalue.Left = Left;
@@ -9476,9 +9408,6 @@ function PYMPLE.new(Config : Window)
 				TabArgs:_UpdateScrolling(Upvalue.Right , Upvalue.RightLayout);
 			end;
 		end);
-
-		--TabArgs.LeftThread();
-		--TabArgs.RightThread();
 
 		function TabArgs:DrawSection(config: Section)
 			config = _lib.__CONFIG(config,{
@@ -10700,7 +10629,6 @@ function PYMPLE.newNotify()
 			BlockFrame.Size = UDim2.new(0, 200, 0, 0)
 			BlockFrame.LayoutOrder = LayoutREF;
 
-
 			NotifyFrame.Name = PYMPLE:_RandomString()
 			NotifyFrame.Parent = BlockFrame
 			NotifyFrame.BackgroundColor3 = PYMPLE.Colors.BGDBColor
@@ -10711,7 +10639,6 @@ function PYMPLE.newNotify()
 			NotifyFrame.Size = UDim2.new(1, 0, 1, -5)
 			NotifyFrame.ZIndex = 2
 			NotifyFrame.Position = UDim2.new(1,200,0,0)
-
 
 			UICorner.CornerRadius = UDim.new(0, 4)
 			UICorner.Parent = NotifyFrame
@@ -10897,11 +10824,9 @@ end)()
 local Notifier = pimpleHUB.newNotify()
 local ConfigManager = pimpleHUB:ConfigManager({ Directory = "pimpleHUB", Config = "Pimple-Configs" })
 
--- Red theme
 pimpleHUB.Colors.Highlight = Color3.fromRGB(220, 60, 60)
 pimpleHUB.Colors.Toggle    = Color3.fromRGB(220, 60, 60)
 
--- Loading screen
 pimpleHUB:Loader(AVATAR_ICON, 2).yield()
 
 local Window = pimpleHUB.new({
@@ -10914,7 +10839,6 @@ local Window = pimpleHUB.new({
 
 Window.OnToggle = function(visible) UIOpen = visible end
 
--- ==================== FOG OVERLAY ====================
 local _fogEnabled = false
 local _fogOverlay
 do
@@ -10941,7 +10865,6 @@ do
 	end)
 end
 
--- ==================== GLOW EFFECTS ====================
 local _glowEnabled = true
 local _glowMF, _gwhub, _gwrap, _gs
 local _glowButtonColor = Color3.fromRGB(220, 60, 60)
@@ -11063,7 +10986,6 @@ end
 
 Notifier.new({ Title = "pimpleHUB Loaded", Content = "Press Left Alt to toggle UI", Duration = 5, Icon = AVATAR_ICON })
 
--- Watermark
 local Watermark = Window:Watermark()
 Watermark:AddText({ Icon = "user",   Text = LocalPlayer.DisplayName })
 Watermark:AddText({ Icon = "clock",  Text = pimpleHUB:GetDate() })
@@ -11076,7 +10998,6 @@ task.spawn(function()
 end)
 Watermark:AddText({ Icon = "server", Text = "v1.0" })
 
--- OWNER/MEMBER rank
 Window:Update({ Username = LocalPlayer.DisplayName, ExpireDate = "Loading..." })
 task.spawn(function()
 	task.wait(0.2)
@@ -11101,13 +11022,6 @@ task.delay(1.5, function()
 	Window:Update({ Username = LocalPlayer.DisplayName, ExpireDate = label })
 end)
 
--- ==================== TABS ====================
--- Add your game tabs here, e.g.:
---   Window:DrawCategory({ Name = "COMBAT" })
---   local MainTab = Window:DrawTab({ Name = "Main", Icon = "sword", EnableScrolling = true })
---   local Section  = MainTab:DrawSection({ Name = "Section", Position = "left" })
-
--- ==================== SETTINGS TAB ====================
 Window:DrawCategory({ Name = "SETTINGS" })
 local SetTab = Window:DrawTab({ Name = "Settings", Icon = "settings-3", Type = "Single", EnableScrolling = true })
 local ThTab  = Window:DrawTab({ Name = "Themes",   Icon = "paintbrush",  Type = "Single" })
@@ -11148,7 +11062,7 @@ local _cpButton = UISection:AddColorPicker({
 		local darkerColor = Color3.fromHSV(bh, math.min(bs * 1.1, 1), bv * 0.55)
 		for _, b in ipairs(_glowButtons) do
 			b.Btn.BackgroundColor3 = v
-			-- BtnGlow stays white to preserve the top shine effect
+			
 			if b.Stroke then
 				b.Stroke.Color = darkerColor
 			end
@@ -11233,9 +11147,9 @@ UISection:AddToggle({
 		end
 	end,
 })
--- _GLOWBUTTON_TEXT_HOVER_SCALE: controls how much the label grows on hover for all glowButtons
+
 local _GLOWBUTTON_TEXT_HOVER_SCALE = 1.20
--- _GLOWBUTTON_BTN_HOVER_SCALE: controls how much the whole button scales on hover (subtle)
+
 local _GLOWBUTTON_BTN_HOVER_SCALE = 1.02
 
 local function _glowButton(parentOrSection, labelText, callback)
@@ -11377,7 +11291,7 @@ ThSec:AddDropdown({
 		for _, s in ipairs(_rgStrokes) do
 			s.Color = pimpleHUB.Colors.Highlight
 		end
-		-- sync color pickers to new theme
+		
 		_cpHighlight:SetValue(pimpleHUB.Colors.Highlight)
 		_cpToggle:SetValue(pimpleHUB.Colors.Toggle)
 		_cpButton:SetValue(pimpleHUB.Colors.Highlight)
@@ -11391,82 +11305,6 @@ ThSec:AddDropdown({
 local CfgUI = Window:DrawConfig({ Name = "Config", Icon = "folder", Config = ConfigManager })
 CfgUI:Init()
 
---[[
-task.defer(function()
-	for _, lbl in ipairs(Window.Root:GetDescendants()) do
-		if lbl:IsA("TextLabel") and lbl.Text == "Add Config" then
-			local btn = lbl.Parent -- Frame_2
-			if btn and btn:IsA("Frame") and btn.BackgroundColor3 == pimpleHUB.Colors.Highlight then
-				local Button    = btn.Parent       -- outer 25px button frame
-				local AddConfig = Button and Button.Parent -- the panel
-				-- Resize containers to match _glowButton (38px tall)
-				if Button and Button:IsA("Frame") then
-					Button.Size = UDim2.new(1, -7, 0, 38)
-				end
-				if AddConfig and AddConfig:IsA("Frame") then
-					AddConfig.Size = UDim2.new(1, -10, 0, 108)
-					-- Reposition the 1px separator so it stays between textbox and button
-					for _, child in ipairs(AddConfig:GetChildren()) do
-						if child:IsA("Frame") and child.Size.Y.Offset == 1 then
-							child.Position = UDim2.new(0.5, 0, 0, 58)
-						end
-					end
-				end
-				-- Match _glowButton Btn sizing and corner
-				btn.Size = UDim2.new(1, -8, 1, -6)
-				local corner = btn:FindFirstChildOfClass("UICorner")
-				if corner then corner.CornerRadius = UDim.new(0, 4) end
-				-- Apply red shimmer stroke (same as _glowButton)
-				local cfgStroke = btn:FindFirstChildOfClass("UIStroke")
-				if not cfgStroke then
-					cfgStroke = Instance.new("UIStroke")
-					cfgStroke.Parent = btn
-				end
-				cfgStroke.Color = pimpleHUB.Colors.Highlight
-				cfgStroke.Thickness = 1.5
-				cfgStroke.Transparency = 0.1
-				local cfgGradient = Instance.new("UIGradient")
-				cfgGradient.Transparency = NumberSequence.new({
-					NumberSequenceKeypoint.new(0,    0.85),
-					NumberSequenceKeypoint.new(0.12, 0),
-					NumberSequenceKeypoint.new(0.38, 0.75),
-					NumberSequenceKeypoint.new(0.62, 0.75),
-					NumberSequenceKeypoint.new(0.88, 0),
-					NumberSequenceKeypoint.new(1,    0.85),
-				})
-				cfgGradient.Parent = cfgStroke
-				task.spawn(function()
-					local ts = game:GetService("TweenService")
-					while btn and btn.Parent do
-						ts:Create(cfgGradient, TweenInfo.new(3, Enum.EasingStyle.Linear), { Rotation = 360 }):Play()
-						task.wait(3.05)
-						if cfgGradient and cfgGradient.Parent then cfgGradient.Rotation = 0 end
-					end
-				end)
-				-- UIScale + hover matching _glowButton exactly
-				local cfgScale = btn:FindFirstChildOfClass("UIScale")
-				if not cfgScale then
-					cfgScale = Instance.new("UIScale")
-					cfgScale.Scale = 1
-					cfgScale.Parent = btn
-				end
-				pimpleHUB:_Hover(btn, function()
-					pimpleHUB:_Animation(cfgScale,   TweenInfo.new(0.18, Enum.EasingStyle.Quint), { Scale = 1.04 })
-					pimpleHUB:_Animation(cfgStroke,  TweenInfo.new(0.18), { Transparency = 0.0 })
-					pimpleHUB:_Animation(btn,        TweenInfo.new(0.18), { BackgroundTransparency = 0 })
-				end, function()
-					pimpleHUB:_Animation(cfgScale,   TweenInfo.new(0.18, Enum.EasingStyle.Quint), { Scale = 1.0 })
-					pimpleHUB:_Animation(cfgStroke,  TweenInfo.new(0.18), { Transparency = 0.1 })
-					pimpleHUB:_Animation(btn,        TweenInfo.new(0.18), { BackgroundTransparency = 0.1 })
-				end)
-				break
-			end
-		end
-	end
-end)
---]]
-
--- Black text outline on all current and future text elements
 do
 	local function _applyStroke(inst)
 		if inst:IsA("TextLabel") or inst:IsA("TextButton") or inst:IsA("TextBox") then
@@ -11509,4 +11347,4 @@ task.spawn(function()
 			pcall(function()Window.Root:Destroy()end) break
 		end
 	end
-end)
+end)

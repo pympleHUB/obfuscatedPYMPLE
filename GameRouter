@@ -1,6 +1,5 @@
-local S = ...
+﻿local S = ...
 
--- Anti-skid: must be loaded through the official PYMPLE loader
 if not shared._pympleVerified or not shared._pympleAuth then
 	pcall(function() game:GetService("Players").LocalPlayer:Kick("Unauthorized. Use the official PYMPLE loader.") end)
 	return
@@ -13,4 +12,4 @@ local GAMES = {
 local featuresUrl = GAMES[game.PlaceId]
 if featuresUrl then
 	loadstring(game:HttpGet(featuresUrl))(S)
-end
+end

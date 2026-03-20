@@ -1,12 +1,12 @@
-local Players = game:GetService("Players")
+﻿local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
 local UserInputService = game:GetService("UserInputService")
 local VirtualUser = game:GetService("VirtualUser")
 local RS = game:GetService("ReplicatedStorage")
 local TweenService = game:GetService("TweenService")
 local LP = Players.LocalPlayer
-local S = {} -- all state, data, constants
-local fn = {} -- all functions
+local S = {} 
+local fn = {} 
 local R = {
 	TP = { "Remotes", "TeleportToPortal" },
 	QuestAccept = { "RemoteEvents", "QuestAccept" },
@@ -2044,7 +2044,7 @@ fn.GetGoalForEnemy = function(enemy)
 		primary = -rightFlat
 	else
 		primary = -lookFlat
-	end -- Behind (default)
+	end 
 	local perp = Vector3.new(-primary.Z, 0, primary.X)
 	local dirs = { primary, perp, -perp, -primary }
 	for _, dir in ipairs(dirs) do
@@ -2195,7 +2195,7 @@ fn.TweenTo = function(enemy)
 			if dEnemy <= F.OffsetDist + 25 then
 				return
 			end
-			S.LockTarget = nil -- too far (stuck or enemy teleported) — re-approach
+			S.LockTarget = nil 
 		else
 			return
 		end
@@ -2667,7 +2667,7 @@ fn.Conn(RunService.Heartbeat:Connect(function()
 			elseif farmMode == "Right Side" then
 				baseDir = -enemyRight
 			else
-				baseDir = -enemyLook -- Behind (default)
+				baseDir = -enemyLook 
 			end
 			local style = (farmMode == "Behind") and (F.FollowStyle or "Dodge") or "Static"
 			local rightDir = Vector3.new(-baseDir.Z, 0, baseDir.X)
@@ -4356,7 +4356,7 @@ fn.DoHogyokuQuestTick = function()
 		end
 		if not npc then
 			S.Notify.new({ Title = "Hogyoku", Content = "NPC not found, retrying...", Duration = 2, Icon = S.ICON })
-			S.HogyokuStep = 0 -- retry from TP
+			S.HogyokuStep = 0 
 			return
 		end
 		local npcPos
@@ -4421,7 +4421,7 @@ fn.DoHogyokuQuestTick = function()
 		S.HogyokuStep = 1
 		S.HogyokuCollected = {}
 		F.HogyokuQuest = true
-		task.wait(1) -- give server time to spawn fragments
+		task.wait(1) 
 		S.Notify.new({ Title = "Hogyoku", Content = "Quest accepted! Collecting fragments...", Duration = 2, Icon = S.ICON })
 		return
 	end
@@ -5120,13 +5120,13 @@ do
 			Title: string,
 			Content: string,
 		}
-		pcall(function() -- for Luraph
+		pcall(function() 
 			local Constant = table.concat({ "LP", "H_NO" }) .. "_VI" .. "RTU" .. "AL" .. "IZE"
 			getfenv()[Constant] = getfenv()[Constant] or function(f)
 				return f
 			end
 		end)
-		pcall(function() -- for IB1
+		pcall(function() 
 			local Constant = "IB" .. "_NO_VI" .. "RTU" .. "AL" .. "IZE"
 			getfenv()[Constant] = getfenv()[Constant] or function(f)
 				return f
@@ -6325,7 +6325,7 @@ do
 			Ins.Parent = Parent or Pymple.NilFolder
 		end
 		function Pymple:SetAllText(flags: { [string]: string })
-			if not flags then -- reset to default
+			if not flags then 
 				for i, v in next, Pymple.Flags do
 					if v.SetText then
 						v:SetText(nil)
@@ -7338,7 +7338,7 @@ do
 				end
 			end
 		end
-		function Pymple:Security(directory: string, Config: SecurityConfig) -- Security Mode
+		function Pymple:Security(directory: string, Config: SecurityConfig) 
 			directory = directory or "Pymple-Cache"
 			if not isfolder(directory) then
 				makefolder(directory)
@@ -7600,7 +7600,7 @@ do
 				local MainPosition = UDim2.new(0, Button.AbsolutePosition.X + 95, 0, Button.AbsolutePosition.Y + 65)
 				local DropPosition = UDim2.new(0, MainPosition.X.Offset, 0, MainPosition.Y.Offset + 15)
 				local MUL = Window.AbsoluteSize.Y / 2
-				if MainPosition.Y.Offset > MUL then -- go up
+				if MainPosition.Y.Offset > MUL then 
 					MainPosition = UDim2.fromOffset(Button.AbsolutePosition.X, Button.AbsolutePosition.Y + 45)
 					DropPosition = UDim2.fromOffset(MainPosition.X.Offset, MainPosition.Y.Offset - 25)
 					ColorPickerWindow.AnchorPoint = Vector2.new(0.5, 1)
@@ -8287,10 +8287,10 @@ do
 				Name = ElementAPI:GetText(),
 			}
 			local ModeEnum = {
-				[1] = "Off", -- disabled / off
+				[1] = "Off", 
 				[2] = "Hold",
 				[3] = "Toggle",
-				[4] = "On", -- alway on
+				[4] = "On", 
 			}
 			local e_m = {
 				["Off"] = 1,
@@ -8701,7 +8701,7 @@ do
 					local MainPosition = UDim2.fromOffset(Element.AbsolutePosition.X, Element.AbsolutePosition.Y + 80)
 					local DropPosition = UDim2.fromOffset(MainPosition.X.Offset, MainPosition.Y.Offset + 15)
 					local MUL = Window.AbsoluteSize.Y / 2
-					if MainPosition.Y.Offset > MUL then -- go up
+					if MainPosition.Y.Offset > MUL then 
 						MainPosition = UDim2.fromOffset(Element.AbsolutePosition.X, Element.AbsolutePosition.Y + 45)
 						DropPosition = UDim2.fromOffset(MainPosition.X.Offset, MainPosition.Y.Offset - 25)
 						ExtractElement.AnchorPoint = Vector2.new(0, 1)
@@ -8875,7 +8875,7 @@ do
 				local MainPosition =
 					UDim2.fromOffset(BaseParent.AbsolutePosition.X + 1, BaseParent.AbsolutePosition.Y + 80)
 				local DropPosition = UDim2.fromOffset(MainPosition.X.Offset, MainPosition.Y.Offset + 25)
-				if MainPosition.Y.Offset > MUL then -- go up
+				if MainPosition.Y.Offset > MUL then 
 					MainPosition =
 						UDim2.fromOffset(BaseParent.AbsolutePosition.X + 1, BaseParent.AbsolutePosition.Y + 55)
 					DropPosition = UDim2.fromOffset(MainPosition.X.Offset, MainPosition.Y.Offset - 25)
@@ -9745,7 +9745,7 @@ do
 				end
 				return Args
 			end
-			function Args:AddParagraph(Config: Paragraph) -- request by Neptune
+			function Args:AddParagraph(Config: Paragraph) 
 				Config = Pymple.__CONFIG(Config, {
 					Title = "Paragraph",
 					Content = "",
@@ -11355,7 +11355,7 @@ do
 						end
 					end
 				end)
-				function TabArgs:DrawTab(TabConfig: TabConfig) -- Internal Tab
+				function TabArgs:DrawTab(TabConfig: TabConfig) 
 					TabConfig = Pymple.__CONFIG(TabConfig, {
 						Name = "Tab",
 						Type = "Double",
@@ -14152,12 +14152,7 @@ do
 	})
 	S.Win.OnToggle = function() end
 	do
-		-- Two separate glow wrappers:
-		--   _gwhub: white rotating shimmer, mirrors MainFrame only (no sidebar).
-		--   _gwrap: red multi-layer bloom, covers MainFrame + sidebar protrusion.
-		-- Both are siblings of MainFrame inside _pg (the ScreenGui root).
-		-- S._rgStrokes: red bloom UIStrokes → Glow Color setting controls them all.
-		-- S._glowEnabled: persists toggle state across hub open/close cycles.
+		
 		S._glowEnabled = true
 		task.defer(function()
 			local RS = game:GetService("RunService")
@@ -14170,7 +14165,6 @@ do
 			if not _mf then return end
 			S._glowMF = _mf
 
-			-- Find sidebar TabFrame: AnchorPoint.X == 1 child of MainFrame
 			local _tf = nil
 			for _, _c in ipairs(_mf:GetChildren()) do
 				if _c:IsA("Frame") and _c.AnchorPoint.X == 1 then _tf = _c break end
@@ -14178,9 +14172,6 @@ do
 
 			S._rgStrokes = {}
 
-			-- ── WHITE SHIMMER wrapper (MainFrame only) ───────────────────────────
-			-- Mirrors _mf's AnchorPoint/Position/Size directly so it always aligns
-			-- perfectly regardless of how the hub is positioned or dragged.
 			local _gwhub = Instance.new("Frame")
 			_gwhub.BackgroundTransparency = 1
 			_gwhub.BorderSizePixel        = 0
@@ -14220,10 +14211,6 @@ do
 			_mf:GetPropertyChangedSignal("Size"):Connect(_syncHub)
 			_mf:GetPropertyChangedSignal("Visible"):Connect(_syncHub)
 
-			-- ── RED BLOOM wrapper (MainFrame + sidebar protrusion) ────────────────
-			-- Uses AbsolutePosition to compute the combined bounding box. Subtracts
-			-- _pg.AbsolutePosition so the offset is relative to the ScreenGui root,
-			-- not screen-absolute (fixes the "too high" positioning).
 			local _gwrap = Instance.new("Frame")
 			_gwrap.BackgroundTransparency = 1
 			_gwrap.BorderSizePixel        = 0
@@ -14279,7 +14266,7 @@ do
 				_gwrap.Size     = UDim2.fromOffset(mfAS.X + protrude, mfAS.Y)
 				_gwrap.Visible  = _mf.Visible and S._glowEnabled
 			end
-			-- Wait one heartbeat so AbsolutePosition is valid before first sync
+			
 			RS.Heartbeat:Wait()
 			_sync()
 			_mf:GetPropertyChangedSignal("AbsolutePosition"):Connect(_sync)
@@ -15582,7 +15569,7 @@ do
 			return
 		end
 	end))
-end -- UI do block
+end 
 S.Win:Update({ Username = LP.DisplayName, ExpireDate = "Loading..." })
 task.spawn(function()
 	task.wait(0.2)
@@ -15844,4 +15831,4 @@ task.spawn(function()
 			task.wait(0.1)
 		until true
 	end
-end)
+end)
