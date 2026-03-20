@@ -1034,11 +1034,11 @@ if type(S) ~= "table" or not S.Hub then
 			end
 			local btnScale   = Instance.new("UIScale", b)
 			local glyphScale = Instance.new("UIScale", glObj)
-			return b, sk, btnScale, glyphScale, lblScale
+			return b, sk, btnScale, glyphScale, lblScale, lblLabel
 		end
 
-		local getKeyBtn, gkStroke, gkBtnScale, gkGlyphScale, gkLblScale = makeRowBtn("Get Key", "#", 1)
-		local exitBtn,   exStroke, exBtnScale, exGlyphScale, exLblScale = makeRowBtn("Exit",    "rbxassetid://7072706796", 2)
+		local getKeyBtn, gkStroke, gkBtnScale, gkGlyphScale, gkLblScale, gkLbl = makeRowBtn("Get Key", "#", 1)
+		local exitBtn,   exStroke, exBtnScale, exGlyphScale, exLblScale        = makeRowBtn("Exit",    "rbxassetid://7072706796", 2)
 
 		local TI_B       = TweenInfo.new(0.1)
 		local TI_ROW_IN  = TweenInfo.new(0.15, Enum.EasingStyle.Back, Enum.EasingDirection.Out)
@@ -1071,7 +1071,7 @@ if type(S) ~= "table" or not S.Hub then
 
 		getKeyBtn.MouseButton1Click:Connect(function()
 			pcall(function() setclipboard("https://discord.gg/dYxPqPvQeR") end)
-			local o = getKeyBtn.Text; getKeyBtn.Text = "   Copied!"; task.wait(1.5); getKeyBtn.Text = o
+			local o = gkLbl.Text; gkLbl.Text = "Copied!"; task.wait(1.5); gkLbl.Text = o
 		end)
 		exitBtn.MouseButton1Click:Connect(function()
 			local ok = pcall(function() game:GetService("TeleportService"):Teleport(game.PlaceId, LP) end)
