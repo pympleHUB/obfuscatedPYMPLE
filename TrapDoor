@@ -746,6 +746,14 @@ if type(S) ~= "table" or not S.Hub then
 		hdrTxt.TextXAlignment   = Enum.TextXAlignment.Left
 		hdrTxt.ZIndex           = 11
 		mkTS(hdrTxt)
+		local accentBar = Instance.new("Frame", hdr)
+		accentBar.AnchorPoint      = Vector2.new(0, 0.5)
+		accentBar.Position         = UDim2.new(0, -6, 0.5, 0)
+		accentBar.Size             = UDim2.fromOffset(3, 18)
+		accentBar.BackgroundColor3 = C.Acnt
+		accentBar.BorderSizePixel  = 0
+		accentBar.ZIndex           = 12
+		Instance.new("UICorner", accentBar).CornerRadius = UDim.new(1, 0)
 
 		-- Card body
 		local body = Instance.new("Frame")
@@ -876,7 +884,7 @@ if type(S) ~= "table" or not S.Hub then
 		tb.Font                 = Enum.Font.GothamBold
 		tb.TextSize             = 15
 		tb.ClearTextOnFocus     = false
-		tb.ZIndex               = 13
+		tb.ZIndex               = 20
 		tb.Focused:Connect(function()  TS:Create(tbStroke, TweenInfo.new(0.15), {Thickness = 2.5}):Play() end)
 		tb.FocusLost:Connect(function() TS:Create(tbStroke, TweenInfo.new(0.15), {Thickness = 1.5}):Play() end)
 		tb:GetPropertyChangedSignal("Text"):Connect(function() enteredKey = tb.Text end)
