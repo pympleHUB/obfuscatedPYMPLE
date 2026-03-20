@@ -831,22 +831,13 @@ if type(S) ~= "table" or not S.Hub then
 		local tbStroke = Instance.new("UIStroke", tbWrap)
 		tbStroke.Color = C.Acnt; tbStroke.Thickness = 1.5
 		local tbStrokeGrad = Instance.new("UIGradient", tbStroke)
-		tbStrokeGrad.Rotation = 0
 		tbStrokeGrad.Transparency = NumberSequence.new{
-			NumberSequenceKeypoint.new(0,    1),
-			NumberSequenceKeypoint.new(0.42, 0.88),
-			NumberSequenceKeypoint.new(0.50, 0),
-			NumberSequenceKeypoint.new(0.58, 0.88),
-			NumberSequenceKeypoint.new(1,    1),
+			NumberSequenceKeypoint.new(0,    0.65),
+			NumberSequenceKeypoint.new(0.18, 0.08),
+			NumberSequenceKeypoint.new(0.5,  0.65),
+			NumberSequenceKeypoint.new(0.82, 0.08),
+			NumberSequenceKeypoint.new(1,    0.65),
 		}
-		task.spawn(function()
-			while tbWrap and tbWrap.Parent do
-				tbStrokeGrad.Offset = Vector2.new(-1, 0)
-				TS:Create(tbStrokeGrad, TweenInfo.new(2.0, Enum.EasingStyle.Sine, Enum.EasingDirection.InOut),
-					{Offset = Vector2.new(1, 0)}):Play()
-				task.wait(2.05)
-			end
-		end)
 		local tbPad = Instance.new("UIPadding", tbWrap)
 		tbPad.PaddingLeft = UDim.new(0, 12); tbPad.PaddingRight = UDim.new(0, 8)
 		
@@ -870,8 +861,7 @@ if type(S) ~= "table" or not S.Hub then
 		local tb = Instance.new("TextBox", tbWrap)
 		tb.Size                 = UDim2.fromScale(1, 1)
 		tb.BackgroundTransparency = 1
-		tb.PlaceholderText      = "Paste your key here..."
-		tb.PlaceholderColor3    = Color3.fromRGB(150, 150, 155)
+		tb.PlaceholderText      = ""
 		tb.Text                 = ""
 		tb.TextColor3           = C.Text
 		tb.Font                 = Enum.Font.GothamBold
@@ -880,13 +870,42 @@ if type(S) ~= "table" or not S.Hub then
 		tb.ZIndex               = 20
 		tb.Focused:Connect(function()  TS:Create(tbStroke, TweenInfo.new(0.15), {Thickness = 2.5}):Play() end)
 		tb.FocusLost:Connect(function() TS:Create(tbStroke, TweenInfo.new(0.15), {Thickness = 1.5}):Play() end)
-		tb:GetPropertyChangedSignal("Text"):Connect(function() enteredKey = tb.Text end)
+		tb:GetPropertyChangedSignal("Text"):Connect(function()
+			enteredKey = tb.Text
+			tbPlaceholder.Visible = (tb.Text == "")
+		end)
+
+		local tbPlaceholder = Instance.new("TextLabel", tbWrap)
+		tbPlaceholder.Size               = UDim2.fromScale(1, 1)
+		tbPlaceholder.BackgroundTransparency = 1
+		tbPlaceholder.Text               = "Paste your key here."
+		tbPlaceholder.Font               = Enum.Font.GothamBold
+		tbPlaceholder.TextSize           = 15
+		tbPlaceholder.TextXAlignment     = Enum.TextXAlignment.Left
+		tbPlaceholder.ZIndex             = 19
+		local tbPlaceholderGrad = Instance.new("UIGradient", tbPlaceholder)
+		tbPlaceholderGrad.Rotation = 0
+		tbPlaceholderGrad.Color = ColorSequence.new{
+			ColorSequenceKeypoint.new(0,    Color3.fromRGB(150, 150, 155)),
+			ColorSequenceKeypoint.new(0.40, Color3.fromRGB(200, 80,  80)),
+			ColorSequenceKeypoint.new(0.50, Color3.fromRGB(220, 60,  60)),
+			ColorSequenceKeypoint.new(0.60, Color3.fromRGB(200, 80,  80)),
+			ColorSequenceKeypoint.new(1,    Color3.fromRGB(150, 150, 155)),
+		}
+		task.spawn(function()
+			while tbPlaceholder and tbPlaceholder.Parent do
+				tbPlaceholderGrad.Offset = Vector2.new(-1, 0)
+				TS:Create(tbPlaceholderGrad, TweenInfo.new(2.0, Enum.EasingStyle.Sine, Enum.EasingDirection.InOut),
+					{Offset = Vector2.new(1, 0)}):Play()
+				task.wait(2.05)
+			end
+		end)
 		task.spawn(function()
 			local pf = { "Paste your key here.", "Paste your key here..", "Paste your key here..." }
 			local i = 0
-			while tb and tb.Parent do
+			while tbPlaceholder and tbPlaceholder.Parent do
 				i = i % 3 + 1
-				tb.PlaceholderText = pf[i]
+				tbPlaceholder.Text = pf[i]
 				task.wait(0.45)
 			end
 		end)
