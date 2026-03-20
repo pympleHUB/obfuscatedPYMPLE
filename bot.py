@@ -830,4 +830,17 @@ async def on_ready():
     ])
     print(f"Bot is online as {bot.user}")
 
-bot.run(DISCORD_TOKEN)
+import time, sys
+
+MAX_RETRIES = 5
+for attempt in range(1, MAX_RETRIES + 1):
+    try:
+        bot.run(DISCORD_TOKEN)
+        break
+    except discord.errors.HTTPException as e:
+        if e.status == 429 and attempt < MAX_RETRIES:
+            wait = 60 * attempt
+            print(f"[Rate limited on login] Attempt {attempt}/{MAX_RETRIES}. Waiting {wait}s...", flush=True)
+            time.sleep(wait)
+        else:
+            raise
