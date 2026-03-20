@@ -6,6 +6,10 @@ local RS = game:GetService("ReplicatedStorage")
 local TweenService = game:GetService("TweenService")
 local LP = Players.LocalPlayer
 local HttpService = game:GetService("HttpService")
+-- Capture real executor file functions BEFORE the embedded PYMPLE library
+-- overrides them with its StringValue-based virtual filesystem via getgenv()
+local _writefile = writefile
+local _readfile  = readfile
 local CONFIG_FILE    = "pimple_sailorpiece.json"
 local CONFIG_VERSION = "1.0"
 local AutoSaveInterval, LastAutoSave = 10, 0
@@ -108,14 +112,8 @@ local SaveableKeys = {
 	"BossRushDiff", "AutoSaveEnabled",
 }
 
-local function CanWrite()
-	local ok = pcall(function() writefile("__pimple_test__.tmp", "1") end)
-	if ok then pcall(function() if isfile then isfile("__pimple_test__.tmp") end end) end
-	return ok
-end
-
 local function SaveConfig()
-	if not CanWrite() then return false end
+	if not _writefile then return false end
 	local data = { version = CONFIG_VERSION, timestamp = os.time(), settings = {} }
 	for _, k in ipairs(SaveableKeys) do
 		local v = F[k]
@@ -124,13 +122,13 @@ local function SaveConfig()
 		end
 	end
 	return pcall(function()
-		writefile(CONFIG_FILE, HttpService:JSONEncode(data))
+		_writefile(CONFIG_FILE, HttpService:JSONEncode(data))
 	end)
 end
 
 local function LoadConfig()
-	if not pcall(function() return readfile end) then return false end
-	local s, r = pcall(function() return HttpService:JSONDecode(readfile(CONFIG_FILE)) end)
+	if not _readfile then return false end
+	local s, r = pcall(function() return HttpService:JSONDecode(_readfile(CONFIG_FILE)) end)
 	if not s or not r or r.version ~= CONFIG_VERSION then return false end
 	for k, v in pairs(r.settings or {}) do
 		if F[k] ~= nil and type(v) == type(F[k]) then
