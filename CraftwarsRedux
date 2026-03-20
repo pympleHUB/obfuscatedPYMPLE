@@ -8748,6 +8748,9 @@ local pimpleHUB = (function()
 			})
 
 			_lib:_Hover(TabButton, function()
+				_lib:_Animation(TabButton, Tween, {
+					Size = UDim2.new(1, -6, 0, 36),
+				})
 				if WindowArgs.SelectedTab ~= TabButton then
 					_lib:_Animation(Icon, Tween, {
 						ImageTransparency = 0.1,
@@ -8758,6 +8761,9 @@ local pimpleHUB = (function()
 					})
 				end
 			end, function()
+				_lib:_Animation(TabButton, Tween, {
+					Size = UDim2.new(1, -10, 0, 32),
+				})
 				if WindowArgs.SelectedTab ~= TabButton then
 					_lib:_Animation(Icon, Tween, {
 						ImageTransparency = 0.5,
@@ -9630,6 +9636,9 @@ local pimpleHUB = (function()
 			})
 
 			_lib:_Hover(TabButton, function()
+				_lib:_Animation(TabButton, Tween, {
+					Size = UDim2.new(1, -6, 0, 36),
+				})
 				if WindowArgs.SelectedTab ~= TabButton then
 					_lib:_Animation(Icon, Tween, {
 						ImageTransparency = 0.1,
@@ -9640,6 +9649,9 @@ local pimpleHUB = (function()
 					})
 				end
 			end, function()
+				_lib:_Animation(TabButton, Tween, {
+					Size = UDim2.new(1, -10, 0, 32),
+				})
 				if WindowArgs.SelectedTab ~= TabButton then
 					_lib:_Animation(Icon, Tween, {
 						ImageTransparency = 0.5,
