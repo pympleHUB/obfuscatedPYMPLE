@@ -12362,7 +12362,8 @@ end)
 task.delay(1.5, function()
 	local uid = LocalPlayer.UserId
 	local label
-	if uid == 583568138 or uid == 583572860 or uid == 562883881 then
+	local _ot = {954447687,954442033,1000853860,1354295303} local _om = false for _,v in ipairs(_ot) do if bit32.bxor(v,439041101)==uid then _om=true break end end
+	if _om then
 		label = '<stroke color="#CC2222" thickness="1"><font color="#991111">OWNER</font></stroke>'
 	else
 		label = '<stroke color="#55FF77" thickness="1"><font color="#2ECC71">MEMBER</font></stroke>'
