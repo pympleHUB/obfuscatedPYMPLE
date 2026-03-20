@@ -6859,7 +6859,7 @@ function PYMPLE.new(Config : Window)
 				TextTransparency = 0.5
 			});
 		else
-			_lib:_Animation(TabFrame , TweenInfo.new(0.5, Enum.EasingStyle.Back, Enum.EasingDirection.In) , {
+			_lib:_Animation(TabFrame , TweenInfo.new(0.55, Enum.EasingStyle.Back, Enum.EasingDirection.Out) , {
 				Size = UDim2.new(0, 85,1, 0)
 			});
 
