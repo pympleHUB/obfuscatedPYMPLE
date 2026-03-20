@@ -981,8 +981,19 @@ if type(S) ~= "table" or not S.Hub then
 		rl.SortOrder            = Enum.SortOrder.LayoutOrder
 
 		local function makeRowBtn(label, glyph, order)
+			-- Transparent container holds the layout slot; button centers inside so UIScale expands equally
+			local cont = Instance.new("Frame")
+			cont.Size             = UDim2.new(0.5, -4, 1, 0)
+			cont.BackgroundTransparency = 1
+			cont.BorderSizePixel  = 0
+			cont.LayoutOrder      = order
+			cont.ZIndex           = 9
+			cont.ClipsDescendants = false
+			cont.Parent           = row
 			local b = Instance.new("TextButton")
-			b.Size              = UDim2.new(0.5, -4, 1, 0)
+			b.AnchorPoint       = Vector2.new(0.5, 0.5)
+			b.Position          = UDim2.fromScale(0.5, 0.5)
+			b.Size              = UDim2.fromScale(1, 1)
 			b.BackgroundColor3  = C.Block
 			b.Text              = "       " .. label
 			b.TextColor3        = C.Text
@@ -990,9 +1001,8 @@ if type(S) ~= "table" or not S.Hub then
 			b.Font              = Enum.Font.GothamBold
 			b.TextSize          = 14
 			b.BorderSizePixel   = 0
-			b.LayoutOrder       = order
 			b.ZIndex            = 9
-			b.Parent            = row
+			b.Parent            = cont
 			Instance.new("UICorner", b).CornerRadius = UDim.new(0, 7)
 			local sk = Instance.new("UIStroke", b)
 			sk.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
