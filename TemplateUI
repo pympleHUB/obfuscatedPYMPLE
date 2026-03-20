@@ -384,6 +384,7 @@ local PYMPLE = {
 		TabClose = 85,
 	},
 	PerformanceMode = false,
+	SidebarBounce = true,
 	WindowsNil = {},
 	NilFolder = Instance.new('Folder'),
 	ArcylicParent = CurrentCamera,
@@ -6859,7 +6860,7 @@ function PYMPLE.new(Config : Window)
 				TextTransparency = 0.5
 			});
 		else
-			_lib:_Animation(TabFrame , TweenInfo.new(0.5, Enum.EasingStyle.Elastic, Enum.EasingDirection.Out) , {
+			_lib:_Animation(TabFrame , (_lib.SidebarBounce and TweenInfo.new(0.5, Enum.EasingStyle.Elastic, Enum.EasingDirection.Out) or TweenInfo.new(0.45, Enum.EasingStyle.Quint)) , {
 				Size = UDim2.new(0, 85,1, 0)
 			});
 
@@ -10985,6 +10986,14 @@ UISection:AddColorPicker({
 	Callback = function(v)
 		pimpleHUB.Colors.StrokeColor = v
 		pimpleHUB:RefreshCurrentColor()
+	end,
+})
+UISection:AddDropdown({
+	Name = "Sidebar Animation",
+	Default = "Bouncy",
+	Values = { "Normal", "Bouncy" },
+	Callback = function(v)
+		pimpleHUB.SidebarBounce = (v == "Bouncy")
 	end,
 })
 UISection:AddToggle({
