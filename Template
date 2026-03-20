@@ -7264,7 +7264,7 @@ function PYMPLE.new(Config : Window)
 
 		_lib:_Hover(TabButton,function()
 			_lib:_Animation(TabButton,Tween,{
-				Size = UDim2.new(1, -6, 0, 36)
+				Size = UDim2.new(1, -6, 0, 40)
 			});
 			if WindowArgs.SelectedTab ~= TabButton then
 				_lib:_Animation(Icon,Tween,{
@@ -7294,10 +7294,6 @@ function PYMPLE.new(Config : Window)
 
 		TabHover:Connect(function(bool)
 			if bool then
-				_lib:_Animation(TabButton,Tween,{
-					Size = UDim2.new(1, -10, 0, 32)
-				});
-
 				_lib:_Animation(Icon,Tween,{
 					Size = UDim2.new(0, 16, 0, 16),
 				});
@@ -8156,7 +8152,7 @@ function PYMPLE.new(Config : Window)
 
 		_lib:_Hover(TabButton,function()
 			_lib:_Animation(TabButton,Tween,{
-				Size = UDim2.new(1, -6, 0, 36)
+				Size = UDim2.new(1, -6, 0, 40)
 			});
 			if WindowArgs.SelectedTab ~= TabButton then
 				_lib:_Animation(Icon,Tween,{
@@ -8186,10 +8182,6 @@ function PYMPLE.new(Config : Window)
 
 		TabHover:Connect(function(bool)
 			if bool then
-				_lib:_Animation(TabButton,Tween,{
-					Size = UDim2.new(1, -10, 0, 32)
-				});
-
 				_lib:_Animation(Icon,Tween,{
 					Size = UDim2.new(0, 16, 0, 16),
 				});
@@ -9149,10 +9141,6 @@ function PYMPLE.new(Config : Window)
 
 			TabHover:Connect(function(bool)
 				if bool then
-					_lib:_Animation(TabButton,Tween,{
-						Size = UDim2.new(1, -10, 0, 32)
-					});
-
 					_lib:_Animation(Icon,Tween,{
 						Size = UDim2.new(0, 16, 0, 16),
 					});

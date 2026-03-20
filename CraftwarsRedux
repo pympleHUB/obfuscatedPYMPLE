@@ -1179,6 +1179,9 @@ local function AimAtEnemy(target)
 	local c = LocalPlayer.Character
 	local rp = c and c:FindFirstChild("HumanoidRootPart")
 	if not rp then return end
+	if ActiveMoveTween and ActiveMoveTween.PlaybackState == Enum.PlaybackState.Playing then return end
+	local hum = c and c:FindFirstChildOfClass("Humanoid")
+	if hum and hum.MoveDirection.Magnitude > 0.1 then return end
 	local hd = target:FindFirstChild("Head") or target:FindFirstChild("HumanoidRootPart")
 	if not hd then return end
 	pcall(function()
@@ -8749,7 +8752,7 @@ local pimpleHUB = (function()
 
 			_lib:_Hover(TabButton, function()
 				_lib:_Animation(TabButton, Tween, {
-					Size = UDim2.new(1, -6, 0, 36),
+					Size = UDim2.new(1, -6, 0, 40),
 				})
 				if WindowArgs.SelectedTab ~= TabButton then
 					_lib:_Animation(Icon, Tween, {
@@ -8779,10 +8782,6 @@ local pimpleHUB = (function()
 
 			TabHover:Connect(function(bool)
 				if bool then
-					_lib:_Animation(TabButton, Tween, {
-						Size = UDim2.new(1, -10, 0, 32),
-					})
-
 					_lib:_Animation(Icon, Tween, {
 						Size = UDim2.new(0, 16, 0, 16),
 					})
@@ -9637,7 +9636,7 @@ local pimpleHUB = (function()
 
 			_lib:_Hover(TabButton, function()
 				_lib:_Animation(TabButton, Tween, {
-					Size = UDim2.new(1, -6, 0, 36),
+					Size = UDim2.new(1, -6, 0, 40),
 				})
 				if WindowArgs.SelectedTab ~= TabButton then
 					_lib:_Animation(Icon, Tween, {
@@ -9667,10 +9666,6 @@ local pimpleHUB = (function()
 
 			TabHover:Connect(function(bool)
 				if bool then
-					_lib:_Animation(TabButton, Tween, {
-						Size = UDim2.new(1, -10, 0, 32),
-					})
-
 					_lib:_Animation(Icon, Tween, {
 						Size = UDim2.new(0, 16, 0, 16),
 					})
@@ -10620,6 +10615,9 @@ local pimpleHUB = (function()
 				})
 
 				_lib:_Hover(TabButton, function()
+					_lib:_Animation(TabButton, Tween, {
+						Size = UDim2.new(1, -6, 0, 40),
+					})
 					if WindowArgs.SelectedTab ~= TabButton then
 						_lib:_Animation(Icon, Tween, {
 							ImageTransparency = 0.1,
@@ -10630,6 +10628,9 @@ local pimpleHUB = (function()
 						})
 					end
 				end, function()
+					_lib:_Animation(TabButton, Tween, {
+						Size = UDim2.new(1, -10, 0, 32),
+					})
 					if WindowArgs.SelectedTab ~= TabButton then
 						_lib:_Animation(Icon, Tween, {
 							ImageTransparency = 0.5,
@@ -10645,10 +10646,6 @@ local pimpleHUB = (function()
 
 				TabHover:Connect(function(bool)
 					if bool then
-						_lib:_Animation(TabButton, Tween, {
-							Size = UDim2.new(1, -10, 0, 32),
-						})
-
 						_lib:_Animation(Icon, Tween, {
 							Size = UDim2.new(0, 16, 0, 16),
 						})
@@ -12680,7 +12677,7 @@ MovementSection:AddSlider({
 	end,
 })
 local AimAssistToggle = MovementSection:AddToggle({
-	Name = "Aim Assist",
+	Name = "Face Target",
 	Flag = "AimAssist",
 	Default = Flags.AimAssist,
 	Callback = function(v)
