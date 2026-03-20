@@ -234,7 +234,7 @@ local SaveableKeys = {
 }
 
 local TOTAL_BIOMES = 41
-local RadiusESPPart = nil
+local RadiusESPParts = {}
 local AimAssistGyro = nil
 local LastEquippedWeaponName = nil
 
@@ -1151,45 +1151,54 @@ local function WalkToTarget(target)
 	end)
 end
 
+local RING_SEGMENTS = 48
+
 local function BuildRadiusESP()
-	if RadiusESPPart then
-		pcall(function() RadiusESPPart:Destroy() end)
-		RadiusESPPart = nil
+	for _, p in ipairs(RadiusESPParts) do
+		pcall(function() p:Destroy() end)
 	end
-	local part = Instance.new("Part")
-	part.Name = "RadiusESPRing"
-	part.Anchored = true
-	part.CanCollide = false
-	part.CastShadow = false
-	part.Shape = Enum.PartType.Cylinder
-	part.Material = Enum.Material.Neon
-	part.Color = Color3.fromRGB(255, 255, 255)
-	part.Transparency = 0.4
-	local d = Flags.KillAuraRadius * 2
-	part.Size = Vector3.new(0.05, d, d)
-	part.Parent = workspace
-	RadiusESPPart = part
+	RadiusESPParts = {}
+	for i = 1, RING_SEGMENTS do
+		local part = Instance.new("Part")
+		part.Name = "RadiusESPRing"
+		part.Anchored = true
+		part.CanCollide = false
+		part.CastShadow = false
+		part.Material = Enum.Material.SmoothPlastic
+		part.Color = Color3.fromRGB(255, 255, 255)
+		part.Transparency = 0
+		part.Size = Vector3.new(1, 0.2, 0.4)
+		part.Parent = workspace
+		RadiusESPParts[i] = part
+	end
 end
 
 local function UpdateRadiusESP()
-	if not RadiusESPPart then return end
+	if #RadiusESPParts == 0 then return end
 	local c = LocalPlayer.Character
 	local rp = c and c:FindFirstChild("HumanoidRootPart")
 	if not rp then
-		RadiusESPPart.Transparency = 1
+		for _, p in ipairs(RadiusESPParts) do p.Transparency = 1 end
 		return
 	end
-	local d = Flags.KillAuraRadius * 2
-	RadiusESPPart.Size = Vector3.new(0.05, d, d)
-	RadiusESPPart.CFrame = CFrame.new(rp.Position.X, rp.Position.Y - 3, rp.Position.Z) * CFrame.Angles(0, 0, math.pi / 2)
-	RadiusESPPart.Transparency = 0.4
+	local r = Flags.KillAuraRadius
+	local arcLen = (2 * math.pi * r) / RING_SEGMENTS + 0.15
+	local ox, oy, oz = rp.Position.X, rp.Position.Y - 3, rp.Position.Z
+	local center = Vector3.new(ox, oy, oz)
+	for i, part in ipairs(RadiusESPParts) do
+		local angle = ((i - 1) / RING_SEGMENTS) * (2 * math.pi)
+		local pos = Vector3.new(ox + r * math.cos(angle), oy, oz + r * math.sin(angle))
+		part.Size = Vector3.new(arcLen, 0.2, 0.4)
+		part.CFrame = CFrame.new(pos, center)
+		part.Transparency = 0
+	end
 end
 
 local function DestroyRadiusESP()
-	if RadiusESPPart then
-		pcall(function() RadiusESPPart:Destroy() end)
-		RadiusESPPart = nil
+	for _, p in ipairs(RadiusESPParts) do
+		pcall(function() p:Destroy() end)
 	end
+	RadiusESPParts = {}
 end
 
 local function AimAtEnemy(target)
