@@ -152,15 +152,16 @@ if type(S) ~= "table" or not S.Hub then
 	end)
 
 	local borderGradWrap = Instance.new("Frame")
-	borderGradWrap.Position               = UDim2.fromOffset(182, -3)
-	borderGradWrap.Size                   = UDim2.fromOffset(351, 356)
+	borderGradWrap.AnchorPoint            = Vector2.new(0.5, 0.5)
+	borderGradWrap.Position               = UDim2.fromOffset(265, 175)
+	borderGradWrap.Size                   = UDim2.fromOffset(530, 350)
 	borderGradWrap.BackgroundTransparency = 1
 	borderGradWrap.BorderSizePixel        = 0
 	borderGradWrap.ZIndex                 = 6
 	borderGradWrap.Parent                 = holder
 	Instance.new("UICorner", borderGradWrap).CornerRadius = UDim.new(0, 15)
 	local borderGradStroke = Instance.new("UIStroke", borderGradWrap)
-	borderGradStroke.Thickness = 1.5
+	borderGradStroke.Thickness = 2
 	local borderGrad = Instance.new("UIGradient", borderGradStroke)
 	borderGrad.Rotation = 90
 	borderGrad.Color = ColorSequence.new{
@@ -169,9 +170,9 @@ if type(S) ~= "table" or not S.Hub then
 		ColorSequenceKeypoint.new(1,    Color3.fromRGB(220, 60,  60)),
 	}
 	borderGrad.Transparency = NumberSequence.new{
-		NumberSequenceKeypoint.new(0,   0.75),
-		NumberSequenceKeypoint.new(0.5, 0.65),
-		NumberSequenceKeypoint.new(1,   0.25),
+		NumberSequenceKeypoint.new(0,   0.5),
+		NumberSequenceKeypoint.new(0.5, 0.4),
+		NumberSequenceKeypoint.new(1,   0),
 	}
 
 	do
