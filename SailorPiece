@@ -8,7 +8,7 @@ local LP = Players.LocalPlayer
 local HttpService = game:GetService("HttpService")
 local CONFIG_FILE    = "pimple_sailorpiece.json"
 local CONFIG_VERSION = "1.0"
-local AutoSaveInterval, LastAutoSave = 30, 0
+local AutoSaveInterval, LastAutoSave = 10, 0
 local S = {} -- all state, data, constants
 local fn = {} -- all functions
 local R = {
@@ -108,13 +108,14 @@ local SaveableKeys = {
 	"BossRushDiff", "AutoSaveEnabled",
 }
 
-local function CanUseFileSystem()
-	local s = pcall(function() return writefile and readfile and isfile end)
-	return s and writefile and readfile and isfile
+local function CanWrite()
+	local ok = pcall(function() writefile("__pimple_test__.tmp", "1") end)
+	if ok then pcall(function() if isfile then isfile("__pimple_test__.tmp") end end) end
+	return ok
 end
 
 local function SaveConfig()
-	if not CanUseFileSystem() then return false end
+	if not CanWrite() then return false end
 	local data = { version = CONFIG_VERSION, timestamp = os.time(), settings = {} }
 	for _, k in ipairs(SaveableKeys) do
 		local v = F[k]
@@ -128,7 +129,7 @@ local function SaveConfig()
 end
 
 local function LoadConfig()
-	if not CanUseFileSystem() or not isfile(CONFIG_FILE) then return false end
+	if not pcall(function() return readfile end) then return false end
 	local s, r = pcall(function() return HttpService:JSONDecode(readfile(CONFIG_FILE)) end)
 	if not s or not r or r.version ~= CONFIG_VERSION then return false end
 	for k, v in pairs(r.settings or {}) do
