@@ -7084,15 +7084,8 @@ function PYMPLE.new(Config : Window)
 		local Highlight = Instance.new("Frame")
 		local UICorner = Instance.new("UICorner")
 
-		local TabWrapper = Instance.new("Frame")
-		TabWrapper.BackgroundTransparency = 1
-		TabWrapper.BorderSizePixel = 0
-		TabWrapper.Size = UDim2.new(1, 0, 0, 40)
-		TabWrapper.Parent = TabButtonScrollingFrame
 		TabButton.Name = _lib:_RandomString()
-		TabButton.Parent = TabWrapper
-		TabButton.AnchorPoint = Vector2.new(0.5, 0.5)
-		TabButton.Position = UDim2.new(0.5, 0, 0.5, 0)
+		TabButton.Parent = TabButtonScrollingFrame
 		TabButton.BackgroundTransparency = 1.000
 		TabButton.BorderColor3 = Color3.fromRGB(0, 0, 0)
 		TabButton.BorderSizePixel = 0
@@ -7106,12 +7099,12 @@ function PYMPLE.new(Config : Window)
 
 		Icon.Name = _lib:_RandomString()
 		Icon.Parent = TabButton
-		Icon.AnchorPoint = Vector2.new(0, 0.5)
+		Icon.AnchorPoint = Vector2.new(0.5, 0.5)
 		Icon.BackgroundColor3 = _lib.Colors.Highlight
 		Icon.BackgroundTransparency = 1.000
 		Icon.BorderColor3 = Color3.fromRGB(0, 0, 0)
 		Icon.BorderSizePixel = 0
-		Icon.Position = UDim2.new(0, 15, 0.5, 0)
+		Icon.Position = UDim2.new(0, 22, 0.5, 0)
 		Icon.Size = UDim2.new(0, 15, 0, 15)
 		Icon.ZIndex = 3
 		Icon.Image = _lib:_GetIcon(TabConfig.Icon);
@@ -7136,6 +7129,8 @@ function PYMPLE.new(Config : Window)
 		TabNameLabel.TextColor3 = _lib.Colors.SwitchColor
 		TabNameLabel.TextSize = 15.000
 		TabNameLabel.TextXAlignment = Enum.TextXAlignment.Left
+		local TabNameUIScale = Instance.new("UIScale")
+		TabNameUIScale.Parent = TabNameLabel
 
 		table.insert(_lib.Elements.SwitchColor , {
 			Element = TabNameLabel,
@@ -7269,32 +7264,20 @@ function PYMPLE.new(Config : Window)
 			Remote = TabOpenSignal
 		});
 
-		_lib:_Hover(TabButton,function()
-			_lib:_Animation(TabButton,Tween,{
-				Size = UDim2.new(1, -10, 0, 40)
-			});
+		_lib:_Hover(TabButton, function()
+			_lib:_Animation(Icon, Tween, { Size = UDim2.new(0, 22, 0, 22) })
+			_lib:_Animation(TabNameUIScale, TweenInfo.new(0.3, Enum.EasingStyle.Sine, Enum.EasingDirection.Out), { Scale = 1.18 })
 			if WindowArgs.SelectedTab ~= TabButton then
-				_lib:_Animation(Icon,Tween,{
-					ImageTransparency = 0.1
-				});
-
-				_lib:_Animation(TabNameLabel,Tween,{
-					TextTransparency = 0.1
-				});
-			end;
-		end , function()
-			_lib:_Animation(TabButton,Tween,{
-				Size = UDim2.new(1, -10, 0, 32)
-			});
+				_lib:_Animation(Icon, Tween, { ImageTransparency = 0.1 })
+				_lib:_Animation(TabNameLabel, Tween, { TextTransparency = 0.1 })
+			end
+		end, function()
+			_lib:_Animation(Icon, Tween, { Size = UDim2.new(0, 15, 0, 15) })
+			_lib:_Animation(TabNameUIScale, TweenInfo.new(0.3, Enum.EasingStyle.Sine, Enum.EasingDirection.Out), { Scale = 1 })
 			if WindowArgs.SelectedTab ~= TabButton then
-				_lib:_Animation(Icon,Tween,{
-					ImageTransparency = 0.5
-				});
-
-				_lib:_Animation(TabNameLabel,Tween,{
-					TextTransparency = 0.5
-				});
-			end;
+				_lib:_Animation(Icon, Tween, { ImageTransparency = 0.5 })
+				_lib:_Animation(TabNameLabel, Tween, { TextTransparency = 0.5 })
+			end
 		end)
 
 		TabOpenSignal:Connect(TabOpen);
@@ -7591,15 +7574,8 @@ function PYMPLE.new(Config : Window)
 			_lib:_AddDragBlacklist(TabButton);
 		end;
 
-		local TabWrapper = Instance.new("Frame")
-		TabWrapper.BackgroundTransparency = 1
-		TabWrapper.BorderSizePixel = 0
-		TabWrapper.Size = UDim2.new(1, 0, 0, 40)
-		TabWrapper.Parent = TabButtonScrollingFrame
 		TabButton.Name = _lib:_RandomString()
-		TabButton.Parent = TabWrapper
-		TabButton.AnchorPoint = Vector2.new(0.5, 0.5)
-		TabButton.Position = UDim2.new(0.5, 0, 0.5, 0)
+		TabButton.Parent = TabButtonScrollingFrame
 		TabButton.BackgroundTransparency = 1.000
 		TabButton.BorderColor3 = Color3.fromRGB(0, 0, 0)
 		TabButton.BorderSizePixel = 0
@@ -7609,12 +7585,12 @@ function PYMPLE.new(Config : Window)
 
 		Icon.Name = _lib:_RandomString()
 		Icon.Parent = TabButton
-		Icon.AnchorPoint = Vector2.new(0, 0.5)
+		Icon.AnchorPoint = Vector2.new(0.5, 0.5)
 		Icon.BackgroundColor3 = _lib.Colors.Highlight
 		Icon.BackgroundTransparency = 1.000
 		Icon.BorderColor3 = Color3.fromRGB(0, 0, 0)
 		Icon.BorderSizePixel = 0
-		Icon.Position = UDim2.new(0, 15, 0.5, 0)
+		Icon.Position = UDim2.new(0, 22, 0.5, 0)
 		Icon.Size = UDim2.new(0, 15, 0, 15)
 		Icon.ZIndex = 3
 		Icon.Image = _lib:_GetIcon(Configuration.Icon);
@@ -7639,6 +7615,8 @@ function PYMPLE.new(Config : Window)
 		TabNameLabel.TextColor3 = _lib.Colors.SwitchColor
 		TabNameLabel.TextSize = 15.000
 		TabNameLabel.TextXAlignment = Enum.TextXAlignment.Left
+		local TabNameUIScale = Instance.new("UIScale")
+		TabNameUIScale.Parent = TabNameLabel
 
 		table.insert(_lib.Elements.SwitchColor , {
 			Element = TabNameLabel,
@@ -8164,32 +8142,20 @@ function PYMPLE.new(Config : Window)
 			Remote = TabOpenSignal
 		});
 
-		_lib:_Hover(TabButton,function()
-			_lib:_Animation(TabButton,Tween,{
-				Size = UDim2.new(1, -10, 0, 40)
-			});
+		_lib:_Hover(TabButton, function()
+			_lib:_Animation(Icon, Tween, { Size = UDim2.new(0, 22, 0, 22) })
+			_lib:_Animation(TabNameUIScale, TweenInfo.new(0.3, Enum.EasingStyle.Sine, Enum.EasingDirection.Out), { Scale = 1.18 })
 			if WindowArgs.SelectedTab ~= TabButton then
-				_lib:_Animation(Icon,Tween,{
-					ImageTransparency = 0.1
-				});
-
-				_lib:_Animation(TabNameLabel,Tween,{
-					TextTransparency = 0.1
-				});
-			end;
-		end , function()
-			_lib:_Animation(TabButton,Tween,{
-				Size = UDim2.new(1, -10, 0, 32)
-			});
+				_lib:_Animation(Icon, Tween, { ImageTransparency = 0.1 })
+				_lib:_Animation(TabNameLabel, Tween, { TextTransparency = 0.1 })
+			end
+		end, function()
+			_lib:_Animation(Icon, Tween, { Size = UDim2.new(0, 15, 0, 15) })
+			_lib:_Animation(TabNameUIScale, TweenInfo.new(0.3, Enum.EasingStyle.Sine, Enum.EasingDirection.Out), { Scale = 1 })
 			if WindowArgs.SelectedTab ~= TabButton then
-				_lib:_Animation(Icon,Tween,{
-					ImageTransparency = 0.5
-				});
-
-				_lib:_Animation(TabNameLabel,Tween,{
-					TextTransparency = 0.5
-				});
-			end;
+				_lib:_Animation(Icon, Tween, { ImageTransparency = 0.5 })
+				_lib:_Animation(TabNameLabel, Tween, { TextTransparency = 0.5 })
+			end
 		end)
 
 		TabOpenSignal:Connect(TabOpen);
@@ -8915,15 +8881,8 @@ function PYMPLE.new(Config : Window)
 			local Highlight = Instance.new("Frame")
 			local UICorner = Instance.new("UICorner")
 
-			local TabWrapper = Instance.new("Frame")
-			TabWrapper.BackgroundTransparency = 1
-			TabWrapper.BorderSizePixel = 0
-			TabWrapper.Size = UDim2.new(1, 0, 0, 40)
-			TabWrapper.Parent = TabButtonScrollingFrame
 			TabButton.Name = _lib:_RandomString()
-			TabButton.Parent = TabWrapper
-			TabButton.AnchorPoint = Vector2.new(0.5, 0.5)
-			TabButton.Position = UDim2.new(0.5, 0, 0.5, 0)
+			TabButton.Parent = TabButtonScrollingFrame
 			TabButton.BackgroundTransparency = 1.000
 			TabButton.BorderColor3 = Color3.fromRGB(0, 0, 0)
 			TabButton.BorderSizePixel = 0
@@ -8933,12 +8892,12 @@ function PYMPLE.new(Config : Window)
 
 			Icon.Name = _lib:_RandomString()
 			Icon.Parent = TabButton
-			Icon.AnchorPoint = Vector2.new(0, 0.5)
+			Icon.AnchorPoint = Vector2.new(0.5, 0.5)
 			Icon.BackgroundColor3 = _lib.Colors.Highlight
 			Icon.BackgroundTransparency = 1.000
 			Icon.BorderColor3 = Color3.fromRGB(0, 0, 0)
 			Icon.BorderSizePixel = 0
-			Icon.Position = UDim2.new(0, 15, 0.5, 0)
+			Icon.Position = UDim2.new(0, 22, 0.5, 0)
 			Icon.Size = UDim2.new(0, 15, 0, 15)
 			Icon.ZIndex = 3
 			Icon.Image = _lib:_GetIcon(TabConfig.Icon);
@@ -8963,6 +8922,8 @@ function PYMPLE.new(Config : Window)
 			TabNameLabel.TextColor3 = _lib.Colors.SwitchColor
 			TabNameLabel.TextSize = 15.000
 			TabNameLabel.TextXAlignment = Enum.TextXAlignment.Left
+			local TabNameUIScale = Instance.new("UIScale")
+			TabNameUIScale.Parent = TabNameLabel
 
 			table.insert(_lib.Elements.SwitchColor , {
 				Element = TabNameLabel,
@@ -9136,26 +9097,20 @@ function PYMPLE.new(Config : Window)
 				Remote = TabOpenSignal
 			});
 
-			_lib:_Hover(TabButton,function()
+			_lib:_Hover(TabButton, function()
+				_lib:_Animation(Icon, Tween, { Size = UDim2.new(0, 22, 0, 22) })
+				_lib:_Animation(TabNameUIScale, TweenInfo.new(0.3, Enum.EasingStyle.Sine, Enum.EasingDirection.Out), { Scale = 1.18 })
 				if WindowArgs.SelectedTab ~= TabButton then
-					_lib:_Animation(Icon,Tween,{
-						ImageTransparency = 0.1
-					});
-
-					_lib:_Animation(TabNameLabel,Tween,{
-						TextTransparency = 0.1
-					});
-				end;
-			end , function()
+					_lib:_Animation(Icon, Tween, { ImageTransparency = 0.1 })
+					_lib:_Animation(TabNameLabel, Tween, { TextTransparency = 0.1 })
+				end
+			end, function()
+				_lib:_Animation(Icon, Tween, { Size = UDim2.new(0, 15, 0, 15) })
+				_lib:_Animation(TabNameUIScale, TweenInfo.new(0.3, Enum.EasingStyle.Sine, Enum.EasingDirection.Out), { Scale = 1 })
 				if WindowArgs.SelectedTab ~= TabButton then
-					_lib:_Animation(Icon,Tween,{
-						ImageTransparency = 0.5
-					});
-
-					_lib:_Animation(TabNameLabel,Tween,{
-						TextTransparency = 0.5
-					});
-				end;
+					_lib:_Animation(Icon, Tween, { ImageTransparency = 0.5 })
+					_lib:_Animation(TabNameLabel, Tween, { TextTransparency = 0.5 })
+				end
 			end)
 
 			TabOpenSignal:Connect(TabOpen);

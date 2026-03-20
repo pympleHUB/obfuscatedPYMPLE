@@ -235,6 +235,7 @@ local SaveableKeys = {
 
 local TOTAL_BIOMES = 41
 local RadiusESPCircle = nil
+local RadiusESPCircle2 = nil
 local LastEquippedWeaponName = nil
 
 local CooldownTimer, BiomeCheckTimer, CutsceneCheckTimer, MeteorTimer, SwingTimer, AbilityTimer, GodTimer, BossAlertTimer, MovementTimer, MinigunTimer =
@@ -1154,13 +1155,23 @@ local function BuildRadiusESP()
 	if RadiusESPCircle then
 		pcall(function() RadiusESPCircle:Remove() end)
 	end
+	if RadiusESPCircle2 then
+		pcall(function() RadiusESPCircle2:Remove() end)
+	end
 	RadiusESPCircle = Drawing.new("Circle")
 	RadiusESPCircle.Visible = false
-	RadiusESPCircle.Color = Color3.fromRGB(220, 50, 50)
+	RadiusESPCircle.Color = Color3.fromRGB(255, 255, 255)
 	RadiusESPCircle.Thickness = 2
 	RadiusESPCircle.Filled = false
 	RadiusESPCircle.NumSides = 64
-	RadiusESPCircle.Transparency = 1
+	RadiusESPCircle.Transparency = 0.85
+	RadiusESPCircle2 = Drawing.new("Circle")
+	RadiusESPCircle2.Visible = false
+	RadiusESPCircle2.Color = Color3.fromRGB(255, 255, 255)
+	RadiusESPCircle2.Thickness = 1
+	RadiusESPCircle2.Filled = false
+	RadiusESPCircle2.NumSides = 64
+	RadiusESPCircle2.Transparency = 0.6
 end
 
 local function UpdateRadiusESP()
@@ -1169,6 +1180,7 @@ local function UpdateRadiusESP()
 	local rp = c and c:FindFirstChild("HumanoidRootPart")
 	if not rp then
 		RadiusESPCircle.Visible = false
+		if RadiusESPCircle2 then RadiusESPCircle2.Visible = false end
 		return
 	end
 	local cam = workspace.CurrentCamera
@@ -1177,21 +1189,32 @@ local function UpdateRadiusESP()
 	local screenCenter, onScreen = cam:WorldToViewportPoint(origin)
 	if not onScreen then
 		RadiusESPCircle.Visible = false
+		if RadiusESPCircle2 then RadiusESPCircle2.Visible = false end
 		return
 	end
 	local camRight = cam.CFrame.RightVector
 	local edgeWorld = origin + camRight * Flags.KillAuraRadius
 	local edgeScreen = cam:WorldToViewportPoint(edgeWorld)
 	local screenRadius = (Vector2.new(edgeScreen.X, edgeScreen.Y) - Vector2.new(screenCenter.X, screenCenter.Y)).Magnitude
-	RadiusESPCircle.Position = Vector2.new(screenCenter.X, screenCenter.Y)
+	local center = Vector2.new(screenCenter.X, screenCenter.Y)
+	RadiusESPCircle.Position = center
 	RadiusESPCircle.Radius = math.max(1, screenRadius)
 	RadiusESPCircle.Visible = true
+	if RadiusESPCircle2 then
+		RadiusESPCircle2.Position = center
+		RadiusESPCircle2.Radius = math.max(1, screenRadius - 4)
+		RadiusESPCircle2.Visible = true
+	end
 end
 
 local function DestroyRadiusESP()
 	if RadiusESPCircle then
 		pcall(function() RadiusESPCircle:Remove() end)
 		RadiusESPCircle = nil
+	end
+	if RadiusESPCircle2 then
+		pcall(function() RadiusESPCircle2:Remove() end)
+		RadiusESPCircle2 = nil
 	end
 end
 
@@ -1200,8 +1223,6 @@ local function AimAtEnemy(target)
 	local rp = c and c:FindFirstChild("HumanoidRootPart")
 	if not rp then return end
 	if ActiveMoveTween and ActiveMoveTween.PlaybackState == Enum.PlaybackState.Playing then return end
-	local hum = c and c:FindFirstChildOfClass("Humanoid")
-	if hum and hum.MoveDirection.Magnitude > 0.1 then return end
 	local hd = target:FindFirstChild("Head") or target:FindFirstChild("HumanoidRootPart")
 	if not hd then return end
 	pcall(function()
@@ -8592,15 +8613,8 @@ local pimpleHUB = (function()
 			local Highlight = Instance.new("Frame")
 			local UICorner = Instance.new("UICorner")
 
-			local TabWrapper = Instance.new("Frame")
-			TabWrapper.BackgroundTransparency = 1
-			TabWrapper.BorderSizePixel = 0
-			TabWrapper.Size = UDim2.new(1, 0, 0, 40)
-			TabWrapper.Parent = TabButtonScrollingFrame
 			TabButton.Name = _lib:_RandomString()
-			TabButton.Parent = TabWrapper
-			TabButton.AnchorPoint = Vector2.new(0.5, 0.5)
-			TabButton.Position = UDim2.new(0.5, 0, 0.5, 0)
+			TabButton.Parent = TabButtonScrollingFrame
 			TabButton.BackgroundTransparency = 1.000
 			TabButton.BorderColor3 = Color3.fromRGB(0, 0, 0)
 			TabButton.BorderSizePixel = 0
@@ -8614,12 +8628,12 @@ local pimpleHUB = (function()
 
 			Icon.Name = _lib:_RandomString()
 			Icon.Parent = TabButton
-			Icon.AnchorPoint = Vector2.new(0, 0.5)
+			Icon.AnchorPoint = Vector2.new(0.5, 0.5)
 			Icon.BackgroundColor3 = _lib.Colors.Highlight
 			Icon.BackgroundTransparency = 1.000
 			Icon.BorderColor3 = Color3.fromRGB(0, 0, 0)
 			Icon.BorderSizePixel = 0
-			Icon.Position = UDim2.new(0, 15, 0.5, 0)
+			Icon.Position = UDim2.new(0, 22, 0.5, 0)
 			Icon.Size = UDim2.new(0, 15, 0, 15)
 			Icon.ZIndex = 3
 			Icon.Image = _lib:_GetIcon(TabConfig.Icon)
@@ -8644,6 +8658,8 @@ local pimpleHUB = (function()
 			TabNameLabel.TextColor3 = _lib.Colors.SwitchColor
 			TabNameLabel.TextSize = 15.000
 			TabNameLabel.TextXAlignment = Enum.TextXAlignment.Left
+			local TabNameUIScale = Instance.new("UIScale")
+			TabNameUIScale.Parent = TabNameLabel
 
 			table.insert(_lib.Elements.SwitchColor, {
 				Element = TabNameLabel,
@@ -8778,30 +8794,18 @@ local pimpleHUB = (function()
 			})
 
 			_lib:_Hover(TabButton, function()
-				_lib:_Animation(TabButton, Tween, {
-					Size = UDim2.new(1, -10, 0, 40),
-				})
+				_lib:_Animation(Icon, Tween, { Size = UDim2.new(0, 22, 0, 22) })
+				_lib:_Animation(TabNameUIScale, TweenInfo.new(0.3, Enum.EasingStyle.Sine, Enum.EasingDirection.Out), { Scale = 1.18 })
 				if WindowArgs.SelectedTab ~= TabButton then
-					_lib:_Animation(Icon, Tween, {
-						ImageTransparency = 0.1,
-					})
-
-					_lib:_Animation(TabNameLabel, Tween, {
-						TextTransparency = 0.1,
-					})
+					_lib:_Animation(Icon, Tween, { ImageTransparency = 0.1 })
+					_lib:_Animation(TabNameLabel, Tween, { TextTransparency = 0.1 })
 				end
 			end, function()
-				_lib:_Animation(TabButton, Tween, {
-					Size = UDim2.new(1, -10, 0, 32),
-				})
+				_lib:_Animation(Icon, Tween, { Size = UDim2.new(0, 15, 0, 15) })
+				_lib:_Animation(TabNameUIScale, TweenInfo.new(0.3, Enum.EasingStyle.Sine, Enum.EasingDirection.Out), { Scale = 1 })
 				if WindowArgs.SelectedTab ~= TabButton then
-					_lib:_Animation(Icon, Tween, {
-						ImageTransparency = 0.5,
-					})
-
-					_lib:_Animation(TabNameLabel, Tween, {
-						TextTransparency = 0.5,
-					})
+					_lib:_Animation(Icon, Tween, { ImageTransparency = 0.5 })
+					_lib:_Animation(TabNameLabel, Tween, { TextTransparency = 0.5 })
 				end
 			end)
 
@@ -9099,15 +9103,8 @@ local pimpleHUB = (function()
 				_lib:_AddDragBlacklist(TabButton)
 			end
 
-			local TabWrapper = Instance.new("Frame")
-			TabWrapper.BackgroundTransparency = 1
-			TabWrapper.BorderSizePixel = 0
-			TabWrapper.Size = UDim2.new(1, 0, 0, 40)
-			TabWrapper.Parent = TabButtonScrollingFrame
 			TabButton.Name = _lib:_RandomString()
-			TabButton.Parent = TabWrapper
-			TabButton.AnchorPoint = Vector2.new(0.5, 0.5)
-			TabButton.Position = UDim2.new(0.5, 0, 0.5, 0)
+			TabButton.Parent = TabButtonScrollingFrame
 			TabButton.BackgroundTransparency = 1.000
 			TabButton.BorderColor3 = Color3.fromRGB(0, 0, 0)
 			TabButton.BorderSizePixel = 0
@@ -9117,12 +9114,12 @@ local pimpleHUB = (function()
 
 			Icon.Name = _lib:_RandomString()
 			Icon.Parent = TabButton
-			Icon.AnchorPoint = Vector2.new(0, 0.5)
+			Icon.AnchorPoint = Vector2.new(0.5, 0.5)
 			Icon.BackgroundColor3 = _lib.Colors.Highlight
 			Icon.BackgroundTransparency = 1.000
 			Icon.BorderColor3 = Color3.fromRGB(0, 0, 0)
 			Icon.BorderSizePixel = 0
-			Icon.Position = UDim2.new(0, 15, 0.5, 0)
+			Icon.Position = UDim2.new(0, 22, 0.5, 0)
 			Icon.Size = UDim2.new(0, 15, 0, 15)
 			Icon.ZIndex = 3
 			Icon.Image = _lib:_GetIcon(Configuration.Icon)
@@ -9147,6 +9144,8 @@ local pimpleHUB = (function()
 			TabNameLabel.TextColor3 = _lib.Colors.SwitchColor
 			TabNameLabel.TextSize = 15.000
 			TabNameLabel.TextXAlignment = Enum.TextXAlignment.Left
+			local TabNameUIScale = Instance.new("UIScale")
+			TabNameUIScale.Parent = TabNameLabel
 
 			table.insert(_lib.Elements.SwitchColor, {
 				Element = TabNameLabel,
@@ -9669,30 +9668,18 @@ local pimpleHUB = (function()
 			})
 
 			_lib:_Hover(TabButton, function()
-				_lib:_Animation(TabButton, Tween, {
-					Size = UDim2.new(1, -10, 0, 40),
-				})
+				_lib:_Animation(Icon, Tween, { Size = UDim2.new(0, 22, 0, 22) })
+				_lib:_Animation(TabNameUIScale, TweenInfo.new(0.3, Enum.EasingStyle.Sine, Enum.EasingDirection.Out), { Scale = 1.18 })
 				if WindowArgs.SelectedTab ~= TabButton then
-					_lib:_Animation(Icon, Tween, {
-						ImageTransparency = 0.1,
-					})
-
-					_lib:_Animation(TabNameLabel, Tween, {
-						TextTransparency = 0.1,
-					})
+					_lib:_Animation(Icon, Tween, { ImageTransparency = 0.1 })
+					_lib:_Animation(TabNameLabel, Tween, { TextTransparency = 0.1 })
 				end
 			end, function()
-				_lib:_Animation(TabButton, Tween, {
-					Size = UDim2.new(1, -10, 0, 32),
-				})
+				_lib:_Animation(Icon, Tween, { Size = UDim2.new(0, 15, 0, 15) })
+				_lib:_Animation(TabNameUIScale, TweenInfo.new(0.3, Enum.EasingStyle.Sine, Enum.EasingDirection.Out), { Scale = 1 })
 				if WindowArgs.SelectedTab ~= TabButton then
-					_lib:_Animation(Icon, Tween, {
-						ImageTransparency = 0.5,
-					})
-
-					_lib:_Animation(TabNameLabel, Tween, {
-						TextTransparency = 0.5,
-					})
+					_lib:_Animation(Icon, Tween, { ImageTransparency = 0.5 })
+					_lib:_Animation(TabNameLabel, Tween, { TextTransparency = 0.5 })
 				end
 			end)
 
@@ -10436,15 +10423,8 @@ local pimpleHUB = (function()
 				local Highlight = Instance.new("Frame")
 				local UICorner = Instance.new("UICorner")
 
-				local TabWrapper = Instance.new("Frame")
-				TabWrapper.BackgroundTransparency = 1
-				TabWrapper.BorderSizePixel = 0
-				TabWrapper.Size = UDim2.new(1, 0, 0, 40)
-				TabWrapper.Parent = TabButtonScrollingFrame
 				TabButton.Name = _lib:_RandomString()
-				TabButton.Parent = TabWrapper
-				TabButton.AnchorPoint = Vector2.new(0.5, 0.5)
-				TabButton.Position = UDim2.new(0.5, 0, 0.5, 0)
+				TabButton.Parent = TabButtonScrollingFrame
 				TabButton.BackgroundTransparency = 1.000
 				TabButton.BorderColor3 = Color3.fromRGB(0, 0, 0)
 				TabButton.BorderSizePixel = 0
@@ -10454,12 +10434,12 @@ local pimpleHUB = (function()
 
 				Icon.Name = _lib:_RandomString()
 				Icon.Parent = TabButton
-				Icon.AnchorPoint = Vector2.new(0, 0.5)
+				Icon.AnchorPoint = Vector2.new(0.5, 0.5)
 				Icon.BackgroundColor3 = _lib.Colors.Highlight
 				Icon.BackgroundTransparency = 1.000
 				Icon.BorderColor3 = Color3.fromRGB(0, 0, 0)
 				Icon.BorderSizePixel = 0
-				Icon.Position = UDim2.new(0, 15, 0.5, 0)
+				Icon.Position = UDim2.new(0, 22, 0.5, 0)
 				Icon.Size = UDim2.new(0, 15, 0, 15)
 				Icon.ZIndex = 3
 				Icon.Image = _lib:_GetIcon(TabConfig.Icon)
@@ -10484,6 +10464,8 @@ local pimpleHUB = (function()
 				TabNameLabel.TextColor3 = _lib.Colors.SwitchColor
 				TabNameLabel.TextSize = 15.000
 				TabNameLabel.TextXAlignment = Enum.TextXAlignment.Left
+				local TabNameUIScale = Instance.new("UIScale")
+				TabNameUIScale.Parent = TabNameLabel
 
 				table.insert(_lib.Elements.SwitchColor, {
 					Element = TabNameLabel,
@@ -10656,30 +10638,18 @@ local pimpleHUB = (function()
 				})
 
 				_lib:_Hover(TabButton, function()
-					_lib:_Animation(TabButton, Tween, {
-						Size = UDim2.new(1, -10, 0, 40),
-					})
+					_lib:_Animation(Icon, Tween, { Size = UDim2.new(0, 22, 0, 22) })
+					_lib:_Animation(TabNameUIScale, TweenInfo.new(0.3, Enum.EasingStyle.Sine, Enum.EasingDirection.Out), { Scale = 1.18 })
 					if WindowArgs.SelectedTab ~= TabButton then
-						_lib:_Animation(Icon, Tween, {
-							ImageTransparency = 0.1,
-						})
-
-						_lib:_Animation(TabNameLabel, Tween, {
-							TextTransparency = 0.1,
-						})
+						_lib:_Animation(Icon, Tween, { ImageTransparency = 0.1 })
+						_lib:_Animation(TabNameLabel, Tween, { TextTransparency = 0.1 })
 					end
 				end, function()
-					_lib:_Animation(TabButton, Tween, {
-						Size = UDim2.new(1, -10, 0, 32),
-					})
+					_lib:_Animation(Icon, Tween, { Size = UDim2.new(0, 15, 0, 15) })
+					_lib:_Animation(TabNameUIScale, TweenInfo.new(0.3, Enum.EasingStyle.Sine, Enum.EasingDirection.Out), { Scale = 1 })
 					if WindowArgs.SelectedTab ~= TabButton then
-						_lib:_Animation(Icon, Tween, {
-							ImageTransparency = 0.5,
-						})
-
-						_lib:_Animation(TabNameLabel, Tween, {
-							TextTransparency = 0.5,
-						})
+						_lib:_Animation(Icon, Tween, { ImageTransparency = 0.5 })
+						_lib:_Animation(TabNameLabel, Tween, { TextTransparency = 0.5 })
 					end
 				end)
 
