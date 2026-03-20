@@ -1,4 +1,4 @@
-﻿﻿--[[ PYMPLE v1.0 - pimpleHUB UI Template ]]
+--[[ PYMPLE v1.0 - pimpleHUB UI Template ]]
 
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
@@ -5023,7 +5023,8 @@ function PYMPLE:_LoadElement(Parent: Frame , EnabledLine: boolean , Signal , Dis
 		Button.BackgroundTransparency = 1.000
 		Button.BorderColor3 = Color3.fromRGB(0, 0, 0)
 		Button.BorderSizePixel = 0
-		Button.Size = UDim2.new(1, -1, 0, 30)
+		Button.Size = UDim2.new(1, -1, 0, 46)
+		Button.ClipsDescendants = false
 		Button.ZIndex = Zindex + 5
 
 		BlockLine.Name = PYMPLE:_RandomString()
@@ -5045,7 +5046,7 @@ function PYMPLE:_LoadElement(Parent: Frame , EnabledLine: boolean , Signal , Dis
 		Frame.Parent = Button
 		Frame.AnchorPoint = Vector2.new(0.5, 0.5)
 		Frame.BackgroundColor3 = PYMPLE.Colors.Highlight
-		Frame.BackgroundTransparency = 0.100
+		Frame.BackgroundTransparency = 0
 		Frame.BorderColor3 = Color3.fromRGB(0, 0, 0)
 		Frame.BorderSizePixel = 0
 		Frame.Position = UDim2.new(0.5, 0, 0.5, 0)
@@ -5069,14 +5070,90 @@ function PYMPLE:_LoadElement(Parent: Frame , EnabledLine: boolean , Signal , Dis
 		UICorner.CornerRadius = UDim.new(0, 3)
 		UICorner.Parent = Frame
 
+		-- Rotating glow border (TrapDoor Submit Key style)
+		local GlowWrap = Instance.new("Frame")
+		GlowWrap.AnchorPoint = Vector2.new(0.5, 0.5)
+		GlowWrap.Position = UDim2.new(0.5, 0, 0.5, 0)
+		GlowWrap.Size = UDim2.new(1, -11, 1, -1)
+		GlowWrap.BackgroundTransparency = 1
+		GlowWrap.BorderSizePixel = 0
+		GlowWrap.ZIndex = Zindex + 5
+		GlowWrap.Parent = Button
+		Instance.new("UICorner", GlowWrap).CornerRadius = UDim.new(0, 5)
+		local GlowStroke = Instance.new("UIStroke", GlowWrap)
+		GlowStroke.Thickness = 2
+		GlowStroke.Color = PYMPLE.Colors.Highlight
+		local GlowGrad = Instance.new("UIGradient", GlowStroke)
+		GlowGrad.Transparency = NumberSequence.new{
+			NumberSequenceKeypoint.new(0,    0.97),
+			NumberSequenceKeypoint.new(0.12, 0),
+			NumberSequenceKeypoint.new(0.38, 0.97),
+			NumberSequenceKeypoint.new(0.62, 0.97),
+			NumberSequenceKeypoint.new(0.88, 0),
+			NumberSequenceKeypoint.new(1,    0.97),
+		}
+		task.spawn(function()
+			while Button and Button.Parent do
+				TweenService:Create(GlowGrad, TweenInfo.new(3, Enum.EasingStyle.Linear), {Rotation = 360}):Play()
+				task.wait(3.05)
+				if GlowGrad and GlowGrad.Parent then GlowGrad.Rotation = 0 end
+			end
+		end)
+
+		-- Inner gradient overlay (top-to-bottom fade matching TrapDoor tbGlowFrame style)
+		local BtnGlow = Instance.new("Frame")
+		BtnGlow.Name = PYMPLE:_RandomString()
+		BtnGlow.AnchorPoint = Vector2.new(0.5, 0.5)
+		BtnGlow.Position = UDim2.fromScale(0.5, 0.5)
+		BtnGlow.Size = UDim2.fromScale(1, 1)
+		BtnGlow.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+		BtnGlow.BackgroundTransparency = 0
+		BtnGlow.BorderSizePixel = 0
+		BtnGlow.ZIndex = Zindex + 7
+		BtnGlow.Parent = Frame
+		local BtnGlowCorner = Instance.new("UICorner")
+		BtnGlowCorner.CornerRadius = UDim.new(0, 3)
+		BtnGlowCorner.Parent = BtnGlow
+		local BtnGlowGrad = Instance.new("UIGradient")
+		BtnGlowGrad.Rotation = 90
+		BtnGlowGrad.Transparency = NumberSequence.new{
+			NumberSequenceKeypoint.new(0,    0.55),
+			NumberSequenceKeypoint.new(0.38, 0.97),
+			NumberSequenceKeypoint.new(1,    0.97),
+		}
+		BtnGlowGrad.Parent = BtnGlow
+
+		-- Star badge (TrapDoor Submit Key style)
+		local BadgeFrame = Instance.new("Frame")
+		BadgeFrame.AnchorPoint = Vector2.new(0, 0.5)
+		BadgeFrame.Position = UDim2.new(0, 10, 0.5, 0)
+		BadgeFrame.Size = UDim2.fromOffset(22, 22)
+		BadgeFrame.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+		BadgeFrame.BackgroundTransparency = 0.82
+		BadgeFrame.BorderSizePixel = 0
+		BadgeFrame.ZIndex = Zindex + 10
+		BadgeFrame.Parent = Frame
+		Instance.new("UICorner", BadgeFrame).CornerRadius = UDim.new(0, 4)
+		local BadgeText = Instance.new("TextLabel", BadgeFrame)
+		BadgeText.Size = UDim2.fromScale(1, 1)
+		BadgeText.BackgroundTransparency = 1
+		BadgeText.Text = "★"
+		BadgeText.TextColor3 = Color3.fromRGB(255, 255, 255)
+		BadgeText.Font = Enum.Font.GothamBold
+		BadgeText.TextSize = 13
+		BadgeText.ZIndex = Zindex + 11
+		local badgeStroke = Instance.new("UIStroke", BadgeText)
+		badgeStroke.Color = Color3.fromRGB(0, 0, 0)
+		badgeStroke.Thickness = 1.8
+
 		TextLabel.Parent = Frame
 		TextLabel.AnchorPoint = Vector2.new(0.5, 0.5)
 		TextLabel.BackgroundTransparency = 1.000
 		TextLabel.BorderColor3 = Color3.fromRGB(0, 0, 0)
 		TextLabel.BorderSizePixel = 0
-		TextLabel.Position = UDim2.new(0.5, 0, 0.5, 0)
+		TextLabel.Position = UDim2.new(0.5, 12, 0.5, 0)
 		TextLabel.Size = UDim2.new(1, 0, 1, 0)
-		TextLabel.ZIndex = Zindex + 8
+		TextLabel.ZIndex = Zindex + 9
 		TextLabel.Font = Enum.Font.GothamMedium
 		TextLabel.Text = Config.Name;
 		TextLabel.TextColor3 = PYMPLE.Colors.SwitchColor
@@ -5090,14 +5167,14 @@ function PYMPLE:_LoadElement(Parent: Frame , EnabledLine: boolean , Signal , Dis
 
 		PYMPLE:_Hover(Frame,function()
 			if Signal:GetValue() then
-				PYMPLE:_Animation(Frame,TweenInfo.new(0.2),{
-					BackgroundTransparency = 0
+				PYMPLE:_Animation(Frame,TweenInfo.new(0.1),{
+					BackgroundColor3 = Color3.fromRGB(240, 80, 80)
 				})
 			end;
 		end,function()
 			if Signal:GetValue() then
-				PYMPLE:_Animation(Frame,TweenInfo.new(0.2),{
-					BackgroundTransparency = 0.1
+				PYMPLE:_Animation(Frame,TweenInfo.new(0.1),{
+					BackgroundColor3 = PYMPLE.Colors.Highlight
 				})
 			end;
 		end);
@@ -5115,7 +5192,7 @@ function PYMPLE:_LoadElement(Parent: Frame , EnabledLine: boolean , Signal , Dis
 				});
 
 				PYMPLE:_Animation(Frame, TweenInfo.new(0.35),{
-					BackgroundTransparency = 0.1
+					BackgroundTransparency = 0
 				});
 
 				PYMPLE:_Animation(UIStroke, TweenInfo.new(0.35),{
@@ -7860,7 +7937,7 @@ function PYMPLE.new(Config : Window)
 		AddConfig.BorderColor3 = Color3.fromRGB(0, 0, 0)
 		AddConfig.BorderSizePixel = 0
 		AddConfig.Position = UDim2.new(0.5, 0, 1, -5)
-		AddConfig.Size = UDim2.new(1, -10, 0, 95)
+		AddConfig.Size = UDim2.new(1, -10, 0, 108)
 		AddConfig.ZIndex = 9
 
 		UICorner_2.CornerRadius = UDim.new(0, 6)
@@ -7971,14 +8048,14 @@ function PYMPLE.new(Config : Window)
 		Button.BorderColor3 = Color3.fromRGB(0, 0, 0)
 		Button.BorderSizePixel = 0
 		Button.Position = UDim2.new(0.5, 0, 1, -10)
-		Button.Size = UDim2.new(1, -7, 0, 25)
+		Button.Size = UDim2.new(1, -7, 0, 38)
 		Button.ZIndex = 10
 
 		BlockLine.Name = _lib:_RandomString()
 		BlockLine.Parent = AddConfig
 		BlockLine.AnchorPoint = Vector2.new(0.5, 1)
 		BlockLine.BackgroundColor3 = _lib.Colors.LineColor
-		BlockLine.BackgroundTransparency = 0.500
+		BlockLine.BackgroundTransparency = 1
 		BlockLine.BorderColor3 = Color3.fromRGB(0, 0, 0)
 		BlockLine.BorderSizePixel = 0
 		BlockLine.Position = UDim2.new(0.5, 0, 0.5, 12)
@@ -7993,7 +8070,7 @@ function PYMPLE.new(Config : Window)
 		Frame_2.Parent = Button
 		Frame_2.AnchorPoint = Vector2.new(0.5, 0.5)
 		Frame_2.BackgroundColor3 = _lib.Colors.Highlight
-		Frame_2.BackgroundTransparency = 0.100
+		Frame_2.BackgroundTransparency = 0
 		Frame_2.BorderColor3 = Color3.fromRGB(0, 0, 0)
 		Frame_2.BorderSizePixel = 0
 		Frame_2.Position = UDim2.new(0.5, 0, 0.5, 0)
@@ -8016,6 +8093,56 @@ function PYMPLE.new(Config : Window)
 		UICorner_4.CornerRadius = UDim.new(0, 3)
 		UICorner_4.Parent = Frame_2
 
+		-- Rotating glow border
+		local CfgGlowWrap = Instance.new("Frame")
+		CfgGlowWrap.AnchorPoint = Vector2.new(0.5, 0.5)
+		CfgGlowWrap.Position = UDim2.new(0.5, 0, 0.5, 0)
+		CfgGlowWrap.Size = UDim2.new(1, -11, 1, -1)
+		CfgGlowWrap.BackgroundTransparency = 1
+		CfgGlowWrap.BorderSizePixel = 0
+		CfgGlowWrap.ZIndex = 8
+		CfgGlowWrap.Parent = Button
+		Instance.new("UICorner", CfgGlowWrap).CornerRadius = UDim.new(0, 5)
+		local CfgGlowStroke = Instance.new("UIStroke", CfgGlowWrap)
+		CfgGlowStroke.Thickness = 2
+		CfgGlowStroke.Color = _lib.Colors.Highlight
+		local CfgGlowGrad = Instance.new("UIGradient", CfgGlowStroke)
+		CfgGlowGrad.Transparency = NumberSequence.new{
+			NumberSequenceKeypoint.new(0,    0.97),
+			NumberSequenceKeypoint.new(0.12, 0),
+			NumberSequenceKeypoint.new(0.38, 0.97),
+			NumberSequenceKeypoint.new(0.62, 0.97),
+			NumberSequenceKeypoint.new(0.88, 0),
+			NumberSequenceKeypoint.new(1,    0.97),
+		}
+		task.spawn(function()
+			while Button and Button.Parent do
+				TweenService:Create(CfgGlowGrad, TweenInfo.new(3, Enum.EasingStyle.Linear), {Rotation = 360}):Play()
+				task.wait(3.05)
+				if CfgGlowGrad and CfgGlowGrad.Parent then CfgGlowGrad.Rotation = 0 end
+			end
+		end)
+
+		-- White shine overlay
+		local CfgBtnGlow = Instance.new("Frame")
+		CfgBtnGlow.AnchorPoint = Vector2.new(0.5, 0.5)
+		CfgBtnGlow.Position = UDim2.fromScale(0.5, 0.5)
+		CfgBtnGlow.Size = UDim2.fromScale(1, 1)
+		CfgBtnGlow.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+		CfgBtnGlow.BackgroundTransparency = 0
+		CfgBtnGlow.BorderSizePixel = 0
+		CfgBtnGlow.ZIndex = 10
+		CfgBtnGlow.Parent = Frame_2
+		Instance.new("UICorner", CfgBtnGlow).CornerRadius = UDim.new(0, 3)
+		local CfgBtnGlowGrad = Instance.new("UIGradient")
+		CfgBtnGlowGrad.Rotation = 90
+		CfgBtnGlowGrad.Transparency = NumberSequence.new{
+			NumberSequenceKeypoint.new(0,    0.55),
+			NumberSequenceKeypoint.new(0.38, 0.97),
+			NumberSequenceKeypoint.new(1,    0.97),
+		}
+		CfgBtnGlowGrad.Parent = CfgBtnGlow
+
 		TextLabel.Parent = Frame_2
 		TextLabel.AnchorPoint = Vector2.new(0.5, 0.5)
 		TextLabel.BackgroundTransparency = 1.000
@@ -8023,7 +8150,7 @@ function PYMPLE.new(Config : Window)
 		TextLabel.BorderSizePixel = 0
 		TextLabel.Position = UDim2.new(0.5, 0, 0.5, 0)
 		TextLabel.Size = UDim2.new(1, 0, 1, 0)
-		TextLabel.ZIndex = 10
+		TextLabel.ZIndex = 12
 		TextLabel.Font = Enum.Font.GothamMedium
 		TextLabel.Text = "Add Config"
 		TextLabel.TextColor3 = _lib.Colors.SwitchColor
@@ -8109,11 +8236,15 @@ function PYMPLE.new(Config : Window)
 				});
 
 				_lib:_Animation(Frame_2,Tween,{
-					BackgroundTransparency = 0.1,
+					BackgroundTransparency = 0,
+				});
+
+				_lib:_Animation(CfgBtnGlow,Tween,{
+					BackgroundTransparency = 0,
 				});
 
 				_lib:_Animation(BlockLine,Tween,{
-					BackgroundTransparency = 0.5,
+					BackgroundTransparency = 1,
 				});
 
 				_lib:_Animation(Frame,Tween,{
@@ -8183,6 +8314,10 @@ function PYMPLE.new(Config : Window)
 				});
 
 				_lib:_Animation(Frame_2,Tween,{
+					BackgroundTransparency = 1,
+				});
+
+				_lib:_Animation(CfgBtnGlow,Tween,{
 					BackgroundTransparency = 1,
 				});
 
@@ -10764,7 +10899,7 @@ local Window = pimpleHUB.new({
 Window.OnToggle = function(visible) UIOpen = visible end
 
 -- ==================== FOG OVERLAY ====================
-local _fogEnabled = true
+local _fogEnabled = false
 local _fogOverlay
 do
 	task.defer(function()
@@ -10969,7 +11104,7 @@ UISection:AddToggle({
 		Window.AlwayShowTab = v
 	end,
 })
-UISection:AddColorPicker({
+local _cpHighlight = UISection:AddColorPicker({
 	Name = "Highlight",
 	Default = pimpleHUB.Colors.Highlight,
 	Callback = function(v)
@@ -10980,7 +11115,7 @@ UISection:AddColorPicker({
 		end
 	end,
 })
-UISection:AddColorPicker({
+local _cpToggle = UISection:AddColorPicker({
 	Name = "Toggle Color",
 	Default = pimpleHUB.Colors.Toggle,
 	Callback = function(v)
@@ -10988,7 +11123,7 @@ UISection:AddColorPicker({
 		pimpleHUB:RefreshCurrentColor()
 	end,
 })
-UISection:AddColorPicker({
+local _cpButton = UISection:AddColorPicker({
 	Name = "Button Color",
 	Default = Color3.fromRGB(220, 60, 60),
 	Callback = function(v)
@@ -10997,13 +11132,14 @@ UISection:AddColorPicker({
 		local darkerColor = Color3.fromHSV(bh, math.min(bs * 1.1, 1), bv * 0.55)
 		for _, b in ipairs(_glowButtons) do
 			b.Btn.BackgroundColor3 = v
+			-- BtnGlow stays white to preserve the top shine effect
 			if b.Stroke then
 				b.Stroke.Color = darkerColor
 			end
 		end
 	end,
 })
-UISection:AddColorPicker({
+local _cpDrop = UISection:AddColorPicker({
 	Name = "Drop Color",
 	Default = pimpleHUB.Colors.DropColor,
 	Callback = function(v)
@@ -11011,7 +11147,7 @@ UISection:AddColorPicker({
 		pimpleHUB:RefreshCurrentColor()
 	end,
 })
-UISection:AddColorPicker({
+local _cpBlock = UISection:AddColorPicker({
 	Name = "Block Color",
 	Default = pimpleHUB.Colors.BlockColor,
 	Callback = function(v)
@@ -11019,7 +11155,7 @@ UISection:AddColorPicker({
 		pimpleHUB:RefreshCurrentColor()
 	end,
 })
-UISection:AddColorPicker({
+local _cpBG = UISection:AddColorPicker({
 	Name = "Background Color",
 	Default = pimpleHUB.Colors.BGDBColor,
 	Callback = function(v)
@@ -11027,7 +11163,7 @@ UISection:AddColorPicker({
 		pimpleHUB:RefreshCurrentColor()
 	end,
 })
-UISection:AddColorPicker({
+local _cpStroke = UISection:AddColorPicker({
 	Name = "Stroke Color",
 	Default = pimpleHUB.Colors.StrokeColor,
 	Callback = function(v)
@@ -11073,7 +11209,7 @@ UISection:AddSlider({
 })
 UISection:AddToggle({
 	Name = "Fog Overlay",
-	Default = true,
+	Default = false,
 	Callback = function(v)
 		_fogEnabled = v
 		if _fogOverlay then
@@ -11114,6 +11250,28 @@ local function _glowButton(parentOrSection, labelText, callback)
 	BtnCorner.CornerRadius = UDim.new(0, 4)
 	BtnCorner.Parent = Btn
 
+	local BtnGlow = Instance.new("Frame")
+	BtnGlow.Name = pimpleHUB:_RandomString()
+	BtnGlow.AnchorPoint = Vector2.new(0.5, 0.5)
+	BtnGlow.Position = UDim2.fromScale(0.5, 0.5)
+	BtnGlow.Size = UDim2.fromScale(1, 1)
+	BtnGlow.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+	BtnGlow.BackgroundTransparency = 0
+	BtnGlow.BorderSizePixel = 0
+	BtnGlow.ZIndex = Btn.ZIndex + 1
+	BtnGlow.Parent = Btn
+	local BtnGlowCorner = Instance.new("UICorner")
+	BtnGlowCorner.CornerRadius = UDim.new(0, 4)
+	BtnGlowCorner.Parent = BtnGlow
+	local BtnGlowGrad = Instance.new("UIGradient")
+	BtnGlowGrad.Rotation = 90
+	BtnGlowGrad.Transparency = NumberSequence.new{
+		NumberSequenceKeypoint.new(0,    0.55),
+		NumberSequenceKeypoint.new(0.38, 0.97),
+		NumberSequenceKeypoint.new(1,    0.97),
+	}
+	BtnGlowGrad.Parent = BtnGlow
+
 	local h, s, v = Color3.toHSV(_glowButtonColor)
 	local BtnStroke = Instance.new("UIStroke")
 	BtnStroke.Color = Color3.fromHSV(h, math.min(s * 1.1, 1), v * 0.55)
@@ -11122,14 +11280,14 @@ local function _glowButton(parentOrSection, labelText, callback)
 	BtnStroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
 	BtnStroke.Parent = Btn
 
-	table.insert(_glowButtons, {Btn = Btn, Stroke = BtnStroke})
+	table.insert(_glowButtons, {Btn = Btn, Stroke = BtnStroke, Glow = BtnGlow})
 
 	local Label = Instance.new("TextLabel")
 	Label.AnchorPoint = Vector2.new(0.5, 0.5)
 	Label.BackgroundTransparency = 1
 	Label.Position = UDim2.new(0.5, 0, 0.5, 0)
 	Label.Size = UDim2.new(1, 0, 1, 0)
-	Label.ZIndex = Btn.ZIndex + 1
+	Label.ZIndex = Btn.ZIndex + 2
 	Label.Font = Enum.Font.GothamMedium
 	Label.Text = labelText
 	Label.TextColor3 = Color3.fromRGB(255, 255, 255)
@@ -11203,11 +11361,21 @@ ThSec:AddDropdown({
 		for _, s in ipairs(_rgStrokes) do
 			s.Color = pimpleHUB.Colors.Highlight
 		end
+		-- sync color pickers to new theme
+		_cpHighlight:SetValue(pimpleHUB.Colors.Highlight)
+		_cpToggle:SetValue(pimpleHUB.Colors.Toggle)
+		_cpButton:SetValue(pimpleHUB.Colors.Highlight)
+		_cpDrop:SetValue(pimpleHUB.Colors.DropColor)
+		_cpBlock:SetValue(pimpleHUB.Colors.BlockColor)
+		_cpBG:SetValue(pimpleHUB.Colors.BGDBColor)
+		_cpStroke:SetValue(pimpleHUB.Colors.StrokeColor)
 	end,
 })
 
 local CfgUI = Window:DrawConfig({ Name = "Config", Icon = "folder", Config = ConfigManager })
 CfgUI:Init()
+
+--[[
 task.defer(function()
 	for _, lbl in ipairs(Window.Root:GetDescendants()) do
 		if lbl:IsA("TextLabel") and lbl.Text == "Add Config" then
@@ -11280,21 +11448,36 @@ task.defer(function()
 		end
 	end
 end)
+--]]
 
--- Black text outline on all text elements
+-- Black text outline on all current and future text elements
 do
 	local function _applyStroke(inst)
 		if inst:IsA("TextLabel") or inst:IsA("TextButton") or inst:IsA("TextBox") then
 			inst.TextStrokeColor3 = Color3.fromRGB(0, 0, 0)
-			inst.TextStrokeTransparency = 0.5
+			inst.TextStrokeTransparency = 0.7
 		end
 	end
-	task.defer(function()
-		for _, desc in ipairs(Window.Root:GetDescendants()) do
+	local function _hookGui(root)
+		for _, desc in ipairs(root:GetDescendants()) do
 			pcall(_applyStroke, desc)
 		end
-		Window.Root.DescendantAdded:Connect(function(desc)
+		root.DescendantAdded:Connect(function(desc)
 			task.defer(function() pcall(_applyStroke, desc) end)
+		end)
+	end
+	task.defer(function()
+		_hookGui(Window.Root)
+		local _cg = Window.Root.Parent
+		for _, gui in ipairs(_cg:GetChildren()) do
+			if gui:IsA("ScreenGui") and gui ~= Window.Root then
+				pcall(_hookGui, gui)
+			end
+		end
+		_cg.ChildAdded:Connect(function(child)
+			if child:IsA("ScreenGui") then
+				task.defer(function() pcall(_hookGui, child) end)
+			end
 		end)
 	end)
 end
