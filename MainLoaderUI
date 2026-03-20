@@ -44,7 +44,8 @@ task.spawn(function() trapSrc = game:HttpGet(BASE .. "TrapDoor") end)
 if url then task.spawn(function() gameSrc = game:HttpGet(url) end) end
 while not trapSrc do task.wait() end
 loadstring(trapSrc)()
-if url then
+if url and not _G._pympleGameLoaded then
+	_G._pympleGameLoaded = true
 	while not gameSrc do task.wait() end
 	loadstring(gameSrc)()
 end
