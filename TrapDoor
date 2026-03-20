@@ -566,6 +566,14 @@ if type(S) ~= "table" or not S.Hub then
 			hTxt.ZIndex          = 10
 			hTxt.Parent          = hdr
 			mkTS(hTxt)
+			local hAccent = Instance.new("Frame", hdr)
+			hAccent.AnchorPoint      = Vector2.new(0, 0.5)
+			hAccent.Position         = UDim2.new(0, 5, 0.5, 0)
+			hAccent.Size             = UDim2.fromOffset(3, 18)
+			hAccent.BackgroundColor3 = C.Acnt
+			hAccent.BorderSizePixel  = 0
+			hAccent.ZIndex           = 10
+			Instance.new("UICorner", hAccent).CornerRadius = UDim.new(1, 0)
 		end
 
 		local bp = Instance.new("Frame")
@@ -730,7 +738,7 @@ if type(S) ~= "table" or not S.Hub then
 		hdrTxt.TextColor3       = C.Text
 		hdrTxt.TextTransparency = 0.15
 		hdrTxt.Font             = Enum.Font.GothamBold
-		hdrTxt.TextSize         = 19
+		hdrTxt.TextSize         = 17
 		hdrTxt.TextXAlignment   = Enum.TextXAlignment.Left
 		hdrTxt.ZIndex           = 11
 		mkTS(hdrTxt)
