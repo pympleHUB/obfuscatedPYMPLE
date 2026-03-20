@@ -32,7 +32,7 @@ last_announce_msg_id = None
 bot_start_time = None
 last_rotation_time = None
 _recent_joins = {}
-ROTATION_HOURS = 12.0
+ROTATION_HOURS = 6.0
 total_reports = 0
 recent_key_channel_msgs = collections.deque(maxlen=20)
 
@@ -366,7 +366,7 @@ async def log_unauthorized(ctx):
 
 # --- Tasks ---
 
-@tasks.loop(hours=12)
+@tasks.loop(hours=6)
 async def auto_rotate_key():
     if auto_rotate_key.current_loop == 0:
         return
