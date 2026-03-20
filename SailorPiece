@@ -16024,7 +16024,7 @@ local function _glowButton(parentOrSection, labelText, callback)
 	Container.Parent = sRoot
 	Container.BackgroundTransparency = 1
 	Container.BorderSizePixel = 0
-	Container.Size = UDim2.new(1, -6, 0, 38)
+	Container.Size = UDim2.new(1, -6, 0, 48)
 	Container.ZIndex = sRoot.ZIndex + 5
 	local _bh, _bs, _bv = Color3.toHSV(_glowButtonColor)
 	local Btn = Instance.new("Frame")
