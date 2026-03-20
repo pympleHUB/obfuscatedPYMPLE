@@ -6350,7 +6350,7 @@ function PYMPLE:_LoadElement(Parent: Frame , EnabledLine: boolean , Signal , Dis
 		Button.BackgroundTransparency = 1.000
 		Button.BorderColor3 = Color3.fromRGB(0, 0, 0)
 		Button.BorderSizePixel = 0
-		Button.Size = UDim2.new(1, -1, 0, 46)
+		Button.Size = UDim2.new(1, -1, 0, 56)
 		Button.ClipsDescendants = false
 		Button.ZIndex = Zindex + 5
 
