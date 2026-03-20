@@ -1165,8 +1165,8 @@ local function BuildRadiusESP()
 		part.CanCollide = false
 		part.CastShadow = false
 		part.Material = Enum.Material.SmoothPlastic
-		part.Color = Color3.fromRGB(255, 255, 255)
-		part.Transparency = 0
+		part.Color = Color3.fromRGB(220, 50, 50)
+		part.Transparency = 0.5
 		part.Size = Vector3.new(1, 0.2, 0.4)
 		part.Parent = workspace
 		RadiusESPParts[i] = part
@@ -1190,7 +1190,7 @@ local function UpdateRadiusESP()
 		local pos = Vector3.new(ox + r * math.cos(angle), oy, oz + r * math.sin(angle))
 		part.Size = Vector3.new(arcLen, 0.2, 0.4)
 		part.CFrame = CFrame.new(pos, center)
-		part.Transparency = 0
+		part.Transparency = 0.5
 	end
 end
 
