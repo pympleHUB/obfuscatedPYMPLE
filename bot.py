@@ -31,6 +31,7 @@ bot = commands.Bot(command_prefix="!", intents=intents)
 last_announce_msg_id = None
 bot_start_time = None
 last_rotation_time = None
+_recent_joins = {}
 ROTATION_HOURS = 12.0
 total_reports = 0
 recent_key_channel_msgs = collections.deque(maxlen=20)
@@ -707,6 +708,12 @@ async def unlock(ctx):
 
 @bot.event
 async def on_member_join(member: discord.Member):
+    key = (member.guild.id, member.id)
+    now = datetime.now()
+    if key in _recent_joins and (now - _recent_joins[key]).total_seconds() < 10:
+        return
+    _recent_joins[key] = now
+
     account_age = datetime.now() - member.created_at.replace(tzinfo=None)
     is_new = account_age.days < 30
     fields = [
