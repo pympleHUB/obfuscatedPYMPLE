@@ -6859,7 +6859,7 @@ function PYMPLE.new(Config : Window)
 				TextTransparency = 0.5
 			});
 		else
-			_lib:_Animation(TabFrame , Style , {
+			_lib:_Animation(TabFrame , TweenInfo.new(0.5, Enum.EasingStyle.Back, Enum.EasingDirection.In) , {
 				Size = UDim2.new(0, 85,1, 0)
 			});
 
@@ -11017,6 +11017,8 @@ UISection:AddSlider({
 })
 -- _GLOWBUTTON_TEXT_HOVER_SCALE: controls how much the label grows on hover for all glowButtons
 local _GLOWBUTTON_TEXT_HOVER_SCALE = 1.20
+-- _GLOWBUTTON_BTN_HOVER_SCALE: controls how much the whole button scales on hover (subtle)
+local _GLOWBUTTON_BTN_HOVER_SCALE = 1.02
 
 local function _glowButton(parentOrSection, labelText, callback)
 	local sRoot = (type(parentOrSection) == "table" and parentOrSection._Root) or parentOrSection
@@ -11029,6 +11031,9 @@ local function _glowButton(parentOrSection, labelText, callback)
 	Container.Position = UDim2.new(0.5, 0, 0, 0)
 	Container.Size = UDim2.new(1, -26, 0, 36)
 	Container.ZIndex = sRoot.ZIndex + 5
+	local ContainerScale = Instance.new("UIScale")
+	ContainerScale.Scale = 1
+	ContainerScale.Parent = Container
 
 	local Btn = Instance.new("Frame")
 	Btn.AnchorPoint = Vector2.new(0.5, 0.5)
@@ -11078,12 +11083,14 @@ local function _glowButton(parentOrSection, labelText, callback)
 			pimpleHUB:_Animation(Btn, TweenInfo.new(0.18), { BackgroundTransparency = 0 })
 			pimpleHUB:_Animation(BtnStroke, TweenInfo.new(0.18), { Transparency = 0 })
 			pimpleHUB:_Animation(LabelScale, HoverTween, { Scale = _GLOWBUTTON_TEXT_HOVER_SCALE })
+			pimpleHUB:_Animation(ContainerScale, HoverTween, { Scale = _GLOWBUTTON_BTN_HOVER_SCALE })
 		end
 	end, function()
 		if Btn.Parent then
 			pimpleHUB:_Animation(Btn, TweenInfo.new(0.18), { BackgroundTransparency = 0.1 })
 			pimpleHUB:_Animation(BtnStroke, TweenInfo.new(0.18), { Transparency = 0.3 })
 			pimpleHUB:_Animation(LabelScale, HoverTween, { Scale = 1 })
+			pimpleHUB:_Animation(ContainerScale, HoverTween, { Scale = 1 })
 		end
 	end)
 end
