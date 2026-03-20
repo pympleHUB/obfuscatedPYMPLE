@@ -16355,7 +16355,7 @@ end
 		:AddHelper({ Text = "TP to crystal on arrival" })
 	FSec:AddDropdown({
 		Name = "Farm Zone",
-		Default = "Auto",
+		Default = fn.PortalDisplayName(F.SelectedIsland),
 		Values = fn.GetIslandNames(),
 		Flag = "SelectedIsland",
 		Callback = function(v)
@@ -16554,7 +16554,7 @@ end
 	local DSec = DTab:DrawSection({ Name = "Auto Dungeons", Position = "right" })
 	DSec:AddDropdown({
 		Name = "Dungeon Type",
-		Default = "Shadow Dungeon",
+		Default = _dtFwd[F.DungeonType] or "Shadow Dungeon",
 		Values = { "Shadow Dungeon", "Rune Dungeon", "Cid Dungeon" },
 		Flag = "SelectedDungeonType",
 		Callback = function(v)
