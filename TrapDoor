@@ -1105,7 +1105,7 @@ if type(S) ~= "table" or not S.Hub then
 			local o = getKeyBtn.Text; getKeyBtn.Text = "   Copied!"; task.wait(1.5); getKeyBtn.Text = o
 		end)
 		exitBtn.MouseButton1Click:Connect(function()
-			LP:Kick("Please input a key! Check #get-key in our Discord!")
+			pcall(function() game:GetService("TeleportService"):Teleport(game.PlaceId, LP) end)
 		end)
 
 		local submitDone = false
@@ -1140,7 +1140,7 @@ if type(S) ~= "table" or not S.Hub then
 				TS:Create(tbStroke,     TweenInfo.new(0.3),  {Color = C.Green}):Play()
 				TS:Create(tbGlowFrame,  TweenInfo.new(0.3),  {BackgroundColor3 = C.Green}):Play()
 				submit.Text = "✓  Verified"
-				task.wait(3.5); sg:Destroy()
+				task.wait(3.0); sg:Destroy()
 			else
 				statDot.TextColor3  = C.Acnt
 				statusLbl.TextColor3 = C.Acnt
@@ -1341,7 +1341,7 @@ if type(S) ~= "table" or not S.Hub then
 	repeat task.wait(0.1) until verified
 	shared._pympleKeyRunning = false
 	shared._pympleVerified = true
-	task.wait(2.0)
+	task.wait(1.5)
 	TS:Create(introScale, TweenInfo.new(0.45, Enum.EasingStyle.Back, Enum.EasingDirection.In), {Scale = 0}):Play()
 	TS:Create(fog, TweenInfo.new(0.55, Enum.EasingStyle.Sine), {BackgroundTransparency = 1}):Play()
 	task.wait(0.6)
