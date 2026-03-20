@@ -17419,28 +17419,6 @@ end
 end 
 S.Win:Update({ Username = LP.DisplayName, ExpireDate = "Loading..." })
 task.spawn(function()
-	task.wait(0.3)
-	local root = S.Win and S.Win.Root
-	if root then
-		local function _applyTextOutline(v)
-			if v:IsA("TextLabel") or v:IsA("TextButton") then
-				for _, c in ipairs(v:GetChildren()) do
-					if c:IsA("UIStroke") and c.ApplyStrokeMode == Enum.ApplyStrokeMode.Contextual then return end
-				end
-				local s = Instance.new("UIStroke")
-				s.Color = Color3.fromRGB(0, 0, 0)
-				s.Thickness = 1.2
-				s.ApplyStrokeMode = Enum.ApplyStrokeMode.Contextual
-				s.Parent = v
-			end
-		end
-		for _, v in ipairs(root:GetDescendants()) do
-			_applyTextOutline(v)
-		end
-		root.DescendantAdded:Connect(_applyTextOutline)
-	end
-end)
-task.spawn(function()
 	task.wait(0.2)
 	local root = S.Win and S.Win.Root
 	if root then
