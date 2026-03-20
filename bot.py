@@ -89,9 +89,14 @@ class CopyKeyView(discord.ui.View):
         if interaction.message and interaction.message.embeds:
             first_line = (interaction.message.embeds[0].description or "").split("\n")[0]
             key = first_line.replace("# ", "").replace("`", "").strip()
+        announcement_color = 0x2b2d31
+        if interaction.message and interaction.message.embeds:
+            c = interaction.message.embeds[0].color
+            if c:
+                announcement_color = c.value
         embed = discord.Embed(
             description=f"```\n{key}\n```",
-            color=0x2b2d31
+            color=announcement_color
         )
         embed.set_footer(text="Select all and copy the text above")
         await interaction.response.send_message(embed=embed, ephemeral=True)
