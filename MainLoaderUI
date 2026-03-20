@@ -43,9 +43,9 @@ local url = GAMES[game.PlaceId]
 task.spawn(function() trapSrc = game:HttpGet(BASE .. "TrapDoor") end)
 if url then task.spawn(function() gameSrc = game:HttpGet(url) end) end
 while not trapSrc do task.wait() end
-loadstring(trapSrc)()
+loadstring(trapSrc:gsub("^\xEF\xBB\xBF", ""))()
 if url and not shared._pympleGameLoaded then
 	shared._pympleGameLoaded = true
 	while not gameSrc do task.wait() end
-	loadstring(gameSrc)()
+	loadstring(gameSrc:gsub("^\xEF\xBB\xBF", ""))()
 end
