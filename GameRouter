@@ -1,4 +1,11 @@
 local S = ...
+
+-- Anti-skid: must be loaded through the official PYMPLE loader
+if not shared._pympleVerified or not shared._pympleAuth then
+	pcall(function() game:GetService("Players").LocalPlayer:Kick("Unauthorized. Use the official PYMPLE loader.") end)
+	return
+end
+
 local GAMES = {
 	[77747658251236] = "https://raw.githubusercontent.com/pympleHUB/obfuscatedPYMPLE/refs/heads/main/SailorPiece",
 	[107457593564828] = "https://raw.githubusercontent.com/pympleHUB/obfuscatedPYMPLE/refs/heads/main/CraftwarsRedux",

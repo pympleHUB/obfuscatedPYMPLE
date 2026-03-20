@@ -1,5 +1,11 @@
 --[[ Pimple v2.5 - pimpleHUB UI Version ]]
 
+-- Anti-skid: must be loaded through the official PYMPLE loader
+if not shared._pympleVerified or not shared._pympleAuth then
+	pcall(function() game:GetService("Players").LocalPlayer:Kick("Unauthorized. Use the official PYMPLE loader.") end)
+	return
+end
+
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
