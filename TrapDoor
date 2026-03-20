@@ -1075,6 +1075,8 @@ if type(S) ~= "table" or not S.Hub then
 				TS:Create(statStroke,       TweenInfo.new(0.2),  {Color = Color3.fromRGB(34, 160, 65)}):Play()
 				TS:Create(submit,           TweenInfo.new(0.25), {BackgroundColor3 = Color3.fromRGB(34, 197, 94)}):Play()
 				TS:Create(submitGlowStroke, TweenInfo.new(0.4),  {Color = Color3.fromRGB(50, 230, 100)}):Play()
+				TS:Create(tbStroke,     TweenInfo.new(0.3),  {Color = C.Green}):Play()
+				TS:Create(tbGlowFrame,  TweenInfo.new(0.3),  {BackgroundColor3 = C.Green}):Play()
 				submit.Text = "✓  Verified"
 				task.wait(0.8); sg:Destroy()
 			else
