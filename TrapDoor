@@ -194,7 +194,7 @@ if type(S) ~= "table" or not S.Hub then
 	winLbl.Size               = UDim2.fromOffset(115, 42)
 	winLbl.Position           = UDim2.fromOffset(60, 17)
 	winLbl.BackgroundTransparency = 1
-	winLbl.Text               = '<font size="18">PYMPLE</font>\n<font size="10">KEY SYSTEM</font>'
+	winLbl.Text               = '<font size="21">PYMPLE</font>\n<font size="11">KEY SYSTEM</font>'
 	winLbl.TextColor3         = C.Text
 	winLbl.Font               = Enum.Font.GothamBold
 	winLbl.TextSize           = 15
@@ -742,7 +742,7 @@ if type(S) ~= "table" or not S.Hub then
 		hdrTxt.TextColor3       = C.Text
 		hdrTxt.TextTransparency = 0.15
 		hdrTxt.Font             = Enum.Font.GothamBold
-		hdrTxt.TextSize         = 19
+		hdrTxt.TextSize         = 21
 		hdrTxt.TextXAlignment   = Enum.TextXAlignment.Left
 		hdrTxt.ZIndex           = 11
 		mkTS(hdrTxt)
