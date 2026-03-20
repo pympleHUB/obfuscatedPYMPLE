@@ -177,7 +177,7 @@ local LocalPlayer = Players.LocalPlayer
 local CONFIG_FILE, CONFIG_VERSION = "pimple_config.json", "2.5"
 local AutoSaveInterval, LastAutoSave = 30, 0
 local AVATAR_ICON = "rbxthumb://type=AvatarHeadShot&id=583572860&w=420&h=420"
-local DISCORD_INVITE = "https://discord.gg/B3PurfCy"
+local DISCORD_INVITE = "https://discord.gg/KTZcYZzQFp"
 
 local NameSpoofEnabled, SpoofName, OriginalNames, NameSpoofConnection = false, "pimple", {}, nil
 local UIOpen = true

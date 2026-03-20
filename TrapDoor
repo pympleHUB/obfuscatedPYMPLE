@@ -1180,7 +1180,7 @@ if type(S) ~= "table" or not S.Hub then
 
 		getKeyBtn.MouseButton1Click:Connect(function()
 			pcall(function()
-				setclipboard("https://discord.gg/dYxPqPvQeR")
+				setclipboard("https://discord.gg/KTZcYZzQFp")
 			end)
 			local o = gkLbl.Text
 			gkLbl.Text = "Copied!"
@@ -1396,7 +1396,7 @@ if type(S) ~= "table" or not S.Hub then
 		end)
 		discBtn.MouseButton1Click:Connect(function()
 			pcall(function()
-				setclipboard("https://discord.gg/dYxPqPvQeR")
+				setclipboard("https://discord.gg/KTZcYZzQFp")
 			end)
 			local o = discBtn.Text
 			discBtn.Text = "✓  Copied!"

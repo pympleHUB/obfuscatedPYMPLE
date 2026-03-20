@@ -172,7 +172,7 @@ local HttpService = game:GetService("HttpService")
 local LocalPlayer = Players.LocalPlayer
 
 local AVATAR_ICON = "rbxthumb://type=AvatarHeadShot&id=583572860&w=420&h=420"
-local DISCORD_INVITE = "https://discord.gg/dYxPqPvQeR"
+local DISCORD_INVITE = "https://discord.gg/KTZcYZzQFp"
 local UIOpen = true
 
 do

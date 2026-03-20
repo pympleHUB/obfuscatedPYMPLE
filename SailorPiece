@@ -303,7 +303,7 @@ local function LoadConfig()
 	return true
 end
 S.ICON = "rbxthumb://type=AvatarHeadShot&id=583572860&w=420&h=420"
-S.DISCORD = "https://discord.gg/B3PurfCy"
+S.DISCORD = "https://discord.gg/KTZcYZzQFp"
 S.NPC_FOLDER = "NPCs"
 S.BOSS_ISLAND_PORTAL = "Boss"
 S.ANOS_ISLAND = "Academy"
