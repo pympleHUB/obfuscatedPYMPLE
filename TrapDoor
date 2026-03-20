@@ -192,7 +192,7 @@ if type(S) ~= "table" or not S.Hub then
 	-- Title
 	local winLbl = Instance.new("TextLabel")
 	winLbl.Size               = UDim2.fromOffset(115, 42)
-	winLbl.Position           = UDim2.fromOffset(60, 17)
+	winLbl.Position           = UDim2.fromOffset(60, 9)
 	winLbl.BackgroundTransparency = 1
 	winLbl.Text               = '<font size="21">PYMPLE</font>\n<font size="11">KEY SYSTEM</font>'
 	winLbl.TextColor3         = C.Text
