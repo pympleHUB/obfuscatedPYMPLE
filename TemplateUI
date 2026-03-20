@@ -7855,6 +7855,14 @@ function PYMPLE.new(Config : Window)
 		UIStroke.Color = _lib.Colors.StrokeColor
 		UIStroke.Parent = ConfigList
 
+		local UIGradient_CL = Instance.new("UIGradient")
+		UIGradient_CL.Color = ColorSequence.new({
+			ColorSequenceKeypoint.new(0, Color3.new(1, 1, 1)),
+			ColorSequenceKeypoint.new(1, Color3.new(0.62, 0.62, 0.62))
+		})
+		UIGradient_CL.Rotation = 90
+		UIGradient_CL.Parent = ConfigList
+
 		table.insert(_lib.Elements.StrokeColor,{
 			Element = UIStroke,
 			Property = "Color"
@@ -7945,6 +7953,14 @@ function PYMPLE.new(Config : Window)
 
 		UIStroke_2.Color = _lib.Colors.StrokeColor
 		UIStroke_2.Parent = AddConfig
+
+		local UIGradient_AC = Instance.new("UIGradient")
+		UIGradient_AC.Color = ColorSequence.new({
+			ColorSequenceKeypoint.new(0, Color3.new(1, 1, 1)),
+			ColorSequenceKeypoint.new(1, Color3.new(0.62, 0.62, 0.62))
+		})
+		UIGradient_AC.Rotation = 90
+		UIGradient_AC.Parent = AddConfig
 
 		table.insert(_lib.Elements.StrokeColor,{
 			Element = UIStroke_2,
