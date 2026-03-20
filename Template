@@ -10981,6 +10981,24 @@ local function _glowButton(parentOrSection, labelText, callback)
 	local BtnCorner = Instance.new("UICorner")
 	BtnCorner.CornerRadius = UDim.new(0, 4)
 	BtnCorner.Parent = Btn
+	local GlossOverlay = Instance.new("Frame")
+	local GlossGradient = Instance.new("UIGradient")
+	GlossOverlay.Name = pimpleHUB:_RandomString()
+	GlossOverlay.Parent = Btn
+	GlossOverlay.AnchorPoint = Vector2.new(0.5, 0)
+	GlossOverlay.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+	GlossOverlay.BorderSizePixel = 0
+	GlossOverlay.Position = UDim2.new(0.5, 0, 0, 3)
+	GlossOverlay.Size = UDim2.new(0.6, 0, 0, 2)
+	GlossOverlay.ZIndex = Btn.ZIndex + 2
+	GlossGradient.Transparency = NumberSequence.new({
+		NumberSequenceKeypoint.new(0, 1),
+		NumberSequenceKeypoint.new(0.2, 0.6),
+		NumberSequenceKeypoint.new(0.8, 0.6),
+		NumberSequenceKeypoint.new(1, 1),
+	})
+	GlossGradient.Rotation = 0
+	GlossGradient.Parent = GlossOverlay
 	local BtnStroke = Instance.new("UIStroke")
 	BtnStroke.Color = pimpleHUB.Colors.Highlight
 	BtnStroke.Thickness = 1.5
