@@ -925,15 +925,22 @@ if type(S) ~= "table" or not S.Hub then
 		submit.Position         = UDim2.fromScale(0.5, 0.5)
 		submit.Size             = UDim2.new(1, 0, 0, 48)
 		submit.BackgroundColor3 = C.Acnt
-		submit.Text             = "Submit Key"
-		submit.TextColor3       = Color3.fromRGB(255, 255, 255)
-		submit.Font             = Enum.Font.GothamBold
-		submit.TextSize         = 16
+		submit.Text             = ""
 		submit.BorderSizePixel  = 0
 		submit.ZIndex           = 12
 		submit.Parent           = submitCont
-		mkTS(submit)
 		Instance.new("UICorner", submit).CornerRadius = UDim.new(0, 6)
+
+		local submitLbl = Instance.new("TextLabel", submit)
+		submitLbl.Size              = UDim2.fromScale(1, 1)
+		submitLbl.BackgroundTransparency = 1
+		submitLbl.Text              = "Submit Key"
+		submitLbl.TextColor3        = Color3.fromRGB(255, 255, 255)
+		submitLbl.Font              = Enum.Font.GothamBold
+		submitLbl.TextSize          = 16
+		submitLbl.ZIndex            = 13
+		mkTS(submitLbl)
+		local submitLblScale = Instance.new("UIScale", submitLbl)
 
 		local abadge = Instance.new("Frame", submit)
 		abadge.AnchorPoint      = Vector2.new(0, 0.5)
@@ -1086,6 +1093,7 @@ if type(S) ~= "table" or not S.Hub then
 				TS:Create(submit,          TweenInfo.new(0.1), {BackgroundColor3 = Color3.fromRGB(240, 80, 80)}):Play()
 				TS:Create(submitBtnScale,  TI_SCALE_IN,  {Scale = 1.04}):Play()
 				TS:Create(submitGlowScale, TI_SCALE_IN,  {Scale = 1.04}):Play()
+				TS:Create(submitLblScale,  TI_SCALE_IN,  {Scale = 1.12}):Play()
 			end
 		end)
 		submit.MouseLeave:Connect(function()
@@ -1093,6 +1101,7 @@ if type(S) ~= "table" or not S.Hub then
 				TS:Create(submit,          TweenInfo.new(0.1), {BackgroundColor3 = C.Acnt}):Play()
 				TS:Create(submitBtnScale,  TI_SCALE_OUT, {Scale = 1}):Play()
 				TS:Create(submitGlowScale, TI_SCALE_OUT, {Scale = 1}):Play()
+				TS:Create(submitLblScale,  TI_SCALE_OUT, {Scale = 1}):Play()
 			end
 		end)
 		submit.MouseButton1Click:Connect(function()
@@ -1109,7 +1118,7 @@ if type(S) ~= "table" or not S.Hub then
 				TS:Create(submitGlowStroke, TweenInfo.new(0.4),  {Color = Color3.fromRGB(50, 230, 100)}):Play()
 				TS:Create(tbStroke,     TweenInfo.new(0.3),  {Color = C.Green}):Play()
 				TS:Create(tbGlowFrame,  TweenInfo.new(0.3),  {BackgroundColor3 = C.Green}):Play()
-				submit.Text = "✓  Verified"
+				submitLbl.Text = "✓  Verified"
 				task.wait(3.0); sg:Destroy()
 			else
 				statDot.TextColor3  = C.Acnt
