@@ -158,6 +158,17 @@ def get_roblox_avatar():
         pass
     return ""
 
+def get_cat_gif():
+    try:
+        r = requests.get("https://api.thecatapi.com/v1/images/search?mime_types=gif", timeout=5)
+        if r.status_code == 200:
+            data = r.json()
+            if data:
+                return data[0].get("url", "")
+    except:
+        pass
+    return ""
+
 def generate_key():
     return "PYMPLE-" + "".join(random.choices(string.ascii_uppercase + string.digits, k=6))
 
@@ -291,7 +302,10 @@ async def announce_key(new_key, expires_at=None):
 
     color = random.choice(COLORS)
     greeting = random.choice(GREETINGS)
-    rotation_count = await asyncio.to_thread(get_rotation_count)
+    rotation_count, cat_gif = await asyncio.gather(
+        asyncio.to_thread(get_rotation_count),
+        asyncio.to_thread(get_cat_gif),
+    )
 
     desc = f"# `{new_key}`\n\n"
     if expires_at:
@@ -306,6 +320,8 @@ async def announce_key(new_key, expires_at=None):
 
     thumb = THUMBNAIL_URL or bot.user.display_avatar.url
     embed.set_thumbnail(url=thumb)
+    if cat_gif:
+        embed.set_image(url=cat_gif)
 
     msg = await channel.send(embed=embed, view=CopyKeyView())
     last_announce_msg_id = msg.id
@@ -760,7 +776,7 @@ async def on_message_edit(before: discord.Message, after: discord.Message):
 @bot.event
 async def on_message(message: discord.Message):
     if message.webhook_id and message.channel.id == LOG_CHANNEL_ID:
-        if message.embeds and message.embeds[0].title == "pimpleHUB Executed":
+        if message.embeds and message.embeds[0].title == "pympleHUB Executed":
             count = await asyncio.to_thread(increment_exec_count)
             await update_exec_channel(count)
         return
