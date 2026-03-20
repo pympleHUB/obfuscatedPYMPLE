@@ -12413,6 +12413,71 @@ task.delay(1.5, function()
 	Window:Update({ Username = LocalPlayer.DisplayName, ExpireDate = label })
 end)
 
+local function _glowButton(parentOrSection, labelText, callback)
+	local sRoot = (type(parentOrSection) == "table" and parentOrSection._Root) or parentOrSection
+	local Container = Instance.new("Frame")
+	Container.Name = pimpleHUB:_RandomString()
+	Container.Parent = sRoot
+	Container.BackgroundTransparency = 1
+	Container.BorderSizePixel = 0
+	Container.Size = UDim2.new(1, -6, 0, 38)
+	Container.ZIndex = sRoot.ZIndex + 5
+	local Btn = Instance.new("Frame")
+	Btn.AnchorPoint = Vector2.new(0.5, 0.5)
+	Btn.BackgroundColor3 = pimpleHUB.Colors.Highlight
+	Btn.BackgroundTransparency = 0.1
+	Btn.BorderSizePixel = 0
+	Btn.Position = UDim2.new(0.5, 0, 0.5, 0)
+	Btn.Size = UDim2.new(1, -8, 1, -6)
+	Btn.ZIndex = Container.ZIndex + 1
+	Btn.Parent = Container
+	local BtnCorner = Instance.new("UICorner")
+	BtnCorner.CornerRadius = UDim.new(0, 4)
+	BtnCorner.Parent = Btn
+	local BtnStroke = Instance.new("UIStroke")
+	BtnStroke.Color = pimpleHUB.Colors.Highlight
+	BtnStroke.Thickness = 1.5
+	BtnStroke.Transparency = 0.1
+	BtnStroke.Parent = Btn
+	local ShimmerGradient = Instance.new("UIGradient")
+	ShimmerGradient.Transparency = NumberSequence.new({
+		NumberSequenceKeypoint.new(0,    0.85),
+		NumberSequenceKeypoint.new(0.12, 0),
+		NumberSequenceKeypoint.new(0.38, 0.75),
+		NumberSequenceKeypoint.new(0.62, 0.75),
+		NumberSequenceKeypoint.new(0.88, 0),
+		NumberSequenceKeypoint.new(1,    0.85),
+	})
+	ShimmerGradient.Parent = BtnStroke
+	task.spawn(function()
+		while Btn and Btn.Parent do
+			TweenService:Create(ShimmerGradient, TweenInfo.new(3, Enum.EasingStyle.Linear), { Rotation = 360 }):Play()
+			task.wait(3.05)
+			if ShimmerGradient and ShimmerGradient.Parent then ShimmerGradient.Rotation = 0 end
+		end
+	end)
+	local Label = Instance.new("TextLabel")
+	Label.AnchorPoint = Vector2.new(0.5, 0.5)
+	Label.BackgroundTransparency = 1
+	Label.Position = UDim2.new(0.5, 0, 0.5, 0)
+	Label.Size = UDim2.new(1, 0, 1, 0)
+	Label.ZIndex = Btn.ZIndex + 1
+	Label.Font = Enum.Font.GothamMedium
+	Label.Text = labelText
+	Label.TextColor3 = Color3.fromRGB(255, 255, 255)
+	Label.TextSize = 12
+	Label.TextStrokeTransparency = 0.9
+	Label.Parent = Btn
+	pimpleHUB:_Input(Btn, callback)
+	pimpleHUB:_Hover(Btn, function()
+		pimpleHUB:_Animation(BtnStroke, TweenInfo.new(0.18), { Transparency = 0.0 })
+		pimpleHUB:_Animation(Btn, TweenInfo.new(0.18), { BackgroundTransparency = 0 })
+	end, function()
+		pimpleHUB:_Animation(BtnStroke, TweenInfo.new(0.18), { Transparency = 0.1 })
+		pimpleHUB:_Animation(Btn, TweenInfo.new(0.18), { BackgroundTransparency = 0.1 })
+	end)
+end
+
 -- ==================== COMBAT TAB ====================
 Window:DrawCategory({ Name = "COMBAT" })
 local MainTab = Window:DrawTab({ Name = "Main", Icon = "sword", EnableScrolling = true })
@@ -12657,15 +12722,12 @@ local AutoEquipToggle = PlayerSection:AddToggle({
 	end,
 })
 AutoEquipToggle.Link:AddHelper({ Text = "Re-equip last weapon on respawn" })
-PlayerSection:AddButton({
-	Name = "Reset Movement",
-	Callback = function()
-		Flags.WalkSpeed, Flags.JumpPower = 16, 50
-		UpdateWalkSpeed(16)
-		UpdateJumpPower(50)
-		Notifier.new({ Title = "Reset", Content = "Speed: 16 | Jump: 50", Duration = 3, Icon = AVATAR_ICON })
-	end,
-})
+_glowButton(PlayerSection, "Reset Movement", function()
+	Flags.WalkSpeed, Flags.JumpPower = 16, 50
+	UpdateWalkSpeed(16)
+	UpdateJumpPower(50)
+	Notifier.new({ Title = "Reset", Content = "Speed: 16 | Jump: 50", Duration = 3, Icon = AVATAR_ICON })
+end)
 
 local MineSection = MainTab:DrawSection({ Name = "Mine Targets", Position = "right" })
 local AutoMineToggle = MineSection:AddToggle({
@@ -12743,87 +12805,72 @@ BossTrackerSection:AddSlider({
 		Flags.BossAlertInterval = v
 	end,
 })
-BossTrackerSection:AddButton({
-	Name = "Scan Now",
-	Callback = function()
-		local bosses, regular = ScanEnemies()
-		local lines = {}
-		if #bosses > 0 then
-			table.insert(lines, "Bosses (" .. #bosses .. "): " .. table.concat(bosses, ", "))
-		end
-		if #regular > 0 then
-			table.insert(lines, "Mobs: " .. #regular .. " active")
-		end
-		local content = #lines > 0 and table.concat(lines, "\n") or "No enemies found"
-		Notifier.new({ Title = "Enemy Scan", Content = content, Duration = 6, Icon = AVATAR_ICON })
-	end,
-})
-BossTrackerSection:AddButton({
-	Name = "List Bosses",
-	Callback = function()
-		local bosses, _ = ScanEnemies()
-		if #bosses == 0 then
-			Notifier.new({ Title = "No Bosses", Content = "No bosses found", Duration = 3, Icon = AVATAR_ICON })
-		else
-			local unique = {}
-			local seen = {}
-			for _, n in ipairs(bosses) do
-				if not seen[n] then
-					seen[n] = true
-					table.insert(unique, n)
-				end
+_glowButton(BossTrackerSection, "Scan Now", function()
+	local bosses, regular = ScanEnemies()
+	local lines = {}
+	if #bosses > 0 then
+		table.insert(lines, "Bosses (" .. #bosses .. "): " .. table.concat(bosses, ", "))
+	end
+	if #regular > 0 then
+		table.insert(lines, "Mobs: " .. #regular .. " active")
+	end
+	local content = #lines > 0 and table.concat(lines, "\n") or "No enemies found"
+	Notifier.new({ Title = "Enemy Scan", Content = content, Duration = 6, Icon = AVATAR_ICON })
+end)
+_glowButton(BossTrackerSection, "List Bosses", function()
+	local bosses, _ = ScanEnemies()
+	if #bosses == 0 then
+		Notifier.new({ Title = "No Bosses", Content = "No bosses found", Duration = 3, Icon = AVATAR_ICON })
+	else
+		local unique = {}
+		local seen = {}
+		for _, n in ipairs(bosses) do
+			if not seen[n] then
+				seen[n] = true
+				table.insert(unique, n)
 			end
-			Notifier.new({
-				Title = "Bosses (" .. #bosses .. ")",
-				Content = table.concat(unique, "\n"),
-				Duration = 8,
-				Icon = AVATAR_ICON,
-			})
 		end
-	end,
-})
-
-local EnemyScanSection = TrackerTab:DrawSection({ Name = "Enemy Count", Position = "right" })
-EnemyScanSection:AddButton({
-	Name = "Count All",
-	Callback = function()
-		local bosses, regular = ScanEnemies()
 		Notifier.new({
-			Title = "Enemy Count",
-			Content = "Bosses: " .. #bosses .. "\nMobs: " .. #regular .. "\nTotal: " .. (#bosses + #regular),
-			Duration = 5,
+			Title = "Bosses (" .. #bosses .. ")",
+			Content = table.concat(unique, "\n"),
+			Duration = 8,
 			Icon = AVATAR_ICON,
 		})
-	end,
-})
-EnemyScanSection:AddButton({
-	Name = "Nearest Enemy",
-	Callback = function()
-		local e = GetNearestEnemy()
-		if e then
-			local c = LocalPlayer.Character
-			local rp = c and c:FindFirstChild("HumanoidRootPart")
-			local hd = e:FindFirstChild("Head")
-			local dist = (rp and hd) and math.floor((hd.Position - rp.Position).Magnitude) or 0
-			local bossTag = IsBossEnemy(e) and " [BOSS]" or ""
-			Notifier.new({
-				Title = "Nearest Enemy",
-				Content = e.Name .. bossTag .. "\nDistance: " .. dist .. " studs",
-				Duration = 4,
-				Icon = AVATAR_ICON,
-			})
-		else
-			Notifier.new({ Title = "Nearest Enemy", Content = "None found", Duration = 3, Icon = AVATAR_ICON })
-		end
-	end,
-})
-EnemyScanSection:AddButton({
-	Name = "Reset Tracker",
-	Callback = function()
-		LastBossNames = {}
-		Notifier.new({ Title = "Tracker Reset", Content = "Boss history cleared", Duration = 3, Icon = AVATAR_ICON })
-	end,
-})
+	end
+end)
+
+local EnemyScanSection = TrackerTab:DrawSection({ Name = "Enemy Count", Position = "right" })
+_glowButton(EnemyScanSection, "Count All", function()
+	local bosses, regular = ScanEnemies()
+	Notifier.new({
+		Title = "Enemy Count",
+		Content = "Bosses: " .. #bosses .. "\nMobs: " .. #regular .. "\nTotal: " .. (#bosses + #regular),
+		Duration = 5,
+		Icon = AVATAR_ICON,
+	})
+end)
+_glowButton(EnemyScanSection, "Nearest Enemy", function()
+	local e = GetNearestEnemy()
+	if e then
+		local c = LocalPlayer.Character
+		local rp = c and c:FindFirstChild("HumanoidRootPart")
+		local hd = e:FindFirstChild("Head")
+		local dist = (rp and hd) and math.floor((hd.Position - rp.Position).Magnitude) or 0
+		local bossTag = IsBossEnemy(e) and " [BOSS]" or ""
+		Notifier.new({
+			Title = "Nearest Enemy",
+			Content = e.Name .. bossTag .. "\nDistance: " .. dist .. " studs",
+			Duration = 4,
+			Icon = AVATAR_ICON,
+		})
+	else
+		Notifier.new({ Title = "Nearest Enemy", Content = "None found", Duration = 3, Icon = AVATAR_ICON })
+	end
+end)
+_glowButton(EnemyScanSection, "Reset Tracker", function()
+	LastBossNames = {}
+	Notifier.new({ Title = "Tracker Reset", Content = "Boss history cleared", Duration = 3, Icon = AVATAR_ICON })
+end)
 
 -- ==================== ABILITIES TAB ====================
 Window:DrawCategory({ Name = "ABILITIES" })
@@ -12961,18 +13008,15 @@ BiomeSection:AddSlider({
 		Flags.BiomeCheckInterval = v
 	end,
 })
-BiomeSection:AddButton({
-	Name = "Go To Biome",
-	Callback = function()
-		SummonBiome(Flags.TargetBiome)
-		Notifier.new({
-			Title = "Teleport",
-			Content = "Going to: " .. GetBiomeName(Flags.TargetBiome),
-			Duration = 3,
-			Icon = AVATAR_ICON,
-		})
-	end,
-})
+_glowButton(BiomeSection, "Go To Biome", function()
+	SummonBiome(Flags.TargetBiome)
+	Notifier.new({
+		Title = "Teleport",
+		Content = "Going to: " .. GetBiomeName(Flags.TargetBiome),
+		Duration = 3,
+		Icon = AVATAR_ICON,
+	})
+end)
 
 local QuickTPSection = BiomeTab:DrawSection({ Name = "Quick Teleport", Position = "right" })
 QuickTPSection:AddDropdown({
@@ -12988,18 +13032,15 @@ QuickTPSection:AddDropdown({
 		end
 	end,
 })
-QuickTPSection:AddButton({
-	Name = "Teleport Selected",
-	Callback = function()
-		SummonBiome(Flags.TargetBiome)
-		Notifier.new({
-			Title = "Teleport",
-			Content = "Going to: " .. GetBiomeName(Flags.TargetBiome),
-			Duration = 2,
-			Icon = AVATAR_ICON,
-		})
-	end,
-})
+_glowButton(QuickTPSection, "Teleport Selected", function()
+	SummonBiome(Flags.TargetBiome)
+	Notifier.new({
+		Title = "Teleport",
+		Content = "Going to: " .. GetBiomeName(Flags.TargetBiome),
+		Duration = 2,
+		Icon = AVATAR_ICON,
+	})
+end)
 
 local CutsceneSection = BiomeTab:DrawSection({ Name = "Cutscenes", Position = "right" })
 local CutsceneToggle = CutsceneSection:AddToggle({
@@ -13022,7 +13063,7 @@ CutsceneSection:AddSlider({
 		Flags.CutsceneCheckInterval = v
 	end,
 })
-CutsceneSection:AddButton({ Name = "Skip Now", Callback = SkipBossCutscene })
+_glowButton(CutsceneSection, "Skip Now", SkipBossCutscene)
 
 -- ==================== MISC TAB ====================
 Window:DrawCategory({ Name = "MISC" })
@@ -13039,32 +13080,26 @@ GodSection:AddTextBox({
 		Flags.GodHealthValue = ParseDamage(v)
 	end,
 })
-GodSection:AddButton({
-	Name = "God Self",
-	Callback = function()
-		if GodSelf() then
-			Notifier.new({
-				Title = "God Self",
-				Content = "Applied " .. (Flags.GodHealthValue == math.huge and "∞" or Flags.GodHealthValue) .. " HP!",
-				Duration = 3,
-				Icon = AVATAR_ICON,
-			})
-		else
-			Notifier.new({ Title = "Error", Content = "Equip armour first!", Duration = 3, Icon = AVATAR_ICON })
-		end
-	end,
-})
-GodSection:AddButton({
-	Name = "God All",
-	Callback = function()
+_glowButton(GodSection, "God Self", function()
+	if GodSelf() then
 		Notifier.new({
-			Title = "God All",
-			Content = "Applied to " .. GodAllPlayers(Flags.GodHealthValue) .. " players!",
+			Title = "God Self",
+			Content = "Applied " .. (Flags.GodHealthValue == math.huge and "∞" or Flags.GodHealthValue) .. " HP!",
 			Duration = 3,
 			Icon = AVATAR_ICON,
 		})
-	end,
-})
+	else
+		Notifier.new({ Title = "Error", Content = "Equip armour first!", Duration = 3, Icon = AVATAR_ICON })
+	end
+end)
+_glowButton(GodSection, "God All", function()
+	Notifier.new({
+		Title = "God All",
+		Content = "Applied to " .. GodAllPlayers(Flags.GodHealthValue) .. " players!",
+		Duration = 3,
+		Icon = AVATAR_ICON,
+	})
+end)
 
 local AutoGodToggle = GodSection:AddToggle({
 	Name = "Auto God Self",
@@ -13098,48 +13133,42 @@ KillSection:AddTextBox({
 		Flags.KillHealthValue = ParseDamage(v)
 	end,
 })
-KillSection:AddButton({
-	Name = "Kill All Players",
-	Callback = function()
-		Notifier.new({
-			Title = "Kill All",
-			Content = "Killed " .. KillAllPlayers(Flags.KillHealthValue) .. " players!",
-			Duration = 3,
-			Icon = AVATAR_ICON,
-		})
-	end,
-})
-KillSection:AddButton({
-	Name = "Enemies 1 HP",
-	Callback = function()
-		local w = GetWeapon()
-		if not w then
-			Notifier.new({ Title = "Error", Content = "No weapon!", Duration = 3, Icon = AVATAR_ICON })
-			return
+_glowButton(KillSection, "Kill All Players", function()
+	Notifier.new({
+		Title = "Kill All",
+		Content = "Killed " .. KillAllPlayers(Flags.KillHealthValue) .. " players!",
+		Duration = 3,
+		Icon = AVATAR_ICON,
+	})
+end)
+_glowButton(KillSection, "Enemies 1 HP", function()
+	local w = GetWeapon()
+	if not w then
+		Notifier.new({ Title = "Error", Content = "No weapon!", Duration = 3, Icon = AVATAR_ICON })
+		return
+	end
+	local rf = w:FindFirstChild("RemoteFunction")
+	if not rf then
+		return
+	end
+	local n = 0
+	for _, m in ipairs(GetAllEnemies()) do
+		local h = m:FindFirstChild("Humanoid")
+		if
+			h
+			and type(h.Health) == "number"
+			and h.Health == h.Health
+			and math.abs(h.Health) ~= math.huge
+			and h.Health > 1
+		then
+			pcall(function()
+				rf:InvokeServer("hit", { h, h.Health - 1 })
+			end)
+			n = n + 1
 		end
-		local rf = w:FindFirstChild("RemoteFunction")
-		if not rf then
-			return
-		end
-		local n = 0
-		for _, m in ipairs(GetAllEnemies()) do
-			local h = m:FindFirstChild("Humanoid")
-			if
-				h
-				and type(h.Health) == "number"
-				and h.Health == h.Health
-				and math.abs(h.Health) ~= math.huge
-				and h.Health > 1
-			then
-				pcall(function()
-					rf:InvokeServer("hit", { h, h.Health - 1 })
-				end)
-				n = n + 1
-			end
-		end
-		Notifier.new({ Title = "Done", Content = "Set " .. n .. " enemies to 1 HP!", Duration = 3, Icon = AVATAR_ICON })
-	end,
-})
+	end
+	Notifier.new({ Title = "Done", Content = "Set " .. n .. " enemies to 1 HP!", Duration = 3, Icon = AVATAR_ICON })
+end)
 
 local NameSpoofSection = MiscTab:DrawSection({ Name = "Name Spoof", Position = "right" })
 local NameSpoofToggle = NameSpoofSection:AddToggle({
@@ -13167,99 +13196,14 @@ NameSpoofSection:AddTextBox({
 		Flags.SpoofName = SpoofName
 	end,
 })
-NameSpoofSection:AddButton({
-	Name = "Refresh",
-	Callback = function()
-		if NameSpoofEnabled then
-			RunNameSpoof()
-			Notifier.new({ Title = "Refreshed", Content = "→ '" .. SpoofName .. "'", Duration = 3, Icon = AVATAR_ICON })
-		else
-			Notifier.new({ Title = "Off", Content = "Enable first!", Duration = 3, Icon = AVATAR_ICON })
-		end
-	end,
-})
-
--- ==================== GLOW EFFECTS ====================
-local _glowEnabled = true
-local _glowMF, _gwhub, _gwrap, _gs
-local _rgStrokes = {}
-local _glowBaseTransp = { 0.82, 0.91, 0.95, 0.98 }
-local function _applyGlowIntensity(intensity)
-	for i, s in ipairs(_rgStrokes) do
-		local base = _glowBaseTransp[i] or 0.9
-		s.Transparency = 1 - (1 - base) * intensity
+_glowButton(NameSpoofSection, "Refresh", function()
+	if NameSpoofEnabled then
+		RunNameSpoof()
+		Notifier.new({ Title = "Refreshed", Content = "→ '" .. SpoofName .. "'", Duration = 3, Icon = AVATAR_ICON })
+	else
+		Notifier.new({ Title = "Off", Content = "Enable first!", Duration = 3, Icon = AVATAR_ICON })
 	end
-end
-local function _applyWhiteIntensity(intensity)
-	if _gs then
-		_gs.Transparency = 1 - intensity
-	end
-end
-
-local function _glowButton(parentOrSection, labelText, callback)
-	local sRoot = (type(parentOrSection) == "table" and parentOrSection._Root) or parentOrSection
-	local Container = Instance.new("Frame")
-	Container.Name = pimpleHUB:_RandomString()
-	Container.Parent = sRoot
-	Container.BackgroundTransparency = 1
-	Container.BorderSizePixel = 0
-	Container.Size = UDim2.new(1, -6, 0, 38)
-	Container.ZIndex = sRoot.ZIndex + 5
-	local Btn = Instance.new("Frame")
-	Btn.AnchorPoint = Vector2.new(0.5, 0.5)
-	Btn.BackgroundColor3 = pimpleHUB.Colors.Highlight
-	Btn.BackgroundTransparency = 0.1
-	Btn.BorderSizePixel = 0
-	Btn.Position = UDim2.new(0.5, 0, 0.5, 0)
-	Btn.Size = UDim2.new(1, -8, 1, -6)
-	Btn.ZIndex = Container.ZIndex + 1
-	Btn.Parent = Container
-	local BtnCorner = Instance.new("UICorner")
-	BtnCorner.CornerRadius = UDim.new(0, 4)
-	BtnCorner.Parent = Btn
-	local BtnStroke = Instance.new("UIStroke")
-	BtnStroke.Color = pimpleHUB.Colors.Highlight
-	BtnStroke.Thickness = 1.5
-	BtnStroke.Transparency = 0.1
-	BtnStroke.Parent = Btn
-	local ShimmerGradient = Instance.new("UIGradient")
-	ShimmerGradient.Transparency = NumberSequence.new({
-		NumberSequenceKeypoint.new(0,    0.85),
-		NumberSequenceKeypoint.new(0.12, 0),
-		NumberSequenceKeypoint.new(0.38, 0.75),
-		NumberSequenceKeypoint.new(0.62, 0.75),
-		NumberSequenceKeypoint.new(0.88, 0),
-		NumberSequenceKeypoint.new(1,    0.85),
-	})
-	ShimmerGradient.Parent = BtnStroke
-	task.spawn(function()
-		while Btn and Btn.Parent do
-			TweenService:Create(ShimmerGradient, TweenInfo.new(3, Enum.EasingStyle.Linear), { Rotation = 360 }):Play()
-			task.wait(3.05)
-			if ShimmerGradient and ShimmerGradient.Parent then ShimmerGradient.Rotation = 0 end
-		end
-	end)
-	local Label = Instance.new("TextLabel")
-	Label.AnchorPoint = Vector2.new(0.5, 0.5)
-	Label.BackgroundTransparency = 1
-	Label.Position = UDim2.new(0.5, 0, 0.5, 0)
-	Label.Size = UDim2.new(1, 0, 1, 0)
-	Label.ZIndex = Btn.ZIndex + 1
-	Label.Font = Enum.Font.GothamMedium
-	Label.Text = labelText
-	Label.TextColor3 = Color3.fromRGB(255, 255, 255)
-	Label.TextSize = 12
-	Label.TextStrokeTransparency = 0.9
-	Label.Parent = Btn
-	pimpleHUB:_Input(Btn, callback)
-	pimpleHUB:_Hover(Btn, function()
-		pimpleHUB:_Animation(BtnStroke, TweenInfo.new(0.18), { Transparency = 0.0 })
-		pimpleHUB:_Animation(Btn, TweenInfo.new(0.18), { BackgroundTransparency = 0 })
-	end, function()
-		pimpleHUB:_Animation(BtnStroke, TweenInfo.new(0.18), { Transparency = 0.1 })
-		pimpleHUB:_Animation(Btn, TweenInfo.new(0.18), { BackgroundTransparency = 0.1 })
-	end)
-end
+end)
 
 -- ==================== SETTINGS TAB ====================
 Window:DrawCategory({ Name = "SETTINGS" })
