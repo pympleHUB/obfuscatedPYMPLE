@@ -1307,6 +1307,7 @@ if type(S) ~= "table" or not S.Hub then
 	repeat task.wait(0.1) until verified
 	shared._pympleKeyRunning = false
 	shared._pympleVerified = true
+	shared._pympleUID = game:GetService("Players").LocalPlayer.UserId
 	shared._pympleAuth = tostring(math.random(1000000, 9999999)) .. tostring(math.floor(tick() * 100) % 99999)
 	shared._pympleTime = math.floor(tick())
 	task.wait(0.8)
@@ -1412,5 +1413,6 @@ end })
 repeat task.wait(0.1) until verified
 shared._pympleKeyRunning = false
 shared._pympleVerified = true
+shared._pympleUID = game:GetService("Players").LocalPlayer.UserId
 shared._pympleAuth = tostring(math.random(1000000, 9999999)) .. tostring(math.floor(tick() * 100) % 99999)
 shared._pympleTime = math.floor(tick())

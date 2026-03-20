@@ -5,7 +5,7 @@ do
 	local _k = 439041101
 	local _ot = {954447687, 954442033, 1000853860, 1354295303}
 	local _owner = false for _, v in ipairs(_ot) do if bit32.bxor(v, _k) == _uid then _owner = true break end end
-	local _ok = _owner or (shared._pympleVerified and shared._pympleAuth and shared._pympleTime and (tick() - shared._pympleTime) < 120)
+	local _ok = _owner or (shared._pympleVerified and shared._pympleAuth and shared._pympleTime and shared._pympleUID == _uid and (tick() - shared._pympleTime) < 120)
 	if not _ok then
 		local _reason = (shared._pympleVerified and shared._pympleAuth and shared._pympleTime) and "token expired" or "missing auth"
 		pcall(function()

