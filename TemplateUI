@@ -1,4 +1,4 @@
-﻿--[[ PYMPLE v1.0 - pimpleHUB UI Template ]]
+﻿﻿--[[ PYMPLE v1.0 - pimpleHUB UI Template ]]
 
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
@@ -7,12 +7,12 @@ local HttpService = game:GetService("HttpService")
 local LocalPlayer = Players.LocalPlayer
 
 local AVATAR_ICON = "rbxthumb://type=AvatarHeadShot&id=583572860&w=420&h=420"
-local DISCORD_INVITE = "https://discord.gg/B3PurfCy"
+local DISCORD_INVITE = "https://discord.gg/dYxPqPvQeR"
 local UIOpen = true
 
 do
 	local _x=bit32.bxor local function _r(t,k)local o={}for i,v in ipairs(t)do o[i]=string.char(_x(v,k))end return table.concat(o)end
-	if not(AVATAR_ICON:find(_r({74,71,76,74,72,77,71,73,79},0x7F),1,true)and DISCORD_INVITE:find(_r({67,50,81,116,115,103,66,120},0x01),1,true))then return end
+	if not(AVATAR_ICON:find(_r({74,71,76,74,72,77,71,73,79},0x7F),1,true)and DISCORD_INVITE:find(_r({101,88,121,81,112,81,119,80},0x01),1,true))then return end
 end
 
 local pimpleHUB = (function()
@@ -417,6 +417,7 @@ PYMPLE.Elements = {
 	BlockBackground = {},
 	LineColor = {},
 	HighStrokeColor = {},
+	Toggle = {},
 };
 
 PYMPLE.DragBlacklist = {};
@@ -1459,7 +1460,7 @@ function PYMPLE:_SetNilP(Ins: Instance , Parent: Instance)
 		PYMPLE.WindowsNil[Ins] = win;
 	end;
 
-	Ins.Parent = Parent or PYMPLE.NilFolder;
+	pcall(function() Ins.Parent = Parent or PYMPLE.NilFolder; end);
 end;
 
 function PYMPLE:SetAllText(flags : {[string] : string})
@@ -1870,20 +1871,51 @@ end;
 
 function PYMPLE:_AddLinkValue(Name , Default , GlobalBlock , LinkValues , rep , Signal)
 	if Name == "Toggle" then
+		local GlowWrapper = Instance.new("Frame")
+		local glowLayers = {}
+		local glowLayerData = {{0,0,0.60},{4,3,0.75},{8,6,0.87},{14,10,0.94}}
 		local Toggle = Instance.new("Frame")
 		local UICorner = Instance.new("UICorner")
 		local UIStroke = Instance.new("UIStroke")
 		local ToggleValue = Instance.new("Frame")
 		local UICorner_2 = Instance.new("UICorner")
 
+		GlowWrapper.Name = PYMPLE:_RandomString()
+		GlowWrapper.BackgroundTransparency = 1
+		GlowWrapper.BorderSizePixel = 0
+		GlowWrapper.ClipsDescendants = false
+		GlowWrapper.Size = UDim2.new(0, 40, 0, 22)
+		GlowWrapper.ZIndex = GlobalBlock.ZIndex
+		GlowWrapper.LayoutOrder = -#LinkValues:GetChildren()
+		GlowWrapper.Parent = LinkValues
+
+		for _, ld in ipairs(glowLayerData) do
+			local gf = Instance.new("Frame")
+			gf.Name = PYMPLE:_RandomString()
+			gf.AnchorPoint = Vector2.new(0.5, 0.5)
+			gf.Position = UDim2.new(0.5, 0, 0.5, 0)
+			gf.Size = UDim2.new(1, ld[1], 1, ld[2])
+			gf.BackgroundColor3 = PYMPLE.Colors.Toggle
+			gf.BackgroundTransparency = 1
+			gf.BorderSizePixel = 0
+			gf.ZIndex = GlobalBlock.ZIndex
+			gf.Parent = GlowWrapper
+			local gc = Instance.new("UICorner")
+			gc.CornerRadius = UDim.new(1, 0)
+			gc.Parent = gf
+			table.insert(PYMPLE.Elements.Toggle, {Element = gf, Property = "BackgroundColor3"})
+			table.insert(glowLayers, {Frame = gf, ActiveTransparency = ld[3]})
+		end
+
 		Toggle.Name = PYMPLE:_RandomString()
-		Toggle.Parent = LinkValues
+		Toggle.Parent = GlowWrapper
+		Toggle.AnchorPoint = Vector2.new(0.5, 0.5)
+		Toggle.Position = UDim2.new(0.5, 0, 0.5, 0)
 		Toggle.BackgroundColor3 = PYMPLE.Colors.DropColor
 		Toggle.BorderColor3 = Color3.fromRGB(0, 0, 0)
 		Toggle.BorderSizePixel = 0
 		Toggle.Size = UDim2.new(0, 30, 0, 16)
 		Toggle.ZIndex = GlobalBlock.ZIndex + 1
-		Toggle.LayoutOrder = -#LinkValues:GetChildren();
 
 		table.insert(PYMPLE.Elements.DropColor , {
 			Element = Toggle,
@@ -1930,6 +1962,13 @@ function PYMPLE:_AddLinkValue(Name , Default , GlobalBlock , LinkValues , rep , 
 				PYMPLE:_Animation(Toggle,rep.Tween,{
 					BackgroundColor3 = PYMPLE.Colors.Toggle
 				})
+
+				for _, gl in ipairs(glowLayers) do
+					PYMPLE:_Animation(gl.Frame,TweenInfo.new(0.12),{
+						BackgroundColor3 = PYMPLE.Colors.Toggle,
+						BackgroundTransparency = gl.ActiveTransparency
+					})
+				end
 			else
 				Toggle:SetAttribute('Enabled',false);
 
@@ -1940,6 +1979,12 @@ function PYMPLE:_AddLinkValue(Name , Default , GlobalBlock , LinkValues , rep , 
 				PYMPLE:_Animation(Toggle,rep.Tween,{
 					BackgroundColor3 = PYMPLE.Colors.DropColor
 				})
+
+				for _, gl in ipairs(glowLayers) do
+					PYMPLE:_Animation(gl.Frame,TweenInfo.new(0.12),{
+						BackgroundTransparency = 1
+					})
+				end
 			end;
 		end;
 
@@ -1972,6 +2017,14 @@ function PYMPLE:_AddLinkValue(Name , Default , GlobalBlock , LinkValues , rep , 
 				PYMPLE:_Animation(UIStroke,rep.Tween,{
 					Transparency = 0
 				})
+
+				if Default then
+					for _, gl in ipairs(glowLayers) do
+						PYMPLE:_Animation(gl.Frame,TweenInfo.new(0.12),{
+							BackgroundTransparency = gl.ActiveTransparency
+						})
+					end
+				end
 			else
 				ToggleElement(false,true);
 
@@ -1986,6 +2039,12 @@ function PYMPLE:_AddLinkValue(Name , Default , GlobalBlock , LinkValues , rep , 
 				PYMPLE:_Animation(UIStroke,rep.Tween,{
 					Transparency = 1
 				})
+
+				for _, gl in ipairs(glowLayers) do
+					PYMPLE:_Animation(gl.Frame,TweenInfo.new(0.12),{
+						BackgroundTransparency = 1
+					})
+				end
 			end;
 		end;
 
@@ -1994,7 +2053,7 @@ function PYMPLE:_AddLinkValue(Name , Default , GlobalBlock , LinkValues , rep , 
 		Signal:Connect(ToggleUI)
 
 		return {
-			Root = Toggle,
+			Root = GlowWrapper,
 			ChangeValue = ToggleElement,
 			Input = Input,
 			ToggleUI = ToggleUI,
@@ -6285,7 +6344,11 @@ function PYMPLE:RefreshCurrentColor()
 
 	for i,v in next , PYMPLE.Elements.DropColor do
 		if v.Element and v.Property then
-			v.Element[v.Property] = PYMPLE.Colors.DropColor;
+			if v.Element:GetAttribute('Enabled') then
+				v.Element[v.Property] = PYMPLE.Colors.Toggle;
+			else
+				v.Element[v.Property] = PYMPLE.Colors.DropColor;
+			end
 		end;
 	end;
 
@@ -6298,6 +6361,12 @@ function PYMPLE:RefreshCurrentColor()
 	for i,v in next , PYMPLE.Elements.HighStrokeColor do
 		if v.Element and v.Property then
 			v.Element[v.Property] = PYMPLE.Colors.HighStrokeColor;
+		end;
+	end;
+
+	for i,v in next , PYMPLE.Elements.Toggle do
+		if v.Element and v.Property then
+			v.Element[v.Property] = PYMPLE.Colors.Toggle;
 		end;
 	end;
 end;
@@ -10676,6 +10745,8 @@ Window.OnToggle = function(visible) UIOpen = visible end
 -- ==================== GLOW EFFECTS ====================
 local _glowEnabled = true
 local _glowMF, _gwhub, _gwrap, _gs
+local _glowButtonColor = Color3.fromRGB(220, 60, 60)
+local _glowButtons = {}
 local _rgStrokes = {}
 local _glowBaseTransp = { 0.82, 0.91, 0.95, 0.98 }
 local function _applyGlowIntensity(intensity)
@@ -10856,6 +10927,9 @@ UISection:AddColorPicker({
 	Callback = function(v)
 		pimpleHUB.Colors.Highlight = v
 		pimpleHUB:RefreshCurrentColor()
+		for _, s in ipairs(_rgStrokes) do
+			s.Color = v
+		end
 	end,
 })
 UISection:AddColorPicker({
@@ -10864,6 +10938,21 @@ UISection:AddColorPicker({
 	Callback = function(v)
 		pimpleHUB.Colors.Toggle = v
 		pimpleHUB:RefreshCurrentColor()
+	end,
+})
+UISection:AddColorPicker({
+	Name = "Button Color",
+	Default = Color3.fromRGB(220, 60, 60),
+	Callback = function(v)
+		_glowButtonColor = v
+		local bh, bs, bv = Color3.toHSV(v)
+		local darkerColor = Color3.fromHSV(bh, math.min(bs * 1.1, 1), bv * 0.55)
+		for _, b in ipairs(_glowButtons) do
+			b.Btn.BackgroundColor3 = v
+			if b.Stroke then
+				b.Stroke.Color = darkerColor
+			end
+		end
 	end,
 })
 UISection:AddColorPicker({
@@ -10917,15 +11006,6 @@ UISection:AddSlider({
 		_applyWhiteIntensity(v / 100)
 	end,
 })
-UISection:AddColorPicker({
-	Name = "Glow Color",
-	Default = Color3.fromRGB(220, 60, 60),
-	Callback = function(v)
-		for _, s in ipairs(_rgStrokes) do
-			s.Color = v
-		end
-	end,
-})
 UISection:AddSlider({
 	Name = "Bloom Intensity",
 	Min = 0,
@@ -10935,6 +11015,9 @@ UISection:AddSlider({
 		_applyGlowIntensity(v / 100)
 	end,
 })
+-- _GLOWBUTTON_TEXT_HOVER_SCALE: controls how much the label grows on hover for all glowButtons
+local _GLOWBUTTON_TEXT_HOVER_SCALE = 1.20
+
 local function _glowButton(parentOrSection, labelText, callback)
 	local sRoot = (type(parentOrSection) == "table" and parentOrSection._Root) or parentOrSection
 	local Container = Instance.new("Frame")
@@ -10942,62 +11025,33 @@ local function _glowButton(parentOrSection, labelText, callback)
 	Container.Parent = sRoot
 	Container.BackgroundTransparency = 1
 	Container.BorderSizePixel = 0
-	Container.Size = UDim2.new(1, -6, 0, 38)
+	Container.AnchorPoint = Vector2.new(0.5, 0)
+	Container.Position = UDim2.new(0.5, 0, 0, 0)
+	Container.Size = UDim2.new(1, -26, 0, 36)
 	Container.ZIndex = sRoot.ZIndex + 5
 
 	local Btn = Instance.new("Frame")
 	Btn.AnchorPoint = Vector2.new(0.5, 0.5)
-	Btn.BackgroundColor3 = pimpleHUB.Colors.Highlight
+	Btn.BackgroundColor3 = _glowButtonColor
 	Btn.BackgroundTransparency = 0.1
 	Btn.BorderSizePixel = 0
 	Btn.Position = UDim2.new(0.5, 0, 0.5, 0)
-	Btn.Size = UDim2.new(1, -8, 1, -6)
+	Btn.Size = UDim2.new(1, 0, 1, -6)
 	Btn.ZIndex = Container.ZIndex + 1
 	Btn.Parent = Container
 	local BtnCorner = Instance.new("UICorner")
 	BtnCorner.CornerRadius = UDim.new(0, 4)
 	BtnCorner.Parent = Btn
-	local GlossOverlay = Instance.new("Frame")
-	local GlossGradient = Instance.new("UIGradient")
-	GlossOverlay.Name = pimpleHUB:_RandomString()
-	GlossOverlay.Parent = Btn
-	GlossOverlay.AnchorPoint = Vector2.new(0.5, 0)
-	GlossOverlay.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-	GlossOverlay.BorderSizePixel = 0
-	GlossOverlay.Position = UDim2.new(0.5, 0, 0, 3)
-	GlossOverlay.Size = UDim2.new(0.6, 0, 0, 2)
-	GlossOverlay.ZIndex = Btn.ZIndex + 2
-	GlossGradient.Transparency = NumberSequence.new({
-		NumberSequenceKeypoint.new(0, 1),
-		NumberSequenceKeypoint.new(0.2, 0.6),
-		NumberSequenceKeypoint.new(0.8, 0.6),
-		NumberSequenceKeypoint.new(1, 1),
-	})
-	GlossGradient.Rotation = 0
-	GlossGradient.Parent = GlossOverlay
+
+	local h, s, v = Color3.toHSV(_glowButtonColor)
 	local BtnStroke = Instance.new("UIStroke")
-	BtnStroke.Color = pimpleHUB.Colors.Highlight
+	BtnStroke.Color = Color3.fromHSV(h, math.min(s * 1.1, 1), v * 0.55)
 	BtnStroke.Thickness = 1.5
-	BtnStroke.Transparency = 0.1
+	BtnStroke.Transparency = 0.3
+	BtnStroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
 	BtnStroke.Parent = Btn
-	local ShimmerGradient = Instance.new("UIGradient")
-	ShimmerGradient.Transparency = NumberSequence.new({
-		NumberSequenceKeypoint.new(0,    0.85),
-		NumberSequenceKeypoint.new(0.12, 0),
-		NumberSequenceKeypoint.new(0.38, 0.75),
-		NumberSequenceKeypoint.new(0.62, 0.75),
-		NumberSequenceKeypoint.new(0.88, 0),
-		NumberSequenceKeypoint.new(1,    0.85),
-	})
-	ShimmerGradient.Parent = BtnStroke
-	task.spawn(function()
-		local ts = game:GetService("TweenService")
-		while Btn and Btn.Parent do
-			ts:Create(ShimmerGradient, TweenInfo.new(3, Enum.EasingStyle.Linear), { Rotation = 360 }):Play()
-			task.wait(3.05)
-			if ShimmerGradient and ShimmerGradient.Parent then ShimmerGradient.Rotation = 0 end
-		end
-	end)
+
+	table.insert(_glowButtons, {Btn = Btn, Stroke = BtnStroke})
 
 	local Label = Instance.new("TextLabel")
 	Label.AnchorPoint = Vector2.new(0.5, 0.5)
@@ -11012,14 +11066,25 @@ local function _glowButton(parentOrSection, labelText, callback)
 	Label.TextStrokeTransparency = 0.9
 	Label.Parent = Btn
 
-	pimpleHUB:_Input(Btn, callback)
+	local LabelScale = Instance.new("UIScale")
+	LabelScale.Scale = 1
+	LabelScale.Parent = Label
 
-	pimpleHUB:_Hover(Btn, function()
-		pimpleHUB:_Animation(BtnStroke, TweenInfo.new(0.18), { Transparency = 0.0 })
-		pimpleHUB:_Animation(Btn, TweenInfo.new(0.18), { BackgroundTransparency = 0 })
+	local Input = pimpleHUB:_Input(Btn, callback)
+	local HoverTween = TweenInfo.new(0.25, Enum.EasingStyle.Quint, Enum.EasingDirection.Out)
+
+	pimpleHUB:_Hover(Input, function()
+		if Btn.Parent then
+			pimpleHUB:_Animation(Btn, TweenInfo.new(0.18), { BackgroundTransparency = 0 })
+			pimpleHUB:_Animation(BtnStroke, TweenInfo.new(0.18), { Transparency = 0 })
+			pimpleHUB:_Animation(LabelScale, HoverTween, { Scale = _GLOWBUTTON_TEXT_HOVER_SCALE })
+		end
 	end, function()
-		pimpleHUB:_Animation(BtnStroke, TweenInfo.new(0.18), { Transparency = 0.1 })
-		pimpleHUB:_Animation(Btn, TweenInfo.new(0.18), { BackgroundTransparency = 0.1 })
+		if Btn.Parent then
+			pimpleHUB:_Animation(Btn, TweenInfo.new(0.18), { BackgroundTransparency = 0.1 })
+			pimpleHUB:_Animation(BtnStroke, TweenInfo.new(0.18), { Transparency = 0.3 })
+			pimpleHUB:_Animation(LabelScale, HoverTween, { Scale = 1 })
+		end
 	end)
 end
 
@@ -11062,6 +11127,9 @@ ThSec:AddDropdown({
 	Values = { "Default", "Dark Green", "Dark Blue", "Purple Rose", "Skeet" },
 	Callback = function(v)
 		pimpleHUB:SetTheme(v)
+		for _, s in ipairs(_rgStrokes) do
+			s.Color = pimpleHUB.Colors.Highlight
+		end
 	end,
 })
 

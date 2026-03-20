@@ -996,7 +996,7 @@ if type(S) ~= "table" or not S.Hub then
 		end)
 
 		getKeyBtn.MouseButton1Click:Connect(function()
-			pcall(function() setclipboard("https://discord.gg/apKnSVs68M") end)
+			pcall(function() setclipboard("https://discord.gg/dYxPqPvQeR") end)
 			local o = getKeyBtn.Text; getKeyBtn.Text = "   Copied!"; task.wait(1.5); getKeyBtn.Text = o
 		end)
 		exitBtn.MouseButton1Click:Connect(function()
@@ -1179,7 +1179,7 @@ if type(S) ~= "table" or not S.Hub then
 			TS:Create(discGlowScale, TI_DISC_OUT, {Scale = 1}):Play()
 		end)
 		discBtn.MouseButton1Click:Connect(function()
-			pcall(function() setclipboard("https://discord.gg/apKnSVs68M") end)
+			pcall(function() setclipboard("https://discord.gg/dYxPqPvQeR") end)
 			local o = discBtn.Text; discBtn.Text = "✓  Copied!"; task.wait(1.5); discBtn.Text = o
 		end)
 	end
