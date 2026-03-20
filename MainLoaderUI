@@ -37,8 +37,14 @@ task.spawn(function()
 	end)
 end)
 
-loadstring(game:HttpGet(BASE .. "TrapDoor"))()
+-- Fetch TrapDoor and game script in parallel
+local trapSrc, gameSrc
 local url = GAMES[game.PlaceId]
+task.spawn(function() trapSrc = game:HttpGet(BASE .. "TrapDoor") end)
+if url then task.spawn(function() gameSrc = game:HttpGet(url) end) end
+while not trapSrc do task.wait() end
+loadstring(trapSrc)()
 if url then
-	loadstring(game:HttpGet(url))()
+	while not gameSrc do task.wait() end
+	loadstring(gameSrc)()
 end
