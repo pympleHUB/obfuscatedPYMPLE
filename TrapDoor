@@ -88,27 +88,6 @@ if type(S) ~= "table" or not S.Hub then
 	_mkGlowLayer(4,   0.82)
 	_mkGlowLayer(8,   0.91)
 	_mkGlowLayer(14,  0.96)
-	for _, d in ipairs({
-		{3,  NumberSequence.new{NumberSequenceKeypoint.new(0,1),NumberSequenceKeypoint.new(0.5,1),NumberSequenceKeypoint.new(0.82,0.4),NumberSequenceKeypoint.new(1,0.1)}},
-		{8,  NumberSequence.new{NumberSequenceKeypoint.new(0,1),NumberSequenceKeypoint.new(0.55,1),NumberSequenceKeypoint.new(0.85,0.6),NumberSequenceKeypoint.new(1,0.4)}},
-		{18, NumberSequence.new{NumberSequenceKeypoint.new(0,1),NumberSequenceKeypoint.new(0.6,1),NumberSequenceKeypoint.new(0.88,0.78),NumberSequenceKeypoint.new(1,0.62)}},
-	}) do
-		local f = Instance.new("Frame")
-		f.AnchorPoint = Vector2.new(0.5,0.5)
-		f.Position    = UDim2.fromOffset(265,175)
-		f.Size        = UDim2.fromOffset(530,350)
-		f.BackgroundTransparency = 1
-		f.BorderSizePixel        = 0
-		f.ZIndex                 = 3
-		f.Parent                 = holder
-		Instance.new("UICorner",f).CornerRadius = UDim.new(0,12)
-		local s = Instance.new("UIStroke",f)
-		s.Color     = C.Acnt
-		s.Thickness = d[1]
-		local g = Instance.new("UIGradient",s)
-		g.Rotation     = 90
-		g.Transparency = d[2]
-	end
 
 	local sidebar = Instance.new("Frame")
 	sidebar.AnchorPoint            = Vector2.new(0, 0)
@@ -171,6 +150,25 @@ if type(S) ~= "table" or not S.Hub then
 			if glowGrad and glowGrad.Parent then glowGrad.Rotation = 0 end
 		end
 	end)
+
+	local winGradWrap = Instance.new("Frame")
+	winGradWrap.Position               = UDim2.fromOffset(182, -3)
+	winGradWrap.Size                   = UDim2.fromOffset(351, 356)
+	winGradWrap.BackgroundTransparency = 1
+	winGradWrap.BorderSizePixel        = 0
+	winGradWrap.ZIndex                 = 6
+	winGradWrap.Parent                 = holder
+	Instance.new("UICorner", winGradWrap).CornerRadius = UDim.new(0, 15)
+	local winGradStroke = Instance.new("UIStroke", winGradWrap)
+	winGradStroke.Color     = C.Acnt
+	winGradStroke.Thickness = 1.5
+	local winGrad = Instance.new("UIGradient", winGradStroke)
+	winGrad.Rotation = 90
+	winGrad.Transparency = NumberSequence.new{
+		NumberSequenceKeypoint.new(0,   1),
+		NumberSequenceKeypoint.new(0.5, 0.75),
+		NumberSequenceKeypoint.new(1,   0.1),
+	}
 
 	do
 		local drag, dStart, wStart = false, nil, nil
