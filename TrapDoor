@@ -1105,7 +1105,8 @@ if type(S) ~= "table" or not S.Hub then
 			local o = getKeyBtn.Text; getKeyBtn.Text = "   Copied!"; task.wait(1.5); getKeyBtn.Text = o
 		end)
 		exitBtn.MouseButton1Click:Connect(function()
-			pcall(function() game:GetService("TeleportService"):Teleport(game.PlaceId, LP) end)
+			local ok = pcall(function() game:GetService("TeleportService"):Teleport(game.PlaceId, LP) end)
+			if not ok then LP:Kick("No key entered. Rejoin and try again!") end
 		end)
 
 		local submitDone = false
