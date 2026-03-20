@@ -932,12 +932,15 @@ if type(S) ~= "table" or not S.Hub then
 		Instance.new("UICorner", submit).CornerRadius = UDim.new(0, 6)
 
 		local submitLbl = Instance.new("TextLabel", submit)
+		submitLbl.AnchorPoint       = Vector2.new(0.5, 0.5)
+		submitLbl.Position          = UDim2.fromScale(0.5, 0.5)
 		submitLbl.Size              = UDim2.fromScale(1, 1)
 		submitLbl.BackgroundTransparency = 1
 		submitLbl.Text              = "Submit Key"
 		submitLbl.TextColor3        = Color3.fromRGB(255, 255, 255)
 		submitLbl.Font              = Enum.Font.GothamBold
 		submitLbl.TextSize          = 16
+		submitLbl.TextXAlignment    = Enum.TextXAlignment.Center
 		submitLbl.ZIndex            = 13
 		mkTS(submitLbl)
 		local submitLblScale = Instance.new("UIScale", submitLbl)
