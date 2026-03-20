@@ -7084,8 +7084,15 @@ function PYMPLE.new(Config : Window)
 		local Highlight = Instance.new("Frame")
 		local UICorner = Instance.new("UICorner")
 
+		local TabWrapper = Instance.new("Frame")
+		TabWrapper.BackgroundTransparency = 1
+		TabWrapper.BorderSizePixel = 0
+		TabWrapper.Size = UDim2.new(1, 0, 0, 40)
+		TabWrapper.Parent = TabButtonScrollingFrame
 		TabButton.Name = _lib:_RandomString()
-		TabButton.Parent = TabButtonScrollingFrame
+		TabButton.Parent = TabWrapper
+		TabButton.AnchorPoint = Vector2.new(0.5, 0.5)
+		TabButton.Position = UDim2.new(0.5, 0, 0.5, 0)
 		TabButton.BackgroundTransparency = 1.000
 		TabButton.BorderColor3 = Color3.fromRGB(0, 0, 0)
 		TabButton.BorderSizePixel = 0
@@ -7264,7 +7271,7 @@ function PYMPLE.new(Config : Window)
 
 		_lib:_Hover(TabButton,function()
 			_lib:_Animation(TabButton,Tween,{
-				Size = UDim2.new(1, -6, 0, 40)
+				Size = UDim2.new(1, -2, 0, 40)
 			});
 			if WindowArgs.SelectedTab ~= TabButton then
 				_lib:_Animation(Icon,Tween,{
@@ -7584,8 +7591,15 @@ function PYMPLE.new(Config : Window)
 			_lib:_AddDragBlacklist(TabButton);
 		end;
 
+		local TabWrapper = Instance.new("Frame")
+		TabWrapper.BackgroundTransparency = 1
+		TabWrapper.BorderSizePixel = 0
+		TabWrapper.Size = UDim2.new(1, 0, 0, 40)
+		TabWrapper.Parent = TabButtonScrollingFrame
 		TabButton.Name = _lib:_RandomString()
-		TabButton.Parent = TabButtonScrollingFrame
+		TabButton.Parent = TabWrapper
+		TabButton.AnchorPoint = Vector2.new(0.5, 0.5)
+		TabButton.Position = UDim2.new(0.5, 0, 0.5, 0)
 		TabButton.BackgroundTransparency = 1.000
 		TabButton.BorderColor3 = Color3.fromRGB(0, 0, 0)
 		TabButton.BorderSizePixel = 0
@@ -8152,7 +8166,7 @@ function PYMPLE.new(Config : Window)
 
 		_lib:_Hover(TabButton,function()
 			_lib:_Animation(TabButton,Tween,{
-				Size = UDim2.new(1, -6, 0, 40)
+				Size = UDim2.new(1, -2, 0, 40)
 			});
 			if WindowArgs.SelectedTab ~= TabButton then
 				_lib:_Animation(Icon,Tween,{
@@ -8901,8 +8915,15 @@ function PYMPLE.new(Config : Window)
 			local Highlight = Instance.new("Frame")
 			local UICorner = Instance.new("UICorner")
 
+			local TabWrapper = Instance.new("Frame")
+			TabWrapper.BackgroundTransparency = 1
+			TabWrapper.BorderSizePixel = 0
+			TabWrapper.Size = UDim2.new(1, 0, 0, 40)
+			TabWrapper.Parent = TabButtonScrollingFrame
 			TabButton.Name = _lib:_RandomString()
-			TabButton.Parent = TabButtonScrollingFrame
+			TabButton.Parent = TabWrapper
+			TabButton.AnchorPoint = Vector2.new(0.5, 0.5)
+			TabButton.Position = UDim2.new(0.5, 0, 0.5, 0)
 			TabButton.BackgroundTransparency = 1.000
 			TabButton.BorderColor3 = Color3.fromRGB(0, 0, 0)
 			TabButton.BorderSizePixel = 0

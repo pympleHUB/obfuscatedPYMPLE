@@ -138,6 +138,8 @@ local Flags = {
 	CutsceneCheckInterval = 0.5,
 	AutoMeteor = false,
 	MeteorCooldown = 0.01,
+	AutoMinigun = false,
+	MinigunCooldown = 0.05,
 	SwingCooldown = 0.1,
 	WalkSpeed = 16,
 	JumpPower = 50,
@@ -192,6 +194,8 @@ local SaveableKeys = {
 	"CutsceneCheckInterval",
 	"AutoMeteor",
 	"MeteorCooldown",
+	"AutoMinigun",
+	"MinigunCooldown",
 	"SwingCooldown",
 	"WalkSpeed",
 	"JumpPower",
@@ -233,8 +237,8 @@ local TOTAL_BIOMES = 41
 local RadiusESPCircle = nil
 local LastEquippedWeaponName = nil
 
-local CooldownTimer, BiomeCheckTimer, CutsceneCheckTimer, MeteorTimer, SwingTimer, AbilityTimer, GodTimer, BossAlertTimer, MovementTimer =
-	0, 0, 0, 0, 0, 0, 0, 0, 0
+local CooldownTimer, BiomeCheckTimer, CutsceneCheckTimer, MeteorTimer, SwingTimer, AbilityTimer, GodTimer, BossAlertTimer, MovementTimer, MinigunTimer =
+	0, 0, 0, 0, 0, 0, 0, 0, 0, 0
 local CachedWeapon, CachedArmour, LastWeaponCheck, LastArmourCheck, CACHE_DURATION = nil, nil, 0, 0, 0.5
 local IsInCutscene, BossDetected = false, false
 local SummonBiomeRemote, BossCutsceneRemote = nil, nil
@@ -792,6 +796,22 @@ local function GetAllEnemies()
 		end
 	end
 	return e
+end
+
+local function FireMinigun(target)
+	local c = LocalPlayer.Character
+	local rp = c and c:FindFirstChild("HumanoidRootPart")
+	if not rp then return end
+	local minigun = c:FindFirstChild("Ultimate Minigun")
+	if not minigun then return end
+	local rf = minigun:FindFirstChild("RemoteFunction")
+	if not rf then return end
+	local hd = target:FindFirstChild("Head") or target:FindFirstChild("HumanoidRootPart")
+	if not hd then return end
+	pcall(function()
+		local barrelCF = rp.CFrame * CFrame.new(0.1, -0.3, -2.1)
+		rf:InvokeServer("drawbeam", { barrelCF, hd.Position })
+	end)
 end
 
 local function FireMeteor(rf, t)
@@ -8572,8 +8592,15 @@ local pimpleHUB = (function()
 			local Highlight = Instance.new("Frame")
 			local UICorner = Instance.new("UICorner")
 
+			local TabWrapper = Instance.new("Frame")
+			TabWrapper.BackgroundTransparency = 1
+			TabWrapper.BorderSizePixel = 0
+			TabWrapper.Size = UDim2.new(1, 0, 0, 40)
+			TabWrapper.Parent = TabButtonScrollingFrame
 			TabButton.Name = _lib:_RandomString()
-			TabButton.Parent = TabButtonScrollingFrame
+			TabButton.Parent = TabWrapper
+			TabButton.AnchorPoint = Vector2.new(0.5, 0.5)
+			TabButton.Position = UDim2.new(0.5, 0, 0.5, 0)
 			TabButton.BackgroundTransparency = 1.000
 			TabButton.BorderColor3 = Color3.fromRGB(0, 0, 0)
 			TabButton.BorderSizePixel = 0
@@ -8752,7 +8779,7 @@ local pimpleHUB = (function()
 
 			_lib:_Hover(TabButton, function()
 				_lib:_Animation(TabButton, Tween, {
-					Size = UDim2.new(1, -6, 0, 40),
+					Size = UDim2.new(1, -2, 0, 40),
 				})
 				if WindowArgs.SelectedTab ~= TabButton then
 					_lib:_Animation(Icon, Tween, {
@@ -9072,8 +9099,15 @@ local pimpleHUB = (function()
 				_lib:_AddDragBlacklist(TabButton)
 			end
 
+			local TabWrapper = Instance.new("Frame")
+			TabWrapper.BackgroundTransparency = 1
+			TabWrapper.BorderSizePixel = 0
+			TabWrapper.Size = UDim2.new(1, 0, 0, 40)
+			TabWrapper.Parent = TabButtonScrollingFrame
 			TabButton.Name = _lib:_RandomString()
-			TabButton.Parent = TabButtonScrollingFrame
+			TabButton.Parent = TabWrapper
+			TabButton.AnchorPoint = Vector2.new(0.5, 0.5)
+			TabButton.Position = UDim2.new(0.5, 0, 0.5, 0)
 			TabButton.BackgroundTransparency = 1.000
 			TabButton.BorderColor3 = Color3.fromRGB(0, 0, 0)
 			TabButton.BorderSizePixel = 0
@@ -9636,7 +9670,7 @@ local pimpleHUB = (function()
 
 			_lib:_Hover(TabButton, function()
 				_lib:_Animation(TabButton, Tween, {
-					Size = UDim2.new(1, -6, 0, 40),
+					Size = UDim2.new(1, -2, 0, 40),
 				})
 				if WindowArgs.SelectedTab ~= TabButton then
 					_lib:_Animation(Icon, Tween, {
@@ -10402,8 +10436,15 @@ local pimpleHUB = (function()
 				local Highlight = Instance.new("Frame")
 				local UICorner = Instance.new("UICorner")
 
+				local TabWrapper = Instance.new("Frame")
+				TabWrapper.BackgroundTransparency = 1
+				TabWrapper.BorderSizePixel = 0
+				TabWrapper.Size = UDim2.new(1, 0, 0, 40)
+				TabWrapper.Parent = TabButtonScrollingFrame
 				TabButton.Name = _lib:_RandomString()
-				TabButton.Parent = TabButtonScrollingFrame
+				TabButton.Parent = TabWrapper
+				TabButton.AnchorPoint = Vector2.new(0.5, 0.5)
+				TabButton.Position = UDim2.new(0.5, 0, 0.5, 0)
 				TabButton.BackgroundTransparency = 1.000
 				TabButton.BorderColor3 = Color3.fromRGB(0, 0, 0)
 				TabButton.BorderSizePixel = 0
@@ -10616,7 +10657,7 @@ local pimpleHUB = (function()
 
 				_lib:_Hover(TabButton, function()
 					_lib:_Animation(TabButton, Tween, {
-						Size = UDim2.new(1, -6, 0, 40),
+						Size = UDim2.new(1, -2, 0, 40),
 					})
 					if WindowArgs.SelectedTab ~= TabButton then
 						_lib:_Animation(Icon, Tween, {
@@ -12996,6 +13037,28 @@ MeteorSection:AddSlider({
 	end,
 })
 
+local MinigunSection = AbilitiesTab:DrawSection({ Name = "Minigun", Position = "left" })
+local MinigunToggle = MinigunSection:AddToggle({
+	Name = "Auto Minigun",
+	Flag = "AutoMinigun",
+	Default = Flags.AutoMinigun,
+	Callback = function(v)
+		Flags.AutoMinigun = v
+	end,
+})
+MinigunToggle.Link:AddHelper({ Text = "Auto fire Ultimate Minigun at nearest enemy" })
+MinigunSection:AddSlider({
+	Name = "Delay",
+	Min = 0.01,
+	Max = 1,
+	Default = Flags.MinigunCooldown,
+	Round = 3,
+	Flag = "MinigunCooldown",
+	Callback = function(v)
+		Flags.MinigunCooldown = v
+	end,
+})
+
 -- ==================== BIOME TAB ====================
 Window:DrawCategory({ Name = "BIOME" })
 local BiomeTab = Window:DrawTab({ Name = "Biome", Icon = "map", EnableScrolling = true })
@@ -13486,8 +13549,8 @@ end)
 RunService.RenderStepped:Connect(function(dt)
 	CooldownTimer, BiomeCheckTimer, CutsceneCheckTimer =
 		CooldownTimer + dt, BiomeCheckTimer + dt, CutsceneCheckTimer + dt
-	MeteorTimer, SwingTimer, AbilityTimer, LastAutoSave, GodTimer, BossAlertTimer, MovementTimer =
-		MeteorTimer + dt, SwingTimer + dt, AbilityTimer + dt, LastAutoSave + dt, GodTimer + dt, BossAlertTimer + dt, MovementTimer + dt
+	MeteorTimer, SwingTimer, AbilityTimer, LastAutoSave, GodTimer, BossAlertTimer, MovementTimer, MinigunTimer =
+		MeteorTimer + dt, SwingTimer + dt, AbilityTimer + dt, LastAutoSave + dt, GodTimer + dt, BossAlertTimer + dt, MovementTimer + dt, MinigunTimer + dt
 
 	if Flags.AutoSaveEnabled and LastAutoSave >= AutoSaveInterval then
 		LastAutoSave = 0
@@ -13583,6 +13646,14 @@ RunService.RenderStepped:Connect(function(dt)
 					FireMeteor(rf, e)
 				end
 			end
+		end
+	end
+
+	if Flags.AutoMinigun and MinigunTimer >= Flags.MinigunCooldown then
+		MinigunTimer = 0
+		local target = GetNearestEnemy()
+		if target then
+			FireMinigun(target)
 		end
 	end
 
