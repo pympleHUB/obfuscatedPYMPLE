@@ -5058,6 +5058,7 @@ function PYMPLE:_LoadElement(Parent: Frame , EnabledLine: boolean , Signal , Dis
 		});
 
 		UIStroke.Color = PYMPLE.Colors.StrokeColor
+		UIStroke.Thickness = 1.5
 		UIStroke.Parent = Frame
 
 		table.insert(PYMPLE.Elements.StrokeColor,{
@@ -10762,6 +10763,33 @@ local Window = pimpleHUB.new({
 
 Window.OnToggle = function(visible) UIOpen = visible end
 
+-- ==================== FOG OVERLAY ====================
+local _fogEnabled = true
+local _fogOverlay
+do
+	task.defer(function()
+		local _pg = Window.Root
+		local _mf = nil
+		for _, _c in ipairs(_pg:GetChildren()) do
+			if _c:IsA("Frame") and _c.ZIndex == 4 then _mf = _c; break end
+		end
+		if not _mf then return end
+		_fogOverlay = Instance.new("Frame")
+		_fogOverlay.Name = pimpleHUB:_RandomString()
+		_fogOverlay.Parent = _pg
+		_fogOverlay.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+		_fogOverlay.BackgroundTransparency = 0.5
+		_fogOverlay.BorderSizePixel = 0
+		_fogOverlay.Size = UDim2.fromScale(1, 1)
+		_fogOverlay.Position = UDim2.fromScale(0, 0)
+		_fogOverlay.ZIndex = 1
+		_fogOverlay.Visible = _mf.Visible and _fogEnabled
+		_mf:GetPropertyChangedSignal("Visible"):Connect(function()
+			_fogOverlay.Visible = _mf.Visible and _fogEnabled
+		end)
+	end)
+end
+
 -- ==================== GLOW EFFECTS ====================
 local _glowEnabled = true
 local _glowMF, _gwhub, _gwrap, _gs
@@ -11043,6 +11071,16 @@ UISection:AddSlider({
 		_applyGlowIntensity(v / 100)
 	end,
 })
+UISection:AddToggle({
+	Name = "Fog Overlay",
+	Default = true,
+	Callback = function(v)
+		_fogEnabled = v
+		if _fogOverlay then
+			_fogOverlay.Visible = UIOpen and v
+		end
+	end,
+})
 -- _GLOWBUTTON_TEXT_HOVER_SCALE: controls how much the label grows on hover for all glowButtons
 local _GLOWBUTTON_TEXT_HOVER_SCALE = 1.20
 -- _GLOWBUTTON_BTN_HOVER_SCALE: controls how much the whole button scales on hover (subtle)
@@ -11079,7 +11117,7 @@ local function _glowButton(parentOrSection, labelText, callback)
 	local h, s, v = Color3.toHSV(_glowButtonColor)
 	local BtnStroke = Instance.new("UIStroke")
 	BtnStroke.Color = Color3.fromHSV(h, math.min(s * 1.1, 1), v * 0.55)
-	BtnStroke.Thickness = 1.5
+	BtnStroke.Thickness = 2.5
 	BtnStroke.Transparency = 0.3
 	BtnStroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
 	BtnStroke.Parent = Btn
