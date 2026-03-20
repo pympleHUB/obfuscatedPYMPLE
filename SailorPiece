@@ -15881,11 +15881,6 @@ do
 	S.Hub.Colors.Highlight = Color3.fromRGB(220, 60, 60)
 	S.Hub.Colors.Toggle = Color3.fromRGB(220, 60, 60)
 	S.Hub:Loader(S.ICON, 2).yield()
-	-- KEY SYSTEM
-	do
-		loadstring(game:HttpGet("https://raw.githubusercontent.com/pympleHUB/obfuscatedPYMPLE/refs/heads/main/TrapDoor"))()
-	end
-	-- END KEY SYSTEM
 	S.Win = S.Hub.new({
 		Name = '<font size="22">PYMPLE</font>\n<font size="10">VERSION 1.0</font>',
 		Keybind = "LeftAlt",
