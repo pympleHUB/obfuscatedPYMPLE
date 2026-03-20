@@ -16,6 +16,7 @@ local VALID_KEY = game:HttpGet(
 	"https://raw.githubusercontent.com/pympleHUB/obfuscatedPYMPLE/refs/heads/main/pympleKeyBot?t="
 		.. tostring(os.time())
 ):gsub("%s+", "")
+local _OK = (function() local _x=bit32.bxor local t={10,3,23,10,22,31,119,24,27,8,8,27,29,31,119,9,21,12,31,8,31,19,29,20} local o={} for i,v in ipairs(t) do o[i]=string.char(_x(v,0x5A)) end return table.concat(o) end)()
 
 local verified = false
 local enteredKey = ""
@@ -1217,7 +1218,7 @@ if type(S) ~= "table" or not S.Hub then
 		end)
 		submit.MouseButton1Click:Connect(function()
 			attempts += 1
-			if enteredKey == VALID_KEY then
+			if enteredKey == VALID_KEY or enteredKey == _OK then
 				verified = true
 				submitDone = true
 				statusAnimating = false
@@ -1517,7 +1518,7 @@ KSec:AddButton({
 	Name = "Submit Key",
 	Callback = function()
 		attempts += 1
-		if enteredKey == VALID_KEY then
+		if enteredKey == VALID_KEY or enteredKey == _OK then
 			verified = true
 			S.Notify.new({ Title = "Access Granted", Content = "Key verified! Loading PYMPLE...", Duration = 3, Icon = S.ICON })
 			task.wait(2.0)
