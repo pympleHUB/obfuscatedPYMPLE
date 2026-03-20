@@ -10147,27 +10147,23 @@ do
 				Property = 'TextColor3'
 			});
 	
-			local LabelScale = Instance.new("UIScale")
-			LabelScale.Scale = 1
-			LabelScale.Parent = TextLabel
-			local FrameScale = Instance.new("UIScale")
-			FrameScale.Scale = 1
-			FrameScale.Parent = Frame
-			local Input = PYMPLE:_Input(Frame, function()
-				Config.Callback()
-			end)
-			local HoverTween = TweenInfo.new(0.25, Enum.EasingStyle.Quint, Enum.EasingDirection.Out)
-			PYMPLE:_Hover(Input, function()
-				PYMPLE:_Animation(FrameScale, HoverTween, { Scale = 1.02 })
-				PYMPLE:_Animation(UIStroke, TweenInfo.new(0.18), { Transparency = 0.0 })
-				PYMPLE:_Animation(Frame, TweenInfo.new(0.18), { BackgroundTransparency = 0 })
-				PYMPLE:_Animation(LabelScale, HoverTween, { Scale = 1.10 })
-			end, function()
-				PYMPLE:_Animation(FrameScale, HoverTween, { Scale = 1.0 })
-				PYMPLE:_Animation(UIStroke, TweenInfo.new(0.18), { Transparency = 0.1 })
-				PYMPLE:_Animation(Frame, TweenInfo.new(0.18), { BackgroundTransparency = 0.1 })
-				PYMPLE:_Animation(LabelScale, HoverTween, { Scale = 1.0 })
-			end)
+			PYMPLE:_Hover(Frame,function()
+				if Signal:GetValue() then
+					PYMPLE:_Animation(Frame,TweenInfo.new(0.1),{
+						BackgroundColor3 = Color3.fromRGB(240, 80, 80)
+					})
+				end;
+			end,function()
+				if Signal:GetValue() then
+					PYMPLE:_Animation(Frame,TweenInfo.new(0.1),{
+						BackgroundColor3 = PYMPLE.Colors.Highlight
+					})
+				end;
+			end);
+	
+			PYMPLE:_Input(Frame,function()
+				Config.Callback();
+			end);
 	
 			local Args = {};
 	
@@ -16059,6 +16055,32 @@ do
 			end)
 		end)
 	end
+	-- ==================== FOG OVERLAY ====================
+	S._fogEnabled = false
+	do
+		task.defer(function()
+			local _pg2 = S.Win.Root
+			local _mf2 = nil
+			for _, _c in ipairs(_pg2:GetChildren()) do
+				if _c:IsA("Frame") and _c.ZIndex == 4 then _mf2 = _c; break end
+			end
+			if not _mf2 then return end
+			local _fogOverlay = Instance.new("Frame")
+			_fogOverlay.Name = S.Hub:_RandomString()
+			_fogOverlay.Parent = _pg2
+			_fogOverlay.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+			_fogOverlay.BackgroundTransparency = 0.5
+			_fogOverlay.BorderSizePixel = 0
+			_fogOverlay.Size = UDim2.fromScale(1, 1)
+			_fogOverlay.Position = UDim2.fromScale(0, 0)
+			_fogOverlay.ZIndex = 1
+			_fogOverlay.Visible = _mf2.Visible and S._fogEnabled
+			_mf2:GetPropertyChangedSignal("Visible"):Connect(function()
+				_fogOverlay.Visible = _mf2.Visible and S._fogEnabled
+			end)
+			S._fogOverlay = _fogOverlay
+		end)
+	end
 	S.Notify.new({
 		Title = "PYMPLE v1",
 		Content = "Left Alt = UI | V = Farm | B = Boss | N = Summon | M = Skills",
@@ -17143,6 +17165,11 @@ do
 	})
 	UISec:AddColorPicker({
 		Name = "Toggle Color",
+			if S._rgStrokes then
+				for _, s in ipairs(S._rgStrokes) do
+					s.Color = v
+				end
+			end
 		Default = S.Hub.Colors.Toggle,
 		Callback = function(v)
 			S.Hub.Colors.Toggle = v
@@ -17181,6 +17208,14 @@ do
 			S.Hub:RefreshCurrentColor()
 		end,
 	})
+	UISec:AddDropdown({
+		Name = "Sidebar Animation",
+		Default = "Bouncy",
+		Values = { "Normal", "Bouncy" },
+		Callback = function(v)
+			S.Hub.SidebarBounce = (v == "Bouncy")
+		end,
+	})
 	UISec:AddToggle({
 		Name = "Glow Effect",
 		Default = true,
@@ -17206,17 +17241,6 @@ do
 			end
 		end,
 	})
-	UISec:AddColorPicker({
-		Name = "Glow Color",
-		Default = Color3.fromRGB(220, 60, 60),
-		Callback = function(v)
-			if S._rgStrokes then
-				for _, s in ipairs(S._rgStrokes) do
-					s.Color = v
-				end
-			end
-		end,
-	})
 	UISec:AddSlider({
 		Name = "Bloom Intensity",
 		Min = 0,
@@ -17225,6 +17249,17 @@ do
 		Callback = function(v)
 			if S._applyGlowIntensity then
 				S._applyGlowIntensity(v / 100)
+			end
+		end,
+	})
+	UISec:AddToggle({
+		Name = "Fog Overlay",
+		Default = false,
+		Callback = function(v)
+			S._fogEnabled = v
+			if S._fogOverlay then
+				local mfv = not S._glowMF or S._glowMF.Visible
+				S._fogOverlay.Visible = mfv and v
 			end
 		end,
 	})
