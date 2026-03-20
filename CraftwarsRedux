@@ -13649,9 +13649,11 @@ RunService.RenderStepped:Connect(function(dt)
 	end
 end)
 
-game:BindToClose(function()
-	if Flags.AutoSaveEnabled then
-		SaveConfig()
+game.Players.LocalPlayer.AncestryChanged:Connect(function()
+	if not game.Players.LocalPlayer:IsDescendantOf(game) then
+		if Flags.AutoSaveEnabled then
+			SaveConfig()
+		end
 	end
 end)
 
