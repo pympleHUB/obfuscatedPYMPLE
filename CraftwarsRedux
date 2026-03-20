@@ -235,6 +235,7 @@ local SaveableKeys = {
 
 local TOTAL_BIOMES = 41
 local RadiusESPPart = nil
+local AimAssistGyro = nil
 local LastEquippedWeaponName = nil
 
 local CooldownTimer, BiomeCheckTimer, CutsceneCheckTimer, MeteorTimer, SwingTimer, AbilityTimer, GodTimer, BossAlertTimer, MovementTimer, MinigunTimer =
@@ -1165,7 +1166,7 @@ local function BuildRadiusESP()
 	part.Color = Color3.fromRGB(255, 255, 255)
 	part.Transparency = 0.4
 	local d = Flags.KillAuraRadius * 2
-	part.Size = Vector3.new(d, 0.05, d)
+	part.Size = Vector3.new(0.05, d, d)
 	part.Parent = workspace
 	RadiusESPPart = part
 end
@@ -1179,8 +1180,8 @@ local function UpdateRadiusESP()
 		return
 	end
 	local d = Flags.KillAuraRadius * 2
-	RadiusESPPart.Size = Vector3.new(d, 0.05, d)
-	RadiusESPPart.CFrame = CFrame.new(rp.Position.X, rp.Position.Y - 3, rp.Position.Z)
+	RadiusESPPart.Size = Vector3.new(0.05, d, d)
+	RadiusESPPart.CFrame = CFrame.new(rp.Position.X, rp.Position.Y - 3, rp.Position.Z) * CFrame.Angles(0, 0, math.pi / 2)
 	RadiusESPPart.Transparency = 0.4
 end
 
@@ -1200,10 +1201,29 @@ local function AimAtEnemy(target)
 	if not hd then return end
 	pcall(function()
 		local lookPos = Vector3.new(hd.Position.X, rp.Position.Y, hd.Position.Z)
-		local vel = rp.AssemblyLinearVelocity
-		rp.CFrame = CFrame.new(rp.Position, lookPos)
-		rp.AssemblyLinearVelocity = vel
+		if not AimAssistGyro or not AimAssistGyro.Parent then
+			AimAssistGyro = Instance.new("BodyGyro")
+			AimAssistGyro.Name = "AimAssistGyro"
+			AimAssistGyro.MaxTorque = Vector3.new(0, math.huge, 0)
+			AimAssistGyro.P = 1e6
+			AimAssistGyro.D = 50
+			AimAssistGyro.Parent = rp
+		end
+		AimAssistGyro.CFrame = CFrame.new(rp.Position, lookPos)
 	end)
+end
+
+local function DestroyAimAssist()
+	if AimAssistGyro then
+		pcall(function() AimAssistGyro:Destroy() end)
+		AimAssistGyro = nil
+	end
+	local c = LocalPlayer.Character
+	local rp = c and c:FindFirstChild("HumanoidRootPart")
+	if rp then
+		local g = rp:FindFirstChild("AimAssistGyro")
+		if g then pcall(function() g:Destroy() end) end
+	end
 end
 
 local function GetFilteredEnemies()
@@ -12668,6 +12688,7 @@ local AimAssistToggle = MovementSection:AddToggle({
 	Default = Flags.AimAssist,
 	Callback = function(v)
 		Flags.AimAssist = v
+		if not v then DestroyAimAssist() end
 	end,
 })
 AimAssistToggle.Link:AddHelper({ Text = "Camera tracks nearest enemy" })
@@ -13522,6 +13543,8 @@ RunService.RenderStepped:Connect(function(dt)
 		local target = GetNearestEnemy()
 		if target then
 			AimAtEnemy(target)
+		else
+			DestroyAimAssist()
 		end
 	end
 	if Flags.RadiusESP then
