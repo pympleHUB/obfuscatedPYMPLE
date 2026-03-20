@@ -8779,7 +8779,7 @@ local pimpleHUB = (function()
 
 			_lib:_Hover(TabButton, function()
 				_lib:_Animation(TabButton, Tween, {
-					Size = UDim2.new(1, -2, 0, 40),
+					Size = UDim2.new(1, -10, 0, 40),
 				})
 				if WindowArgs.SelectedTab ~= TabButton then
 					_lib:_Animation(Icon, Tween, {
@@ -9670,7 +9670,7 @@ local pimpleHUB = (function()
 
 			_lib:_Hover(TabButton, function()
 				_lib:_Animation(TabButton, Tween, {
-					Size = UDim2.new(1, -2, 0, 40),
+					Size = UDim2.new(1, -10, 0, 40),
 				})
 				if WindowArgs.SelectedTab ~= TabButton then
 					_lib:_Animation(Icon, Tween, {
@@ -10657,7 +10657,7 @@ local pimpleHUB = (function()
 
 				_lib:_Hover(TabButton, function()
 					_lib:_Animation(TabButton, Tween, {
-						Size = UDim2.new(1, -2, 0, 40),
+						Size = UDim2.new(1, -10, 0, 40),
 					})
 					if WindowArgs.SelectedTab ~= TabButton then
 						_lib:_Animation(Icon, Tween, {
