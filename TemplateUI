@@ -1,4 +1,4 @@
---[[ PYMPLE v1.0 - pimpleHUB UI Template ]]
+﻿--[[ PYMPLE v1.0 - pimpleHUB UI Template ]]
 
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
