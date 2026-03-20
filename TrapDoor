@@ -997,6 +997,7 @@ if type(S) ~= "table" or not S.Hub then
 			local sk = Instance.new("UIStroke", b)
 			sk.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
 			sk.Color = C.Strok; sk.Thickness = 1.5
+			local glObj
 			if type(glyph) == "string" and glyph:sub(1, 13) == "rbxassetid://" then
 				local gl = Instance.new("ImageLabel", b)
 				gl.AnchorPoint         = Vector2.new(0, 0.5)
@@ -1007,6 +1008,7 @@ if type(S) ~= "table" or not S.Hub then
 				gl.ImageColor3         = C.Text
 				gl.ImageTransparency   = 0.3
 				gl.ZIndex              = 10
+				glObj = gl
 			else
 				local gl = Instance.new("TextLabel", b)
 				gl.AnchorPoint      = Vector2.new(0, 0.5)
@@ -1020,22 +1022,39 @@ if type(S) ~= "table" or not S.Hub then
 				gl.TextSize         = 15
 				gl.ZIndex           = 10
 				mkTS(gl)
+				glObj = gl
 			end
-			return b, sk
+			local btnScale   = Instance.new("UIScale", b)
+			local glyphScale = Instance.new("UIScale", glObj)
+			return b, sk, btnScale, glyphScale
 		end
 
-		local getKeyBtn, gkStroke = makeRowBtn("Get Key", "#", 1)
-		local exitBtn,   exStroke = makeRowBtn("Exit",    "rbxassetid://7072706796", 2)
+		local getKeyBtn, gkStroke, gkBtnScale, gkGlyphScale = makeRowBtn("Get Key", "#", 1)
+		local exitBtn,   exStroke, exBtnScale, exGlyphScale = makeRowBtn("Exit",    "rbxassetid://7072706796", 2)
 
-		local TI_B = TweenInfo.new(0.1)
+		local TI_B       = TweenInfo.new(0.1)
+		local TI_ROW_IN  = TweenInfo.new(0.15, Enum.EasingStyle.Back, Enum.EasingDirection.Out)
+		local TI_ROW_OUT = TweenInfo.new(0.1,  Enum.EasingStyle.Sine)
 		local ROW_BORDER = C.Strok
-		getKeyBtn.MouseEnter:Connect(function() TS:Create(gkStroke, TI_B, {Color = C.Acnt}):Play() end)
-		getKeyBtn.MouseLeave:Connect(function() TS:Create(gkStroke, TI_B, {Color = ROW_BORDER}):Play() end)
+		getKeyBtn.MouseEnter:Connect(function()
+			TS:Create(gkStroke,     TI_B,       {Color = C.Acnt}):Play()
+			TS:Create(gkBtnScale,   TI_ROW_IN,  {Scale = 1.04}):Play()
+			TS:Create(gkGlyphScale, TI_ROW_IN,  {Scale = 1.15}):Play()
+		end)
+		getKeyBtn.MouseLeave:Connect(function()
+			TS:Create(gkStroke,     TI_B,       {Color = ROW_BORDER}):Play()
+			TS:Create(gkBtnScale,   TI_ROW_OUT, {Scale = 1}):Play()
+			TS:Create(gkGlyphScale, TI_ROW_OUT, {Scale = 1}):Play()
+		end)
 		exitBtn.MouseEnter:Connect(function()
-			TS:Create(exStroke, TI_B, {Color = C.Acnt}):Play()
+			TS:Create(exStroke,     TI_B,       {Color = C.Acnt}):Play()
+			TS:Create(exBtnScale,   TI_ROW_IN,  {Scale = 1.04}):Play()
+			TS:Create(exGlyphScale, TI_ROW_IN,  {Scale = 1.15}):Play()
 		end)
 		exitBtn.MouseLeave:Connect(function()
-			TS:Create(exStroke, TI_B, {Color = ROW_BORDER}):Play()
+			TS:Create(exStroke,     TI_B,       {Color = ROW_BORDER}):Play()
+			TS:Create(exBtnScale,   TI_ROW_OUT, {Scale = 1}):Play()
+			TS:Create(exGlyphScale, TI_ROW_OUT, {Scale = 1}):Play()
 		end)
 
 		getKeyBtn.MouseButton1Click:Connect(function()
