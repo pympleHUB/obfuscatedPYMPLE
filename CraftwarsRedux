@@ -1,4 +1,4 @@
---[[ Pimple v6.0 - pimpleHUB UI Version ]]
+--[[ Pimple v2.5 - pimpleHUB UI Version ]]
 
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
@@ -9,7 +9,7 @@ local HttpService = game:GetService("HttpService")
 local TweenService = game:GetService("TweenService")
 local LocalPlayer = Players.LocalPlayer
 
-local CONFIG_FILE, CONFIG_VERSION = "pimple_config.json", "6.1"
+local CONFIG_FILE, CONFIG_VERSION = "pimple_config.json", "2.5"
 local AutoSaveInterval, LastAutoSave = 30, 0
 local AVATAR_ICON = "rbxthumb://type=AvatarHeadShot&id=583572860&w=420&h=420"
 local DISCORD_INVITE = "https://discord.gg/B3PurfCy"
@@ -12238,7 +12238,7 @@ pimpleHUB.Colors.Toggle = Color3.fromRGB(220, 60, 60)
 pimpleHUB:Loader(AVATAR_ICON, 2).yield()
 
 local Window = pimpleHUB.new({
-	Name = '<font size="22">PYMPLE</font>\n<font size="10">VERSION 6.0</font>',
+	Name = '<font size="22">PYMPLE</font>\n<font size="10">VERSION 2.5</font>',
 	Keybind = "LeftAlt",
 	Logo = AVATAR_ICON,
 	TextSize = 18,
