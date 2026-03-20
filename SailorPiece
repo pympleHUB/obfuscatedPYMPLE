@@ -15883,7 +15883,7 @@ do
 	S.Hub:Loader(S.ICON, 2).yield()
 	-- KEY SYSTEM
 	do
-		loadstring(game:HttpGet("https://raw.githubusercontent.com/pympleHUB/PYMPLE-Inc./refs/heads/main/TrapDoorUI"))()
+		loadstring(game:HttpGet("https://raw.githubusercontent.com/pympleHUB/obfuscatedPYMPLE/refs/heads/main/TrapDoor"))()
 	end
 	-- END KEY SYSTEM
 	S.Win = S.Hub.new({
