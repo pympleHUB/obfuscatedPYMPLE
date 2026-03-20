@@ -5,6 +5,10 @@ local VirtualUser = game:GetService("VirtualUser")
 local RS = game:GetService("ReplicatedStorage")
 local TweenService = game:GetService("TweenService")
 local LP = Players.LocalPlayer
+local HttpService = game:GetService("HttpService")
+local CONFIG_FILE    = "pimple_sailorpiece.json"
+local CONFIG_VERSION = "1.0"
+local AutoSaveInterval, LastAutoSave = 30, 0
 local S = {} -- all state, data, constants
 local fn = {} -- all functions
 local R = {
@@ -86,7 +90,54 @@ local F = {
 	BossNotify = true,
 	DodgeMode = true,
 	FollowStyle = "Dodge",
+	AutoSaveEnabled = true,
+	BossRushDiff = "Medium",
 }
+local SaveableKeys = {
+	"AutoFarmLevel", "AutoDungeon", "AutoBossRush",
+	"HeightOffset", "TweenSpeed", "AntiAFK", "AutoEquip", "AutoQuest",
+	"AutoSpawn", "SelectedIsland", "SkillZ", "SkillX", "SkillC", "SkillV", "SkillF",
+	"SkillCooldown", "BossEnabled", "SummonBossEnabled",
+	"GilgameshDiff", "BlessedMaidenDiff", "SaberAlterDiff", "RimuruDiff",
+	"AnosDiff", "StrongestTodayDiff", "TrueAizenDiff", "StrongestHistoryDiff",
+	"AutoChest", "FarmMode", "BossRushFarmMode", "BossRushMoveMode", "MoveMode",
+	"OffsetDist", "AutoMerchant", "MerchNotify", "DungeonQuest", "HogyokuQuest",
+	"DungeonType", "BossNotify", "FollowStyle", "RuneDiff", "CidDiff", "DoubleDiff",
+	"RuneHeight", "RuneSpeed", "RuneMove", "CidHeight", "CidSpeed", "CidMove",
+	"DoubleHeight", "DoubleSpeed", "DoubleMove", "BossRushHeightOffset", "BossRushTweenSpeed",
+	"BossRushDiff", "AutoSaveEnabled",
+}
+
+local function CanUseFileSystem()
+	local s = pcall(function() return writefile and readfile and isfile end)
+	return s and writefile and readfile and isfile
+end
+
+local function SaveConfig()
+	if not CanUseFileSystem() then return false end
+	local data = { version = CONFIG_VERSION, timestamp = os.time(), settings = {} }
+	for _, k in ipairs(SaveableKeys) do
+		local v = F[k]
+		if v ~= nil then
+			data.settings[k] = v
+		end
+	end
+	return pcall(function()
+		writefile(CONFIG_FILE, HttpService:JSONEncode(data))
+	end)
+end
+
+local function LoadConfig()
+	if not CanUseFileSystem() or not isfile(CONFIG_FILE) then return false end
+	local s, r = pcall(function() return HttpService:JSONDecode(readfile(CONFIG_FILE)) end)
+	if not s or not r or r.version ~= CONFIG_VERSION then return false end
+	for k, v in pairs(r.settings or {}) do
+		if F[k] ~= nil and type(v) == type(F[k]) then
+			F[k] = v
+		end
+	end
+	return true
+end
 S.ICON = "rbxthumb://type=AvatarHeadShot&id=583572860&w=420&h=420"
 S.DISCORD = "https://discord.gg/B3PurfCy"
 S.NPC_FOLDER = "NPCs"
@@ -15758,6 +15809,7 @@ do
 	S.Hub.Colors.Highlight = Color3.fromRGB(220, 60, 60)
 	S.Hub.Colors.Toggle = Color3.fromRGB(220, 60, 60)
 	S.Hub:Loader(S.ICON, 2).yield()
+	LoadConfig()
 	S.Win = S.Hub.new({
 		Name = '<font size="22">PYMPLE</font>\n<font size="10">VERSION 1.0</font>',
 		Keybind = "LeftAlt",
@@ -16088,7 +16140,7 @@ end
 	S.DungeonToggle = QSec:AddToggle({
 		Name = "Dungeon Pieces Info",
 		Flag = "DungeonQuest",
-		Default = false,
+		Default = F.DungeonQuest,
 		Callback = function(v)
 			F.DungeonQuest = v
 			if v then
@@ -16159,7 +16211,7 @@ end
 	S.HogyokuToggle = QSec:AddToggle({
 		Name = "Hogyoku Fragments Info",
 		Flag = "HogyokuQuest",
-		Default = false,
+		Default = F.HogyokuQuest,
 		Callback = function(v)
 			F.HogyokuQuest = v
 			if v then
@@ -16240,7 +16292,7 @@ end
 	S.FarmToggle = FSec:AddToggle({
 		Name = "Enable Auto Farm",
 		Flag = "AutoFarmLevel",
-		Default = false,
+		Default = F.AutoFarmLevel,
 		Callback = function(v)
 			if v and (F.AutoDungeon or F.AutoBossRush) then
 				task.defer(function()
@@ -16294,7 +16346,7 @@ end
 	FSec:AddToggle({
 		Name = "Auto Equip Weapon",
 		Flag = "AutoEquip",
-		Default = true,
+		Default = F.AutoEquip,
 		Callback = function(v)
 			F.AutoEquip = v
 		end,
@@ -16302,7 +16354,7 @@ end
 	FSec:AddToggle({
 		Name = "Auto Quest",
 		Flag = "AutoQuest",
-		Default = true,
+		Default = F.AutoQuest,
 		Callback = function(v)
 			F.AutoQuest = v
 			if v and F.AutoFarmLevel then
@@ -16313,7 +16365,7 @@ end
 	FSec:AddToggle({
 		Name = "Set Spawn Crystal",
 		Flag = "AutoSpawn",
-		Default = false,
+		Default = F.AutoSpawn,
 		Callback = function(v)
 			F.AutoSpawn = v
 			S.SpawnDone = false
@@ -16349,7 +16401,7 @@ end
 	})
 	FSec:AddDropdown({
 		Name = "Stand Position",
-		Default = "Behind",
+		Default = F.FarmMode,
 		Values = { "Behind", "In Front", "Left Side", "Right Side" },
 		Flag = "FarmMode",
 		Callback = function(v)
@@ -16363,7 +16415,7 @@ end
 		})
 	FSec:AddDropdown({
 		Name = "Combat Style",
-		Default = "Dodge",
+		Default = F.FollowStyle,
 		Values = { "Dodge", "Static", "Orbit", "Strafe" },
 		Flag = "FollowStyle",
 		Callback = function(v)
@@ -16376,7 +16428,7 @@ end
 		})
 	FSec:AddDropdown({
 		Name = "Travel Mode",
-		Default = "Tween",
+		Default = F.MoveMode,
 		Values = { "Tween", "Teleport" },
 		Flag = "MoveMode",
 		Callback = function(v)
@@ -16393,7 +16445,7 @@ end
 		Name = "Offset Distance",
 		Min = 5,
 		Max = 50,
-		Default = 25,
+		Default = F.OffsetDist,
 		Round = 0,
 		Flag = "OffsetDist",
 		Callback = function(v)
@@ -16404,7 +16456,7 @@ end
 		Name = "Movement Speed",
 		Min = 15,
 		Max = 200,
-		Default = 100,
+		Default = F.TweenSpeed,
 		Round = 0,
 		Flag = "TweenSpeed",
 		Callback = function(v)
@@ -16415,7 +16467,7 @@ end
 	FSec:AddToggle({
 		Name = "Anti-AFK",
 		Flag = "AntiAFK",
-		Default = true,
+		Default = F.AntiAFK,
 		Callback = function(v)
 			F.AntiAFK = v
 		end,
@@ -16537,7 +16589,7 @@ end
 	S.DungeonUnifiedToggle = DSec:AddToggle({
 		Name = "Enable Auto Dungeon",
 		Flag = "AutoDungeonEnabled",
-		Default = false,
+		Default = F.AutoDungeon,
 		Callback = function(v)
 			fn.EnableDungeonType(F.DungeonType or "Double", v)
 		end,
@@ -16548,7 +16600,7 @@ end
 	end
 	DSec:AddDropdown({
 		Name = "Difficulty",
-		Default = "Normal",
+		Default = F.RuneDiff,
 		Values = S.DungeonDifficulties,
 		Flag = "DungeonDiff",
 		Callback = function(v)
@@ -16560,7 +16612,7 @@ end
 	})
 	DSec:AddDropdown({
 		Name = "Stand Position",
-		Default = "Behind",
+		Default = F.FarmMode,
 		Values = { "Behind", "In Front", "Left Side", "Right Side" },
 		Flag = "DungeonFarmMode",
 		Callback = function(v)
@@ -16572,7 +16624,7 @@ end
 		:AddHelper({ Text = "Behind = follow + Combat Style | others = fixed position (Static only)" })
 	DSec:AddDropdown({
 		Name = "Travel Mode",
-		Default = "Tween",
+		Default = F.MoveMode,
 		Values = { "Tween", "Teleport" },
 		Flag = "DungeonMove",
 		Callback = function(v)
@@ -16587,7 +16639,7 @@ end
 		:AddHelper({ Text = "Tween = smooth glide | Teleport = instant" })
 	DSec:AddDropdown({
 		Name = "Combat Style",
-		Default = "Dodge",
+		Default = F.FollowStyle,
 		Values = { "Dodge", "Static", "Orbit", "Strafe" },
 		Flag = "DungeonFollowStyle",
 		Callback = function(v)
@@ -16600,7 +16652,7 @@ end
 		Name = "Offset Distance",
 		Min = 5,
 		Max = 50,
-		Default = 25,
+		Default = F.OffsetDist,
 		Round = 0,
 		Flag = "DungeonOffsetDist",
 		Callback = function(v)
@@ -16611,7 +16663,7 @@ end
 		Name = "Movement Speed",
 		Min = 20,
 		Max = 250,
-		Default = 100,
+		Default = F.TweenSpeed,
 		Round = 0,
 		Flag = "DungeonSpeed",
 		Callback = function(v)
@@ -16642,7 +16694,7 @@ end
 	S.BossRushAutoToggle = BRSec:AddToggle({
 		Name = "Enable Boss Rush",
 		Flag = "AutoBossRush",
-		Default = false,
+		Default = F.AutoBossRush,
 		Callback = function(v)
 			F.AutoBossRush = v
 			if v then
@@ -16705,7 +16757,7 @@ end
 	S.BossRushAutoToggle.Link:AddHelper({ Text = "Boss Rush gamemode only — targets all boss NPCs" })
 	BRSec:AddDropdown({
 		Name = "Difficulty",
-		Default = "Medium",
+		Default = F.BossRushDiff,
 		Values = { "Easy", "Medium", "Hard" },
 		Flag = "BossRushDiff",
 		Callback = function(v)
@@ -16739,7 +16791,7 @@ end
 		:AddHelper({ Text = "Auto-enters Boss Rush portal when not inside" })
 	BRSec:AddDropdown({
 		Name = "Stand Position",
-		Default = "Behind",
+		Default = F.FarmMode,
 		Values = { "Behind", "In Front", "Left Side", "Right Side" },
 		Flag = "BossRushFarmMode",
 		Callback = function(v)
@@ -16753,7 +16805,7 @@ end
 		})
 	BRSec:AddDropdown({
 		Name = "Travel Mode",
-		Default = "Tween",
+		Default = F.MoveMode,
 		Values = { "Tween", "Teleport" },
 		Flag = "BossRushMoveMode",
 		Callback = function(v)
@@ -16768,7 +16820,7 @@ end
 		:AddHelper({ Text = "Tween = smooth glide | Teleport = instant" })
 	BRSec:AddDropdown({
 		Name = "Combat Style",
-		Default = "Dodge",
+		Default = F.FollowStyle,
 		Values = { "Dodge", "Static", "Orbit", "Strafe" },
 		Flag = "BossRushFollowStyle",
 		Callback = function(v)
@@ -16783,7 +16835,7 @@ end
 		Name = "Offset Distance",
 		Min = 5,
 		Max = 50,
-		Default = 25,
+		Default = F.OffsetDist,
 		Round = 0,
 		Flag = "BossRushOffsetDist",
 		Callback = function(v)
@@ -16794,7 +16846,7 @@ end
 		Name = "Movement Speed",
 		Min = 20,
 		Max = 250,
-		Default = 50,
+		Default = F.BossRushTweenSpeed,
 		Round = 0,
 		Flag = "BossRushTweenSpeed",
 		Callback = function(v)
@@ -16827,7 +16879,7 @@ end
 	S.BossToggle = BSec:AddToggle({
 		Name = "Enable Boss Killing",
 		Flag = "BossEnabled",
-		Default = false,
+		Default = F.BossEnabled,
 		Callback = function(v)
 			if v and (F.AutoDungeon or F.AutoBossRush) then
 				task.defer(function()
@@ -16856,7 +16908,7 @@ end
 	BSec:AddToggle({
 		Name = "Boss Notifications",
 		Flag = "BossNotify",
-		Default = true,
+		Default = F.BossNotify,
 		Callback = function(v)
 			F.BossNotify = v
 		end,
@@ -16997,7 +17049,7 @@ end
 	S.SkillToggles.SkillZ = SSec:AddToggle({
 		Name = "Skill Z",
 		Flag = "SkillZ",
-		Default = false,
+		Default = F.SkillZ,
 		Callback = function(v)
 			F.SkillZ = v
 		end,
@@ -17006,7 +17058,7 @@ end
 	S.SkillToggles.SkillX = SSec:AddToggle({
 		Name = "Skill X",
 		Flag = "SkillX",
-		Default = false,
+		Default = F.SkillX,
 		Callback = function(v)
 			F.SkillX = v
 		end,
@@ -17015,7 +17067,7 @@ end
 	S.SkillToggles.SkillC = SSec:AddToggle({
 		Name = "Skill C",
 		Flag = "SkillC",
-		Default = false,
+		Default = F.SkillC,
 		Callback = function(v)
 			F.SkillC = v
 		end,
@@ -17024,7 +17076,7 @@ end
 	S.SkillToggles.SkillV = SSec:AddToggle({
 		Name = "Skill V",
 		Flag = "SkillV",
-		Default = false,
+		Default = F.SkillV,
 		Callback = function(v)
 			F.SkillV = v
 		end,
@@ -17033,7 +17085,7 @@ end
 	S.SkillToggles.SkillF = SSec:AddToggle({
 		Name = "Skill F (Nuke)",
 		Flag = "SkillF",
-		Default = false,
+		Default = F.SkillF,
 		Callback = function(v)
 			F.SkillF = v
 		end,
@@ -17043,7 +17095,7 @@ end
 		Name = "Skill Cooldown",
 		Min = 0.3,
 		Max = 5,
-		Default = 1.0,
+		Default = F.SkillCooldown,
 		Round = 1,
 		Flag = "SkillCooldown",
 		Callback = function(v)
@@ -17054,7 +17106,7 @@ end
 	CSec:AddToggle({
 		Name = "Auto Open Chests",
 		Flag = "AutoChest",
-		Default = false,
+		Default = F.AutoChest,
 		Callback = function(v)
 			F.AutoChest = v
 		end,
@@ -17076,7 +17128,7 @@ end
 	MSec:AddToggle({
 		Name = "Enable Auto Merchant",
 		Flag = "AutoMerchant",
-		Default = false,
+		Default = F.AutoMerchant,
 		Callback = function(v)
 			F.AutoMerchant = v
 			if v then
@@ -17088,7 +17140,7 @@ end
 	MSec:AddToggle({
 		Name = "Merchant Notification",
 		Flag = "MerchNotify",
-		Default = true,
+		Default = F.MerchNotify,
 		Callback = function(v)
 			F.MerchNotify = v
 		end,
@@ -17625,5 +17677,23 @@ task.spawn(function()
 			fn.DoFarmTick()
 			task.wait(0.1)
 		until true
+	end
+end)
+
+RunService.Heartbeat:Connect(function(dt)
+	if F.AutoSaveEnabled then
+		LastAutoSave = LastAutoSave + dt
+		if LastAutoSave >= AutoSaveInterval then
+			LastAutoSave = 0
+			task.spawn(SaveConfig)
+		end
+	end
+end)
+
+game.Players.LocalPlayer.AncestryChanged:Connect(function()
+	if not game.Players.LocalPlayer:IsDescendantOf(game) then
+		if F.AutoSaveEnabled then
+			SaveConfig()
+		end
 	end
 end)
