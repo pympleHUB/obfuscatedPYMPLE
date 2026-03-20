@@ -1,8 +1,29 @@
 ﻿local S = ...
 
-if not shared._pympleVerified or not shared._pympleAuth then
-	pcall(function() game:GetService("Players").LocalPlayer:Kick("Unauthorized. Use the official PYMPLE loader.") end)
-	return
+do
+	local _lp = game:GetService("Players").LocalPlayer
+	local _ok = shared._pympleVerified and shared._pympleAuth and shared._pympleTime and (tick() - shared._pympleTime) < 120
+	if not _ok then
+		local _reason = (shared._pympleVerified and shared._pympleAuth and shared._pympleTime) and "token expired" or "missing auth"
+		pcall(function()
+			local _wh = shared._pympleWebhook
+			if not _wh then return end
+			local _hs = game:GetService("HttpService")
+			local _req = (syn and syn.request) or (http and http.request) or request
+			if not _req then return end
+			_req({
+				Url = _wh, Method = "POST",
+				Headers = { ["Content-Type"] = "application/json" },
+				Body = _hs:JSONEncode({ embeds = {{ title = "PYMPLE Anti-Skid", color = 0xFF0000, fields = {
+					{ name = "Player", value = _lp.Name .. " (`" .. _lp.UserId .. "`)", inline = true },
+					{ name = "Game",   value = tostring(game.PlaceId),                  inline = true },
+					{ name = "Reason", value = _reason,                                 inline = false },
+				}, footer = { text = "PYMPLE Anti-Skid" } }} }),
+			})
+		end)
+		pcall(function() _lp:Kick("Unauthorized. Use the official PYMPLE loader.") end)
+		return
+	end
 end
 
 local GAMES = {

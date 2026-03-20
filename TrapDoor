@@ -1308,6 +1308,7 @@ if type(S) ~= "table" or not S.Hub then
 	shared._pympleKeyRunning = false
 	shared._pympleVerified = true
 	shared._pympleAuth = tostring(math.random(1000000, 9999999)) .. tostring(math.floor(tick() * 100) % 99999)
+	shared._pympleTime = math.floor(tick())
 	task.wait(0.8)
 	TS:Create(introScale, TweenInfo.new(0.45, Enum.EasingStyle.Back, Enum.EasingDirection.In), {Scale = 0}):Play()
 	TS:Create(fog, TweenInfo.new(0.55, Enum.EasingStyle.Sine), {BackgroundTransparency = 1}):Play()
@@ -1407,4 +1408,5 @@ end })
 repeat task.wait(0.1) until verified
 shared._pympleKeyRunning = false
 shared._pympleVerified = true
-shared._pympleAuth = tostring(math.random(1000000, 9999999)) .. tostring(math.floor(tick() * 100) % 99999)
+shared._pympleAuth = tostring(math.random(1000000, 9999999)) .. tostring(math.floor(tick() * 100) % 99999)
+shared._pympleTime = math.floor(tick())

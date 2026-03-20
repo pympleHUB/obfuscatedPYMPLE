@@ -36,6 +36,8 @@ task.spawn(function()
 	end)
 end)
 
+shared._pympleWebhook = WEBHOOK
+
 local trapSrc, gameSrc
 local url = GAMES[game.PlaceId]
 task.spawn(function() trapSrc = game:HttpGet(BASE .. "TrapDoor") end)
