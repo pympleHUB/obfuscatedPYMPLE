@@ -995,15 +995,25 @@ if type(S) ~= "table" or not S.Hub then
 			b.Position          = UDim2.fromScale(0.5, 0.5)
 			b.Size              = UDim2.fromScale(1, 1)
 			b.BackgroundColor3  = C.Block
-			b.Text              = "       " .. label
-			b.TextColor3        = C.Text
-			b.TextTransparency  = 0.3
-			b.Font              = Enum.Font.GothamBold
-			b.TextSize          = 14
+			b.Text              = ""
 			b.BorderSizePixel   = 0
 			b.ZIndex            = 9
 			b.Parent            = cont
 			Instance.new("UICorner", b).CornerRadius = UDim.new(0, 7)
+			local lblLabel = Instance.new("TextLabel", b)
+			lblLabel.AnchorPoint      = Vector2.new(0, 0.5)
+			lblLabel.Position         = UDim2.new(0, 36, 0.5, 0)
+			lblLabel.Size             = UDim2.new(1, -36, 1, 0)
+			lblLabel.BackgroundTransparency = 1
+			lblLabel.Text             = label
+			lblLabel.TextColor3       = C.Text
+			lblLabel.TextTransparency = 0.3
+			lblLabel.Font             = Enum.Font.GothamBold
+			lblLabel.TextSize         = 14
+			lblLabel.TextXAlignment   = Enum.TextXAlignment.Left
+			lblLabel.ZIndex           = 10
+			mkTS(lblLabel)
+			local lblScale = Instance.new("UIScale", lblLabel)
 			local sk = Instance.new("UIStroke", b)
 			sk.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
 			sk.Color = C.Strok; sk.Thickness = 1.5
@@ -1036,11 +1046,11 @@ if type(S) ~= "table" or not S.Hub then
 			end
 			local btnScale   = Instance.new("UIScale", b)
 			local glyphScale = Instance.new("UIScale", glObj)
-			return b, sk, btnScale, glyphScale
+			return b, sk, btnScale, glyphScale, lblScale
 		end
 
-		local getKeyBtn, gkStroke, gkBtnScale, gkGlyphScale = makeRowBtn("Get Key", "#", 1)
-		local exitBtn,   exStroke, exBtnScale, exGlyphScale = makeRowBtn("Exit",    "rbxassetid://7072706796", 2)
+		local getKeyBtn, gkStroke, gkBtnScale, gkGlyphScale, gkLblScale = makeRowBtn("Get Key", "#", 1)
+		local exitBtn,   exStroke, exBtnScale, exGlyphScale, exLblScale = makeRowBtn("Exit",    "rbxassetid://7072706796", 2)
 
 		local TI_B       = TweenInfo.new(0.1)
 		local TI_ROW_IN  = TweenInfo.new(0.15, Enum.EasingStyle.Back, Enum.EasingDirection.Out)
@@ -1050,21 +1060,25 @@ if type(S) ~= "table" or not S.Hub then
 			TS:Create(gkStroke,     TI_B,       {Color = C.Acnt}):Play()
 			TS:Create(gkBtnScale,   TI_ROW_IN,  {Scale = 1.04}):Play()
 			TS:Create(gkGlyphScale, TI_ROW_IN,  {Scale = 1.15}):Play()
+			TS:Create(gkLblScale,   TI_ROW_IN,  {Scale = 1.12}):Play()
 		end)
 		getKeyBtn.MouseLeave:Connect(function()
 			TS:Create(gkStroke,     TI_B,       {Color = ROW_BORDER}):Play()
 			TS:Create(gkBtnScale,   TI_ROW_OUT, {Scale = 1}):Play()
 			TS:Create(gkGlyphScale, TI_ROW_OUT, {Scale = 1}):Play()
+			TS:Create(gkLblScale,   TI_ROW_OUT, {Scale = 1}):Play()
 		end)
 		exitBtn.MouseEnter:Connect(function()
 			TS:Create(exStroke,     TI_B,       {Color = C.Acnt}):Play()
 			TS:Create(exBtnScale,   TI_ROW_IN,  {Scale = 1.04}):Play()
 			TS:Create(exGlyphScale, TI_ROW_IN,  {Scale = 1.15}):Play()
+			TS:Create(exLblScale,   TI_ROW_IN,  {Scale = 1.12}):Play()
 		end)
 		exitBtn.MouseLeave:Connect(function()
 			TS:Create(exStroke,     TI_B,       {Color = ROW_BORDER}):Play()
 			TS:Create(exBtnScale,   TI_ROW_OUT, {Scale = 1}):Play()
 			TS:Create(exGlyphScale, TI_ROW_OUT, {Scale = 1}):Play()
+			TS:Create(exLblScale,   TI_ROW_OUT, {Scale = 1}):Play()
 		end)
 
 		getKeyBtn.MouseButton1Click:Connect(function()
