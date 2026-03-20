@@ -738,11 +738,11 @@ if type(S) ~= "table" or not S.Hub then
 		local hdrTxt = Instance.new("TextLabel", hdr)
 		hdrTxt.Size             = UDim2.fromScale(1, 1)
 		hdrTxt.BackgroundTransparency = 1
-		hdrTxt.Text             = "Enter Your Key"
+		hdrTxt.Text             = "Authentication Required"
 		hdrTxt.TextColor3       = C.Text
 		hdrTxt.TextTransparency = 0.15
 		hdrTxt.Font             = Enum.Font.GothamBold
-		hdrTxt.TextSize         = 17
+		hdrTxt.TextSize         = 19
 		hdrTxt.TextXAlignment   = Enum.TextXAlignment.Left
 		hdrTxt.ZIndex           = 11
 		mkTS(hdrTxt)
@@ -1358,7 +1358,7 @@ end
 KeyWin:DrawCategory({ Name = "AUTHENTICATION" })
 local KTab = KeyWin:DrawTab({ Name = "Key System", Icon = "key", EnableScrolling = true })
 
-local KSec = KTab:DrawSection({ Name = "Enter Your Key", Position = "left" })
+local KSec = KTab:DrawSection({ Name = "Authentication Required", Position = "left" })
 KSec:AddParagraph({ Title = "• Status", Content = "Awaiting key - paste your key below and press Submit." })
 KSec:AddTextBox({ Name = "Key Input", Default = "", Placeholder = "Paste your key here...", Callback = function(v) enteredKey = v end })
 KSec:AddButton({ Name = "Submit Key", Callback = function()
