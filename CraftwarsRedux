@@ -234,8 +234,7 @@ local SaveableKeys = {
 }
 
 local TOTAL_BIOMES = 41
-local RadiusESPCircle = nil
-local RadiusESPCircle2 = nil
+local RadiusESPPart = nil
 local LastEquippedWeaponName = nil
 
 local CooldownTimer, BiomeCheckTimer, CutsceneCheckTimer, MeteorTimer, SwingTimer, AbilityTimer, GodTimer, BossAlertTimer, MovementTimer, MinigunTimer =
@@ -1152,69 +1151,43 @@ local function WalkToTarget(target)
 end
 
 local function BuildRadiusESP()
-	if RadiusESPCircle then
-		pcall(function() RadiusESPCircle:Remove() end)
+	if RadiusESPPart then
+		pcall(function() RadiusESPPart:Destroy() end)
+		RadiusESPPart = nil
 	end
-	if RadiusESPCircle2 then
-		pcall(function() RadiusESPCircle2:Remove() end)
-	end
-	RadiusESPCircle = Drawing.new("Circle")
-	RadiusESPCircle.Visible = false
-	RadiusESPCircle.Color = Color3.fromRGB(255, 255, 255)
-	RadiusESPCircle.Thickness = 2
-	RadiusESPCircle.Filled = false
-	RadiusESPCircle.NumSides = 64
-	RadiusESPCircle.Transparency = 0.85
-	RadiusESPCircle2 = Drawing.new("Circle")
-	RadiusESPCircle2.Visible = false
-	RadiusESPCircle2.Color = Color3.fromRGB(255, 255, 255)
-	RadiusESPCircle2.Thickness = 1
-	RadiusESPCircle2.Filled = false
-	RadiusESPCircle2.NumSides = 64
-	RadiusESPCircle2.Transparency = 0.6
+	local part = Instance.new("Part")
+	part.Name = "RadiusESPRing"
+	part.Anchored = true
+	part.CanCollide = false
+	part.CastShadow = false
+	part.Shape = Enum.PartType.Cylinder
+	part.Material = Enum.Material.Neon
+	part.Color = Color3.fromRGB(255, 255, 255)
+	part.Transparency = 0.4
+	local d = Flags.KillAuraRadius * 2
+	part.Size = Vector3.new(d, 0.05, d)
+	part.Parent = workspace
+	RadiusESPPart = part
 end
 
 local function UpdateRadiusESP()
-	if not RadiusESPCircle then return end
+	if not RadiusESPPart then return end
 	local c = LocalPlayer.Character
 	local rp = c and c:FindFirstChild("HumanoidRootPart")
 	if not rp then
-		RadiusESPCircle.Visible = false
-		if RadiusESPCircle2 then RadiusESPCircle2.Visible = false end
+		RadiusESPPart.Transparency = 1
 		return
 	end
-	local cam = workspace.CurrentCamera
-	if not cam then return end
-	local origin = rp.Position
-	local screenCenter, onScreen = cam:WorldToViewportPoint(origin)
-	if not onScreen then
-		RadiusESPCircle.Visible = false
-		if RadiusESPCircle2 then RadiusESPCircle2.Visible = false end
-		return
-	end
-	local camRight = cam.CFrame.RightVector
-	local edgeWorld = origin + camRight * Flags.KillAuraRadius
-	local edgeScreen = cam:WorldToViewportPoint(edgeWorld)
-	local screenRadius = (Vector2.new(edgeScreen.X, edgeScreen.Y) - Vector2.new(screenCenter.X, screenCenter.Y)).Magnitude
-	local center = Vector2.new(screenCenter.X, screenCenter.Y)
-	RadiusESPCircle.Position = center
-	RadiusESPCircle.Radius = math.max(1, screenRadius)
-	RadiusESPCircle.Visible = true
-	if RadiusESPCircle2 then
-		RadiusESPCircle2.Position = center
-		RadiusESPCircle2.Radius = math.max(1, screenRadius - 4)
-		RadiusESPCircle2.Visible = true
-	end
+	local d = Flags.KillAuraRadius * 2
+	RadiusESPPart.Size = Vector3.new(d, 0.05, d)
+	RadiusESPPart.CFrame = CFrame.new(rp.Position.X, rp.Position.Y - 3, rp.Position.Z)
+	RadiusESPPart.Transparency = 0.4
 end
 
 local function DestroyRadiusESP()
-	if RadiusESPCircle then
-		pcall(function() RadiusESPCircle:Remove() end)
-		RadiusESPCircle = nil
-	end
-	if RadiusESPCircle2 then
-		pcall(function() RadiusESPCircle2:Remove() end)
-		RadiusESPCircle2 = nil
+	if RadiusESPPart then
+		pcall(function() RadiusESPPart:Destroy() end)
+		RadiusESPPart = nil
 	end
 end
 
@@ -1227,7 +1200,9 @@ local function AimAtEnemy(target)
 	if not hd then return end
 	pcall(function()
 		local lookPos = Vector3.new(hd.Position.X, rp.Position.Y, hd.Position.Z)
+		local vel = rp.AssemblyLinearVelocity
 		rp.CFrame = CFrame.new(rp.Position, lookPos)
+		rp.AssemblyLinearVelocity = vel
 	end)
 end
 
