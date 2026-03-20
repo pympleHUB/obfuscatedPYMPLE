@@ -6,11 +6,16 @@ import base64
 import os
 import random
 import string
+import threading
+import time
 from datetime import datetime, timedelta
 from discord.ext import commands, tasks
+from flask import Flask, request as flask_req
 
 DISCORD_TOKEN = os.environ["DISCORD_TOKEN"]
 GITHUB_TOKEN = os.environ["GITHUB_TOKEN"]
+DISCORD_WEBHOOK_URL = os.environ.get("DISCORD_WEBHOOK", "")
+WEBHOOK_SECRET = os.environ.get("WEBHOOK_SECRET", "")
 GITHUB_REPO = "pympleHUB/obfuscatedPYMPLE"
 KEY_FILE = "pympleKeyBot"
 HISTORY_FILE = "pympleKeyHistory"
@@ -840,7 +845,35 @@ async def on_ready():
     ])
     print(f"Bot is online as {bot.user}")
 
-import time, sys
+_flask_app = Flask(__name__)
+_wh_rate: dict = {}
+
+@_flask_app.route("/webhook/<secret>", methods=["POST"])
+def _proxy_webhook(secret):
+    if not WEBHOOK_SECRET or secret != WEBHOOK_SECRET:
+        return "", 403
+    if not DISCORD_WEBHOOK_URL:
+        return "", 500
+    ip = flask_req.remote_addr
+    now = time.time()
+    bucket = [t for t in _wh_rate.get(ip, []) if now - t < 60]
+    if len(bucket) >= 20:
+        return "", 429
+    bucket.append(now)
+    _wh_rate[ip] = bucket
+    try:
+        r = requests.post(DISCORD_WEBHOOK_URL, json=flask_req.get_json(force=True, silent=True))
+        return "", r.status_code
+    except:
+        return "", 500
+
+def _run_flask():
+    port = int(os.environ.get("PORT", 5000))
+    _flask_app.run(host="0.0.0.0", port=port, debug=False, threaded=True)
+
+threading.Thread(target=_run_flask, daemon=True).start()
+
+import sys
 
 MAX_RETRIES = 5
 for attempt in range(1, MAX_RETRIES + 1):
