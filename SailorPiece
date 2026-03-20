@@ -10051,89 +10051,13 @@ do
 	
 			UICorner.CornerRadius = UDim.new(0, 3)
 			UICorner.Parent = Frame
-	
-			-- Rotating glow border (TrapDoor Submit Key style)
-			local GlowWrap = Instance.new("Frame")
-			GlowWrap.AnchorPoint = Vector2.new(0.5, 0.5)
-			GlowWrap.Position = UDim2.new(0.5, 0, 0.5, 0)
-			GlowWrap.Size = UDim2.new(1, -11, 1, -1)
-			GlowWrap.BackgroundTransparency = 1
-			GlowWrap.BorderSizePixel = 0
-			GlowWrap.ZIndex = Zindex + 5
-			GlowWrap.Parent = Button
-			Instance.new("UICorner", GlowWrap).CornerRadius = UDim.new(0, 5)
-			local GlowStroke = Instance.new("UIStroke", GlowWrap)
-			GlowStroke.Thickness = 2
-			GlowStroke.Color = PYMPLE.Colors.Highlight
-			local GlowGrad = Instance.new("UIGradient", GlowStroke)
-			GlowGrad.Transparency = NumberSequence.new{
-				NumberSequenceKeypoint.new(0,    0.97),
-				NumberSequenceKeypoint.new(0.12, 0),
-				NumberSequenceKeypoint.new(0.38, 0.97),
-				NumberSequenceKeypoint.new(0.62, 0.97),
-				NumberSequenceKeypoint.new(0.88, 0),
-				NumberSequenceKeypoint.new(1,    0.97),
-			}
-			task.spawn(function()
-				while Button and Button.Parent do
-					TweenService:Create(GlowGrad, TweenInfo.new(3, Enum.EasingStyle.Linear), {Rotation = 360}):Play()
-					task.wait(3.05)
-					if GlowGrad and GlowGrad.Parent then GlowGrad.Rotation = 0 end
-				end
-			end)
-	
-			-- Inner gradient overlay (top-to-bottom fade matching TrapDoor tbGlowFrame style)
-			local BtnGlow = Instance.new("Frame")
-			BtnGlow.Name = PYMPLE:_RandomString()
-			BtnGlow.AnchorPoint = Vector2.new(0.5, 0.5)
-			BtnGlow.Position = UDim2.fromScale(0.5, 0.5)
-			BtnGlow.Size = UDim2.fromScale(1, 1)
-			BtnGlow.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-			BtnGlow.BackgroundTransparency = 0
-			BtnGlow.BorderSizePixel = 0
-			BtnGlow.ZIndex = Zindex + 7
-			BtnGlow.Parent = Frame
-			local BtnGlowCorner = Instance.new("UICorner")
-			BtnGlowCorner.CornerRadius = UDim.new(0, 3)
-			BtnGlowCorner.Parent = BtnGlow
-			local BtnGlowGrad = Instance.new("UIGradient")
-			BtnGlowGrad.Rotation = 90
-			BtnGlowGrad.Transparency = NumberSequence.new{
-				NumberSequenceKeypoint.new(0,    0.55),
-				NumberSequenceKeypoint.new(0.38, 0.97),
-				NumberSequenceKeypoint.new(1,    0.97),
-			}
-			BtnGlowGrad.Parent = BtnGlow
-	
-			-- Star badge (TrapDoor Submit Key style)
-			local BadgeFrame = Instance.new("Frame")
-			BadgeFrame.AnchorPoint = Vector2.new(0, 0.5)
-			BadgeFrame.Position = UDim2.new(0, 10, 0.5, 0)
-			BadgeFrame.Size = UDim2.fromOffset(22, 22)
-			BadgeFrame.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-			BadgeFrame.BackgroundTransparency = 0.82
-			BadgeFrame.BorderSizePixel = 0
-			BadgeFrame.ZIndex = Zindex + 10
-			BadgeFrame.Parent = Frame
-			Instance.new("UICorner", BadgeFrame).CornerRadius = UDim.new(0, 4)
-			local BadgeText = Instance.new("TextLabel", BadgeFrame)
-			BadgeText.Size = UDim2.fromScale(1, 1)
-			BadgeText.BackgroundTransparency = 1
-			BadgeText.Text = "★"
-			BadgeText.TextColor3 = Color3.fromRGB(255, 255, 255)
-			BadgeText.Font = Enum.Font.GothamBold
-			BadgeText.TextSize = 13
-			BadgeText.ZIndex = Zindex + 11
-			local badgeStroke = Instance.new("UIStroke", BadgeText)
-			badgeStroke.Color = Color3.fromRGB(0, 0, 0)
-			badgeStroke.Thickness = 1.8
-	
+
 			TextLabel.Parent = Frame
 			TextLabel.AnchorPoint = Vector2.new(0.5, 0.5)
 			TextLabel.BackgroundTransparency = 1.000
 			TextLabel.BorderColor3 = Color3.fromRGB(0, 0, 0)
 			TextLabel.BorderSizePixel = 0
-			TextLabel.Position = UDim2.new(0.5, 12, 0.5, 0)
+			TextLabel.Position = UDim2.new(0.5, 0, 0.5, 0)
 			TextLabel.Size = UDim2.new(1, 0, 1, 0)
 			TextLabel.ZIndex = Zindex + 9
 			TextLabel.Font = Enum.Font.GothamMedium
@@ -10147,19 +10071,27 @@ do
 				Property = 'TextColor3'
 			});
 	
-			PYMPLE:_Hover(Frame,function()
-				if Signal:GetValue() then
-					PYMPLE:_Animation(Frame,TweenInfo.new(0.1),{
-						BackgroundColor3 = Color3.fromRGB(240, 80, 80)
-					})
-				end;
-			end,function()
-				if Signal:GetValue() then
-					PYMPLE:_Animation(Frame,TweenInfo.new(0.1),{
-						BackgroundColor3 = PYMPLE.Colors.Highlight
-					})
-				end;
-			end);
+			do
+				local BtnScale = Instance.new("UIScale")
+				BtnScale.Scale = 1
+				BtnScale.Parent = Frame
+				local HT = TweenInfo.new(0.18, Enum.EasingStyle.Quint, Enum.EasingDirection.Out)
+				PYMPLE:_Hover(Frame,function()
+					if Signal:GetValue() then
+						PYMPLE:_Animation(Frame,TweenInfo.new(0.1),{
+							BackgroundColor3 = PYMPLE.Colors.MouseEnter
+						})
+						PYMPLE:_Animation(BtnScale,HT,{Scale=1.03})
+					end;
+				end,function()
+					if Signal:GetValue() then
+						PYMPLE:_Animation(Frame,TweenInfo.new(0.1),{
+							BackgroundColor3 = PYMPLE.Colors.Highlight
+						})
+					end;
+					PYMPLE:_Animation(BtnScale,HT,{Scale=1})
+				end);
+			end
 	
 			PYMPLE:_Input(Frame,function()
 				Config.Callback();
@@ -13091,55 +13023,6 @@ do
 			UICorner_4.CornerRadius = UDim.new(0, 3)
 			UICorner_4.Parent = Frame_2
 	
-			-- Rotating glow border
-			local CfgGlowWrap = Instance.new("Frame")
-			CfgGlowWrap.AnchorPoint = Vector2.new(0.5, 0.5)
-			CfgGlowWrap.Position = UDim2.new(0.5, 0, 0.5, 0)
-			CfgGlowWrap.Size = UDim2.new(1, -11, 1, -1)
-			CfgGlowWrap.BackgroundTransparency = 1
-			CfgGlowWrap.BorderSizePixel = 0
-			CfgGlowWrap.ZIndex = 8
-			CfgGlowWrap.Parent = Button
-			Instance.new("UICorner", CfgGlowWrap).CornerRadius = UDim.new(0, 5)
-			local CfgGlowStroke = Instance.new("UIStroke", CfgGlowWrap)
-			CfgGlowStroke.Thickness = 2
-			CfgGlowStroke.Color = _lib.Colors.Highlight
-			local CfgGlowGrad = Instance.new("UIGradient", CfgGlowStroke)
-			CfgGlowGrad.Transparency = NumberSequence.new{
-				NumberSequenceKeypoint.new(0,    0.97),
-				NumberSequenceKeypoint.new(0.12, 0),
-				NumberSequenceKeypoint.new(0.38, 0.97),
-				NumberSequenceKeypoint.new(0.62, 0.97),
-				NumberSequenceKeypoint.new(0.88, 0),
-				NumberSequenceKeypoint.new(1,    0.97),
-			}
-			task.spawn(function()
-				while Button and Button.Parent do
-					TweenService:Create(CfgGlowGrad, TweenInfo.new(3, Enum.EasingStyle.Linear), {Rotation = 360}):Play()
-					task.wait(3.05)
-					if CfgGlowGrad and CfgGlowGrad.Parent then CfgGlowGrad.Rotation = 0 end
-				end
-			end)
-	
-			-- White shine overlay
-			local CfgBtnGlow = Instance.new("Frame")
-			CfgBtnGlow.AnchorPoint = Vector2.new(0.5, 0.5)
-			CfgBtnGlow.Position = UDim2.fromScale(0.5, 0.5)
-			CfgBtnGlow.Size = UDim2.fromScale(1, 1)
-			CfgBtnGlow.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-			CfgBtnGlow.BackgroundTransparency = 0
-			CfgBtnGlow.BorderSizePixel = 0
-			CfgBtnGlow.ZIndex = 10
-			CfgBtnGlow.Parent = Frame_2
-			Instance.new("UICorner", CfgBtnGlow).CornerRadius = UDim.new(0, 3)
-			local CfgBtnGlowGrad = Instance.new("UIGradient")
-			CfgBtnGlowGrad.Rotation = 90
-			CfgBtnGlowGrad.Transparency = NumberSequence.new{
-				NumberSequenceKeypoint.new(0,    0.55),
-				NumberSequenceKeypoint.new(0.38, 0.97),
-				NumberSequenceKeypoint.new(1,    0.97),
-			}
-			CfgBtnGlowGrad.Parent = CfgBtnGlow
 	
 			TextLabel.Parent = Frame_2
 			TextLabel.AnchorPoint = Vector2.new(0.5, 0.5)
@@ -13237,9 +13120,6 @@ do
 						BackgroundTransparency = 0,
 					});
 	
-					_lib:_Animation(CfgBtnGlow,Tween,{
-						BackgroundTransparency = 0,
-					});
 	
 					_lib:_Animation(BlockLine,Tween,{
 						BackgroundTransparency = 1,
@@ -13315,9 +13195,6 @@ do
 						BackgroundTransparency = 1,
 					});
 	
-					_lib:_Animation(CfgBtnGlow,Tween,{
-						BackgroundTransparency = 1,
-					});
 	
 					_lib:_Animation(BlockLine,Tween,{
 						BackgroundTransparency = 1,
@@ -16076,6 +15953,106 @@ do
 			S._fogOverlay = _fogOverlay
 		end)
 	end
+local _glowButtonColor = S.Hub.Colors.Highlight
+local _glowButtons = {}
+local function _glowButton(parentOrSection, labelText, callback)
+	local sRoot = (type(parentOrSection) == "table" and parentOrSection._Root) or parentOrSection
+	local Container = Instance.new("Frame")
+	Container.Name = S.Hub:_RandomString()
+	Container.Parent = sRoot
+	Container.BackgroundTransparency = 1
+	Container.BorderSizePixel = 0
+	Container.Size = UDim2.new(1, -6, 0, 38)
+	Container.ZIndex = sRoot.ZIndex + 5
+	local _bh, _bs, _bv = Color3.toHSV(_glowButtonColor)
+	local Btn = Instance.new("Frame")
+	Btn.AnchorPoint = Vector2.new(0.5, 0.5)
+	Btn.BackgroundColor3 = _glowButtonColor
+	Btn.BackgroundTransparency = 0.1
+	Btn.BorderSizePixel = 0
+	Btn.Position = UDim2.new(0.5, 0, 0.5, 0)
+	Btn.Size = UDim2.new(1, -8, 1, -6)
+	Btn.ZIndex = Container.ZIndex + 1
+	Btn.Parent = Container
+	local BtnCorner = Instance.new("UICorner")
+	BtnCorner.CornerRadius = UDim.new(0, 4)
+	BtnCorner.Parent = Btn
+	local BtnGlow = Instance.new("Frame")
+	BtnGlow.Name = S.Hub:_RandomString()
+	BtnGlow.AnchorPoint = Vector2.new(0.5, 0.5)
+	BtnGlow.Position = UDim2.fromScale(0.5, 0.5)
+	BtnGlow.Size = UDim2.fromScale(1, 1)
+	BtnGlow.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+	BtnGlow.BackgroundTransparency = 0
+	BtnGlow.BorderSizePixel = 0
+	BtnGlow.ZIndex = Btn.ZIndex + 1
+	BtnGlow.Parent = Btn
+	local BtnGlowCorner = Instance.new("UICorner")
+	BtnGlowCorner.CornerRadius = UDim.new(0, 4)
+	BtnGlowCorner.Parent = BtnGlow
+	local BtnGlowGrad = Instance.new("UIGradient")
+	BtnGlowGrad.Rotation = 90
+	BtnGlowGrad.Transparency = NumberSequence.new({
+		NumberSequenceKeypoint.new(0,    0.55),
+		NumberSequenceKeypoint.new(0.38, 0.97),
+		NumberSequenceKeypoint.new(1,    0.97),
+	})
+	BtnGlowGrad.Parent = BtnGlow
+	local BtnStroke = Instance.new("UIStroke")
+	BtnStroke.Color = Color3.fromHSV(_bh, math.min(_bs * 1.1, 1), _bv * 0.55)
+	BtnStroke.Thickness = 1.5
+	BtnStroke.Transparency = 0.1
+	BtnStroke.Parent = Btn
+	table.insert(_glowButtons, { Btn = Btn, Stroke = BtnStroke })
+	local ShimmerGradient = Instance.new("UIGradient")
+	ShimmerGradient.Transparency = NumberSequence.new({
+		NumberSequenceKeypoint.new(0,    0.85),
+		NumberSequenceKeypoint.new(0.12, 0),
+		NumberSequenceKeypoint.new(0.38, 0.75),
+		NumberSequenceKeypoint.new(0.62, 0.75),
+		NumberSequenceKeypoint.new(0.88, 0),
+		NumberSequenceKeypoint.new(1,    0.85),
+	})
+	ShimmerGradient.Parent = BtnStroke
+	task.spawn(function()
+		while Btn and Btn.Parent do
+			TweenService:Create(ShimmerGradient, TweenInfo.new(3, Enum.EasingStyle.Linear), { Rotation = 360 }):Play()
+			task.wait(3.05)
+			if ShimmerGradient and ShimmerGradient.Parent then ShimmerGradient.Rotation = 0 end
+		end
+	end)
+	local Label = Instance.new("TextLabel")
+	Label.AnchorPoint = Vector2.new(0.5, 0.5)
+	Label.BackgroundTransparency = 1
+	Label.Position = UDim2.new(0.5, 0, 0.5, 0)
+	Label.Size = UDim2.new(1, 0, 1, 0)
+	Label.ZIndex = Btn.ZIndex + 1
+	Label.Font = Enum.Font.GothamMedium
+	Label.Text = labelText
+	Label.TextColor3 = Color3.fromRGB(255, 255, 255)
+	Label.TextSize = 12
+	Label.TextStrokeTransparency = 0.9
+	Label.Parent = Btn
+	local LabelScale = Instance.new("UIScale")
+	LabelScale.Scale = 1
+	LabelScale.Parent = Label
+	local BtnScale = Instance.new("UIScale")
+	BtnScale.Scale = 1
+	BtnScale.Parent = Btn
+	local Input = S.Hub:_Input(Btn, callback)
+	local HoverTween = TweenInfo.new(0.25, Enum.EasingStyle.Quint, Enum.EasingDirection.Out)
+	S.Hub:_Hover(Input, function()
+		S.Hub:_Animation(BtnScale, HoverTween, { Scale = 1.02 })
+		S.Hub:_Animation(BtnStroke, TweenInfo.new(0.18), { Transparency = 0.0 })
+		S.Hub:_Animation(Btn, TweenInfo.new(0.18), { BackgroundTransparency = 0 })
+		S.Hub:_Animation(LabelScale, HoverTween, { Scale = 1.10 })
+	end, function()
+		S.Hub:_Animation(BtnScale, HoverTween, { Scale = 1.0 })
+		S.Hub:_Animation(BtnStroke, TweenInfo.new(0.18), { Transparency = 0.1 })
+		S.Hub:_Animation(Btn, TweenInfo.new(0.18), { BackgroundTransparency = 0.1 })
+		S.Hub:_Animation(LabelScale, HoverTween, { Scale = 1.0 })
+	end)
+end
 	S.Notify.new({
 		Title = "PYMPLE v1",
 		Content = "Left Alt = UI | V = Farm | B = Boss | N = Summon | M = Skills",
@@ -16251,20 +16228,14 @@ do
 		Content = "1). Accepts quest remotely\n\n2). Collects 6 fragments (Snow→Shibuya→Hueco Mundo→Shinjuku→Slime→Judgement)\n\n3). Returns to Gin (Hueco Mundo)\n\nPriority: overrides all other modes",
 	})
 	local QDbgSec = QTab:DrawSection({ Name = "Quest Debug", Position = "right" })
-	QDbgSec:AddButton({
-		Name = "Scan Dungeon Debug",
-		Callback = function()
-			local result = fn.ScanDungeonDebug()
-			S.Notify.new({ Title = "DUNGEON DEBUG", Content = result:sub(1, 500), Duration = 20, Icon = S.ICON })
-		end,
-	})
-	QDbgSec:AddButton({
-		Name = "Scan Hogyoku Debug",
-		Callback = function()
-			local result = fn.ScanHogyokuDebug()
-			S.Notify.new({ Title = "HOGYOKU DEBUG", Content = result:sub(1, 500), Duration = 20, Icon = S.ICON })
-		end,
-	})
+	_glowButton(QDbgSec, "Scan Dungeon Debug", function()
+		local result = fn.ScanDungeonDebug()
+		S.Notify.new({ Title = "DUNGEON DEBUG", Content = result:sub(1, 500), Duration = 20, Icon = S.ICON })
+	end)
+	_glowButton(QDbgSec, "Scan Hogyoku Debug", function()
+		local result = fn.ScanHogyokuDebug()
+		S.Notify.new({ Title = "HOGYOKU DEBUG", Content = result:sub(1, 500), Duration = 20, Icon = S.ICON })
+	end)
 	local FSec = FTab:DrawSection({ Name = "Auto Farm", Position = "left" })
 	S.FarmToggle = FSec:AddToggle({
 		Name = "Enable Auto Farm",
@@ -16450,42 +16421,39 @@ do
 		end,
 	}).Link
 		:AddHelper({ Text = "Prevents disconnect" })
-	FSec:AddButton({
-		Name = "Scan All NPCs",
-		Callback = function()
-			local isl = S.CurIsland or fn.IslandForLevel(fn.GetLevel())
-			local en = fn.FindEnemies(isl)
-			local nf = fn.GetNPCFolder()
-			local all = {}
-			if nf then
-				local ct = {}
-				local function addModel(m)
-					if m:IsA("Model") then
-						ct[m.Name] = (ct[m.Name] or 0) + 1
-					end
+	_glowButton(FSec, "Scan All NPCs", function()
+		local isl = S.CurIsland or fn.IslandForLevel(fn.GetLevel())
+		local en = fn.FindEnemies(isl)
+		local nf = fn.GetNPCFolder()
+		local all = {}
+		if nf then
+			local ct = {}
+			local function addModel(m)
+				if m:IsA("Model") then
+					ct[m.Name] = (ct[m.Name] or 0) + 1
 				end
-				for _, child in ipairs(nf:GetChildren()) do
-					if child:IsA("Folder") then
-						for _, m in ipairs(child:GetChildren()) do
-							addModel(m)
-						end
-					else
-						addModel(child)
-					end
-				end
-				for n, c in pairs(ct) do
-					table.insert(all, n .. " x" .. c)
-				end
-				table.sort(all)
 			end
-			S.Notify.new({
-				Title = "Matched: " .. #en .. " (" .. isl.Portal .. ")",
-				Content = "All NPCs:\n" .. table.concat(all, "\n"),
-				Duration = 15,
-				Icon = S.ICON,
-			})
-		end,
-	})
+			for _, child in ipairs(nf:GetChildren()) do
+				if child:IsA("Folder") then
+					for _, m in ipairs(child:GetChildren()) do
+						addModel(m)
+					end
+				else
+					addModel(child)
+				end
+			end
+			for n, c in pairs(ct) do
+				table.insert(all, n .. " x" .. c)
+			end
+			table.sort(all)
+		end
+		S.Notify.new({
+			Title = "Matched: " .. #en .. " (" .. isl.Portal .. ")",
+			Content = "All NPCs:\n" .. table.concat(all, "\n"),
+			Duration = 15,
+			Icon = S.ICON,
+		})
+	end)
 	S.DungeonToggles = {}
 	fn.EnableDungeonType = function(dtype, v)
 		if v then
@@ -16836,27 +16804,24 @@ do
 	local TpSec = FTab:DrawSection({ Name = "Teleport to Island", Position = "left" })
 	for _, name in ipairs(S.TpIslands) do
 		local displayName = fn.PortalDisplayName(name)
-		TpSec:AddButton({
-			Name = displayName,
-			Callback = function()
-				if F.AutoFarmLevel then
-					S.Notify.new({
-						Title = "Auto Farm is ON",
-						Content = "Disable Auto Farm before teleporting manually",
-						Duration = 3,
-						Icon = S.ICON,
-					})
-					return
-				end
-				fn.ForceTP(name)
+		_glowButton(TpSec, displayName, function()
+			if F.AutoFarmLevel then
 				S.Notify.new({
-					Title = "Teleporting to " .. displayName,
-					Content = "Successfully teleported!",
-					Duration = 4,
+					Title = "Auto Farm is ON",
+					Content = "Disable Auto Farm before teleporting manually",
+					Duration = 3,
 					Icon = S.ICON,
 				})
-			end,
-		})
+				return
+			end
+			fn.ForceTP(name)
+			S.Notify.new({
+				Title = "Teleporting to " .. displayName,
+				Content = "Successfully teleported!",
+				Duration = 4,
+				Icon = S.ICON,
+			})
+		end)
 	end
 	local BSec = FTab:DrawSection({ Name = "Auto Farm Boss", Position = "right" })
 	S.BossToggle = BSec:AddToggle({
@@ -17150,7 +17115,7 @@ do
 			S.Win.AlwayShowTab = v
 		end,
 	})
-	UISec:AddColorPicker({
+	S._cpHighlight = UISec:AddColorPicker({
 		Name = "Highlight",
 		Default = S.Hub.Colors.Highlight,
 		Callback = function(v)
@@ -17163,7 +17128,7 @@ do
 			end
 		end,
 	})
-	UISec:AddColorPicker({
+	S._cpToggle = UISec:AddColorPicker({
 		Name = "Toggle Color",
 		Default = S.Hub.Colors.Toggle,
 		Callback = function(v)
@@ -17171,7 +17136,7 @@ do
 			S.Hub:RefreshCurrentColor()
 		end,
 	})
-	UISec:AddColorPicker({
+	S._cpDrop = UISec:AddColorPicker({
 		Name = "Drop Color",
 		Default = S.Hub.Colors.DropColor,
 		Callback = function(v)
@@ -17179,7 +17144,7 @@ do
 			S.Hub:RefreshCurrentColor()
 		end,
 	})
-	UISec:AddColorPicker({
+	S._cpBlock = UISec:AddColorPicker({
 		Name = "Block Color",
 		Default = S.Hub.Colors.BlockColor,
 		Callback = function(v)
@@ -17187,7 +17152,7 @@ do
 			S.Hub:RefreshCurrentColor()
 		end,
 	})
-	UISec:AddColorPicker({
+	S._cpBG = UISec:AddColorPicker({
 		Name = "Background Color",
 		Default = S.Hub.Colors.BGDBColor,
 		Callback = function(v)
@@ -17195,7 +17160,7 @@ do
 			S.Hub:RefreshCurrentColor()
 		end,
 	})
-	UISec:AddColorPicker({
+	S._cpStroke = UISec:AddColorPicker({
 		Name = "Stroke Color",
 		Default = S.Hub.Colors.StrokeColor,
 		Callback = function(v)
@@ -17258,92 +17223,86 @@ do
 			end
 		end,
 	})
-	UISec:AddButton({
-		Name = "Copy Discord",
-		Callback = function()
-			pcall(function()
-				setclipboard(S.DISCORD)
-			end)
-			S.Notify.new({ Title = "Copied", Content = "Discord link copied!", Duration = 2, Icon = S.ICON })
-		end,
-	})
-	UISec:AddButton({
-		Name = "Destroy GUI",
-		Callback = function()
-			S.Running = false
-			F.AutoFarmLevel = false
-			F.AutoDungeon = false
-			F.AutoBossRush = false
-			F.BossEnabled = false
-			F.AutoChest = false
-			F.AutoMerchant = false
-			F.DungeonQuest = false
-			F.HogyokuQuest = false
-			for _, k in ipairs(S.SkillKeys) do
-				F[k] = false
-			end
-			pcall(function()
-				local c = LP.Character
-				if c then
-					local hm = c:FindFirstChildOfClass("Humanoid")
-					if hm then
-						hm.PlatformStand = false
-					end
-					for _, p in ipairs(c:GetDescendants()) do
-						if p:IsA("BasePart") then
-							p.CanCollide = true
-						end
+	_glowButton(UISec, "Copy Discord", function()
+		pcall(function()
+			setclipboard(S.DISCORD)
+		end)
+		S.Notify.new({ Title = "Copied", Content = "Discord link copied!", Duration = 2, Icon = S.ICON })
+	end)
+	_glowButton(UISec, "Destroy GUI", function()
+		S.Running = false
+		F.AutoFarmLevel = false
+		F.AutoDungeon = false
+		F.AutoBossRush = false
+		F.BossEnabled = false
+		F.AutoChest = false
+		F.AutoMerchant = false
+		F.DungeonQuest = false
+		F.HogyokuQuest = false
+		for _, k in ipairs(S.SkillKeys) do
+			F[k] = false
+		end
+		pcall(function()
+			local c = LP.Character
+			if c then
+				local hm = c:FindFirstChildOfClass("Humanoid")
+				if hm then
+					hm.PlatformStand = false
+				end
+				for _, p in ipairs(c:GetDescendants()) do
+					if p:IsA("BasePart") then
+						p.CanCollide = true
 					end
 				end
-			end)
-			fn.StopTw()
-			fn.ClearTgt()
-			S.HoverPos = nil
-			S.NoclipActive = false
-			fn.DisableAllAutoSpawn()
-			for _, c in ipairs(S.Conns) do
-				pcall(function()
-					c:Disconnect()
-				end)
 			end
-			S.Conns = {}
-			task.delay(0.1, function()
+		end)
+		fn.StopTw()
+		fn.ClearTgt()
+		S.HoverPos = nil
+		S.NoclipActive = false
+		fn.DisableAllAutoSpawn()
+		for _, c in ipairs(S.Conns) do
+			pcall(function()
+				c:Disconnect()
+			end)
+		end
+		S.Conns = {}
+		task.delay(0.1, function()
+			pcall(function()
+				S.Win:Destroy()
+			end)
+			pcall(function()
+				S.Hub:Destroy()
+			end)
+			local function nukeGuis(parent)
 				pcall(function()
-					S.Win:Destroy()
-				end)
-				pcall(function()
-					S.Hub:Destroy()
-				end)
-				local function nukeGuis(parent)
-					pcall(function()
-						for _, gui in ipairs(parent:GetChildren()) do
-							if gui:IsA("ScreenGui") then
-								local n = gui.Name:lower()
-								if
-									n:find("pimple")
-									or n:find("pymple")
-									or n:find("notify")
-									or n:find("loader")
-									or n:find("watermark")
-								then
-									gui:Destroy()
-								end
+					for _, gui in ipairs(parent:GetChildren()) do
+						if gui:IsA("ScreenGui") then
+							local n = gui.Name:lower()
+							if
+								n:find("pimple")
+								or n:find("pymple")
+								or n:find("notify")
+								or n:find("loader")
+								or n:find("watermark")
+							then
+								gui:Destroy()
 							end
 						end
-					end)
-				end
-				nukeGuis(LP.PlayerGui)
-				pcall(function()
-					nukeGuis(game:GetService("CoreGui"))
-				end)
-				pcall(function()
-					if gethui then
-						nukeGuis(gethui())
 					end
 				end)
+			end
+			nukeGuis(LP.PlayerGui)
+			pcall(function()
+				nukeGuis(game:GetService("CoreGui"))
 			end)
-		end,
-	})
+			pcall(function()
+				if gethui then
+					nukeGuis(gethui())
+				end
+			end)
+		end)
+	end)
 	local InfoSec = SetTab:DrawSection({ Name = "Info", Position = "right" })
 	InfoSec:AddParagraph({
 		Title = "PYMPLE v1",
@@ -17356,6 +17315,15 @@ do
 		Values = { "Default", "Dark Green", "Dark Blue", "Purple Rose", "Skeet" },
 		Callback = function(v)
 			S.Hub:SetTheme(v)
+			if S._rgStrokes then
+				for _, s in ipairs(S._rgStrokes) do s.Color = S.Hub.Colors.Highlight end
+			end
+			if S._cpHighlight then S._cpHighlight:SetValue(S.Hub.Colors.Highlight) end
+			if S._cpToggle   then S._cpToggle:SetValue(S.Hub.Colors.Toggle)       end
+			if S._cpDrop     then S._cpDrop:SetValue(S.Hub.Colors.DropColor)      end
+			if S._cpBlock    then S._cpBlock:SetValue(S.Hub.Colors.BlockColor)     end
+			if S._cpBG       then S._cpBG:SetValue(S.Hub.Colors.BGDBColor)        end
+			if S._cpStroke   then S._cpStroke:SetValue(S.Hub.Colors.StrokeColor)  end
 		end,
 	})
 	local CfgUI = S.Win:DrawConfig({ Name = "Config", Icon = "folder", Config = S.CfgMgr })
