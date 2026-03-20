@@ -151,23 +151,21 @@ if type(S) ~= "table" or not S.Hub then
 		end
 	end)
 
-	local winGradWrap = Instance.new("Frame")
-	winGradWrap.Position               = UDim2.fromOffset(182, -3)
-	winGradWrap.Size                   = UDim2.fromOffset(351, 356)
-	winGradWrap.BackgroundTransparency = 1
-	winGradWrap.BorderSizePixel        = 0
-	winGradWrap.ZIndex                 = 6
-	winGradWrap.Parent                 = holder
-	Instance.new("UICorner", winGradWrap).CornerRadius = UDim.new(0, 15)
-	local winGradStroke = Instance.new("UIStroke", winGradWrap)
-	winGradStroke.Color     = C.Acnt
-	winGradStroke.Thickness = 1.5
-	local winGrad = Instance.new("UIGradient", winGradStroke)
-	winGrad.Rotation = 90
-	winGrad.Transparency = NumberSequence.new{
-		NumberSequenceKeypoint.new(0,   1),
-		NumberSequenceKeypoint.new(0.5, 0.75),
-		NumberSequenceKeypoint.new(1,   0.1),
+	local winBottomGlow = Instance.new("Frame")
+	winBottomGlow.AnchorPoint          = Vector2.new(0, 1)
+	winBottomGlow.Position             = UDim2.new(0, 0, 1, 0)
+	winBottomGlow.Size                 = UDim2.new(1, 0, 0.6, 0)
+	winBottomGlow.BackgroundColor3     = C.Acnt
+	winBottomGlow.BackgroundTransparency = 0
+	winBottomGlow.BorderSizePixel      = 0
+	winBottomGlow.ZIndex               = 4
+	winBottomGlow.Parent               = win
+	Instance.new("UICorner", winBottomGlow).CornerRadius = UDim.new(0, 12)
+	local winBottomGlowGrad = Instance.new("UIGradient", winBottomGlow)
+	winBottomGlowGrad.Rotation = 90
+	winBottomGlowGrad.Transparency = NumberSequence.new{
+		NumberSequenceKeypoint.new(0, 1),
+		NumberSequenceKeypoint.new(1, 0.78),
 	}
 
 	do
