@@ -11,7 +11,9 @@ do
 			local _wh = shared._pympleWebhook
 			local _base = _wh and string.match(_wh, "^(https?://[^/]+)")
 			local _req = (syn and syn.request) or (http and http.request) or request
-			if _base and _req then
+			if not _base then
+				_ok, _reason = false, "missing auth"
+			elseif _req then
 				local _hs = game:GetService("HttpService")
 				local _cok, _res = pcall(_req, {
 					Url = _base .. "/session/check",
