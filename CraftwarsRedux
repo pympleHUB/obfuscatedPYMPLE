@@ -11584,7 +11584,7 @@ local pimpleHUB = (function()
 
 			local cwGlowStroke = Instance.new("UIStroke", CloseWindow)
 			cwGlowStroke.Thickness = 2
-			cwGlowStroke.Color = Color3.fromRGB(220, 60, 60)
+			cwGlowStroke.Color = Color3.fromRGB(255, 255, 255)
 			cwGlowStroke.Transparency = 1
 			local cwGlowGrad = Instance.new("UIGradient", cwGlowStroke)
 			cwGlowGrad.Transparency = NumberSequence.new({
