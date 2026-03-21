@@ -97,11 +97,6 @@ class ReportModal(discord.ui.Modal, title="Report an Issue"):
             channel = bot.get_channel(REPORTS_CHANNEL_ID)
             if channel:
                 await channel.send(embed=embed)
-        await log("🚨 Issue Reported", 0xE74C3C, [
-            ("Reported By", f"{interaction.user} (`{interaction.user.id}`)", False),
-            ("Description", self.description.value[:1024], False),
-            ("Key at Report", f"`{self.key}`", True),
-        ])
         await interaction.response.send_message("Your report has been submitted. Thank you!", ephemeral=True)
 
 
