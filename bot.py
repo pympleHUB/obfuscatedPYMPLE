@@ -21,7 +21,7 @@ DISCORD_WEBHOOK_URL = os.environ.get("DISCORD_WEBHOOK", "")
 WEBHOOK_SECRET = os.environ.get("WEBHOOK_SECRET", "")
 SESSION_SECRET = os.environ.get("SESSION_SECRET", "")
 GITHUB_REPO = "pympleHUB/obfuscatedPYMPLE"
-KEY_FILE = "pympleKeyBot"
+KEY_FILE = "_pb"
 HISTORY_FILE = "pympleKeyHistory"
 ROTATION_COUNT_FILE = "pympleKeyCount"
 EXEC_COUNT_FILE = "pympleExecCount"
@@ -44,6 +44,7 @@ last_rotation_time = None
 _recent_joins = {}
 ROTATION_HOURS = 6.0
 _current_key = ""
+_last_exec_channel_update = 0.0
 total_reports = 0
 recent_key_channel_msgs = collections.deque(maxlen=20)
 
@@ -231,7 +232,8 @@ def generate_key():
 def update_key(new_key):
     global _current_key
     _current_key = new_key
-    return gh_put(KEY_FILE, new_key, "Update key")
+    encoded = base64.b64encode(bytes([b ^ 0x42 for b in new_key.encode()])).decode()
+    return gh_put(KEY_FILE, encoded, "cfg")
 
 def add_to_history(new_key):
     existing, _ = gh_get(HISTORY_FILE)
@@ -289,8 +291,13 @@ def increment_exec_count():
     return count
 
 async def update_exec_channel(count):
+    global _last_exec_channel_update
     if not EXEC_STATS_CHANNEL_ID:
         return
+    now = asyncio.get_event_loop().time()
+    if now - _last_exec_channel_update < 600:
+        return
+    _last_exec_channel_update = now
     channel = bot.get_channel(EXEC_STATS_CHANNEL_ID)
     if channel:
         try:
@@ -883,9 +890,14 @@ async def on_message(message: discord.Message):
 async def on_ready():
     global bot_start_time, THUMBNAIL_URL, last_announce_msg_id, _current_key
     bot_start_time = datetime.now()
-    _loaded_key, _ = await asyncio.to_thread(gh_get, KEY_FILE)
-    if _loaded_key:
-        _current_key = _loaded_key
+    _raw, _ = await asyncio.to_thread(gh_get, KEY_FILE)
+    if _raw:
+        try:
+            _current_key = bytes([b ^ 0x42 for b in base64.b64decode(_raw.strip())]).decode()
+        except:
+            pass
+    if not _current_key:
+        _current_key = os.environ.get("INITIAL_KEY", "")
     if not THUMBNAIL_URL:
         THUMBNAIL_URL = await asyncio.to_thread(get_roblox_avatar)
     bot.add_view(CopyKeyView())
