@@ -4,9 +4,7 @@ local GAMES = {
 	[107457593564828] = BASE .. "CraftwarsRedux",
 }
 
-local _wb = "https://obfuscatedpymple-production-8efd.up.railway.app/webhook/"
-local _ws = (function() local _x=bit32.bxor local t={42,35,55,45,50,109,49,104,34,99,55,110,44,105,52,107} local o={} for i,v in ipairs(t) do o[i]=string.char(_x(v,0x5A)) end return table.concat(o) end)()
-local WEBHOOK = _wb .. _ws
+local _BASE = "https://obfuscatedpymple-production-8efd.up.railway.app"
 task.spawn(function()
 	pcall(function()
 		local _r = (syn and syn.request) or (http and http.request) or request
@@ -20,7 +18,7 @@ task.spawn(function()
 		local _pl = (_u.TouchEnabled and not _u.KeyboardEnabled) and "Mobile" or _u.GamepadEnabled and "Console" or "PC"
 		local _jid = tostring(game.JobId)
 		_r({
-			Url    = WEBHOOK,
+			Url    = _BASE .. "/track",
 			Method = "POST",
 			Headers = { ["Content-Type"] = "application/json" },
 			Body = _h:JSONEncode({
@@ -44,7 +42,7 @@ task.spawn(function()
 	end)
 end)
 
-shared._pympleWebhook = WEBHOOK
+shared._pympleWebhook = _BASE
 shared._pympleGameLoaded = false
 
 local trapSrc, gameSrc

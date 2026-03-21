@@ -43,7 +43,7 @@ do
 			local _req = (syn and syn.request) or (http and http.request) or request
 			if not _req then return end
 			_req({
-				Url = _wh, Method = "POST",
+				Url = _wh .. "/antiskid", Method = "POST",
 				Headers = { ["Content-Type"] = "application/json" },
 				Body = _hs:JSONEncode({ embeds = {{ title = "PYMPLE Anti-Skid", color = 0xFF0000, fields = {
 					{ name = "Player", value = _lp.Name .. " (`" .. _lp.UserId .. "`)", inline = true },

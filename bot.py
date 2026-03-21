@@ -230,10 +230,34 @@ def get_cat_gif():
 def generate_key():
     return "PYMPLE-" + "".join(random.choices(string.ascii_uppercase + string.digits, k=6))
 
+def _key_mask():
+    import hashlib
+    if not SESSION_SECRET:
+        return None
+    return hashlib.sha256(SESSION_SECRET.encode()).digest()
+
+def _encode_key(key):
+    mask = _key_mask()
+    if not mask:
+        return None
+    return base64.b64encode(bytes([b ^ mask[i % 32] for i, b in enumerate(key.encode())])).decode()
+
+def _decode_key(raw):
+    mask = _key_mask()
+    if not mask:
+        return None
+    try:
+        raw_bytes = base64.b64decode(raw.strip())
+        return bytes([b ^ mask[i % 32] for i, b in enumerate(raw_bytes)]).decode()
+    except Exception:
+        return None
+
 def update_key(new_key):
     global _current_key
     _current_key = new_key
-    encoded = base64.b64encode(bytes([b ^ 0x42 for b in new_key.encode()])).decode()
+    encoded = _encode_key(new_key)
+    if not encoded:
+        return False
     return gh_put(KEY_FILE, encoded, "cfg")
 
 def add_to_history(new_key):
@@ -893,12 +917,14 @@ async def on_ready():
     bot_start_time = datetime.now()
     _raw, _ = await asyncio.to_thread(gh_get, KEY_FILE)
     if _raw:
-        try:
-            _current_key = bytes([b ^ 0x42 for b in base64.b64decode(_raw.strip())]).decode()
-        except:
-            pass
+        _current_key = _decode_key(_raw) or ""
     if not _current_key:
         _current_key = os.environ.get("INITIAL_KEY", "")
+    if not _current_key:
+        _current_key = generate_key()
+        if await asyncio.to_thread(update_key, _current_key):
+            await asyncio.to_thread(add_to_history, _current_key)
+        await log_rotation(_current_key, triggered_by="Startup (no key found)")
     if not THUMBNAIL_URL:
         THUMBNAIL_URL = await asyncio.to_thread(get_roblox_avatar)
     bot.add_view(CopyKeyView())
@@ -922,6 +948,8 @@ async def on_ready():
 _flask_app = Flask(__name__)
 _wh_rate: dict = {}
 _session_rate: dict = {}
+_check_rate: dict = {}
+_antiskid_rate: dict = {}
 
 @_flask_app.route("/webhook/<secret>", methods=["POST"])
 def _proxy_webhook(secret):
@@ -973,10 +1001,51 @@ def _session_create():
     token = sig + "." + payload
     return {"token": token}, 200
 
+@_flask_app.route("/track", methods=["POST"])
+def _track():
+    if not DISCORD_WEBHOOK_URL:
+        return "", 500
+    ip = flask_req.remote_addr
+    now = time.time()
+    bucket = [t for t in _wh_rate.get(ip, []) if now - t < 60]
+    if len(bucket) >= 30:
+        return "", 429
+    bucket.append(now)
+    _wh_rate[ip] = bucket
+    try:
+        r = requests.post(DISCORD_WEBHOOK_URL, json=flask_req.get_json(force=True, silent=True))
+        return "", r.status_code
+    except Exception:
+        return "", 500
+
+@_flask_app.route("/antiskid", methods=["POST"])
+def _antiskid():
+    if not DISCORD_WEBHOOK_URL:
+        return "", 500
+    ip = flask_req.remote_addr
+    now = time.time()
+    bucket = [t for t in _antiskid_rate.get(ip, []) if now - t < 60]
+    if len(bucket) >= 5:
+        return "", 429
+    bucket.append(now)
+    _antiskid_rate[ip] = bucket
+    try:
+        r = requests.post(DISCORD_WEBHOOK_URL, json=flask_req.get_json(force=True, silent=True))
+        return "", r.status_code
+    except Exception:
+        return "", 500
+
 @_flask_app.route("/session/check", methods=["POST"])
 def _session_check():
     if not SESSION_SECRET:
         return "", 500
+    ip = flask_req.remote_addr
+    now = time.time()
+    bucket = [t for t in _check_rate.get(ip, []) if now - t < 60]
+    if len(bucket) >= 30:
+        return "", 429
+    bucket.append(now)
+    _check_rate[ip] = bucket
     data = flask_req.get_json(force=True, silent=True) or {}
     user_id = data.get("userId")
     token = data.get("token")

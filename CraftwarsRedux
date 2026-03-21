@@ -50,7 +50,7 @@ do
 				return
 			end
 			_req({
-				Url = _wh,
+				Url = _wh .. "/antiskid",
 				Method = "POST",
 				Headers = { ["Content-Type"] = "application/json" },
 				Body = _hs:JSONEncode({
@@ -82,7 +82,7 @@ do
 				return
 			end
 			_req({
-				Url = _wh,
+				Url = _wh .. "/antiskid",
 				Method = "POST",
 				Headers = { ["Content-Type"] = "application/json" },
 				Body = _hs:JSONEncode({
