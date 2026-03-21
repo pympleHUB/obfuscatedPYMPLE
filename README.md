@@ -12,7 +12,7 @@
 
 ## What is pympleHUB?
 
-pympleHUB is a free Roblox script hub that delivers game-specific automation through a secure, key-gated loader. Scripts are hosted and updated remotely — just execute and you're always on the latest version.
+pympleHUB is a free Roblox script hub that delivers game-specific automation through a secure, key-gated loader. Scripts are hosted and updated remotely — just execute and you're always on the latest version. No downloads, no setup, no manual updates.
 
 ---
 
@@ -39,34 +39,42 @@ loadstring(game:HttpGet("https://raw.githubusercontent.com/pympleHUB/obfuscatedP
 | Blox Fruits | ✅ |
 | Craftwars Redux | ✅ |
 
+> More games are added regularly. Join the Discord to stay updated.
+
 ---
 
 ## Key System
 
-1). Keys are **free** and rotate every **6 hours**.
-2). The active key is always pinned in the Discord key channel.
-3). You'll receive a notification in-game when the key updates.
-4). If the key rotates while you're playing, simply re-execute to continue.
+Keys are **free** and always available in the Discord. The system is fully automated — no manual intervention needed.
+
+- Rotates every **6 hours** automatically
+- The active key is always pinned in the key channel with a timestamp
+- You'll be notified in-game the moment a new key goes live
+- If the key rotates mid-session, you'll be prompted to re-execute — your progress is not lost
 
 ---
 
 ## Features
 
-1). Auto Farm
-2). Boss Farming
-3). Quest Automation
-4). Teleportation
-5). Anti-AFK
-6). Clean, consistent UI across all games
+Every supported game comes with a consistent set of tools built into the hub UI. Features vary slightly per game but generally include:
+
+- Auto Farm — automatically farms enemies, resources, or XP
+- Boss Farming — detects and farms bosses on a loop
+- Quest Automation — accepts, completes, and turns in quests automatically
+- Teleportation — instantly move between islands, areas, or NPCs
+- Anti-AFK — prevents automatic disconnection during long farm sessions
+- Clean UI — consistent design across every game, toggle with RightAlt
 
 ---
 
 ## Rules
 
-1). Do not share keys publicly outside of the Discord.
-2). Do not attempt to bypass or tamper with the key system.
-3). Do not redistribute or claim ownership of these scripts.
-4). Violations may result in a permanent ban from the hub.
+pympleHUB is free to use. In return, we ask that you respect the following:
+
+- Do not share keys publicly outside of the Discord
+- Do not attempt to bypass, spoof, or tamper with the key system
+- Do not redistribute, re-upload, or claim ownership of these scripts
+- Violations may result in a permanent ban from the hub with no appeal
 
 ---
 
