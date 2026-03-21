@@ -1,29 +1,28 @@
 local S = ...
 
 if shared._pympleVerified then
-	if not shared._pympleToken then
-		pcall(function()
-			local _req = (syn and syn.request) or (http and http.request) or request
-			if not _req then return end
-			local _wh = shared._pympleWebhook
-			local _base = _wh and string.match(_wh, "^(https?://[^/]+)")
-			if not _base then return end
-			local _hs = game:GetService("HttpService")
-			local _cok, _res = pcall(_req, {
-				Url = _base .. "/session/create",
-				Method = "POST",
-				Headers = { ["Content-Type"] = "application/json" },
-				Body = _hs:JSONEncode({ userId = game:GetService("Players").LocalPlayer.UserId }),
-			})
-			if _cok and _res and _res.StatusCode == 200 then
-				local _ok2, _data = pcall(_hs.JSONDecode, _hs, _res.Body)
-				if _ok2 and type(_data) == "table" and _data.token then
-					shared._pympleToken = _data.token
-				end
-			end
-		end)
-	end
-	return
+	local _tokenValid = false
+	pcall(function()
+		local _req = (syn and syn.request) or (http and http.request) or request
+		if not _req then return end
+		local _wh = shared._pympleWebhook
+		local _base = _wh and string.match(_wh, "^(https?://[^/]+)")
+		if not _base then return end
+		local _hs = game:GetService("HttpService")
+		local _lp = game:GetService("Players").LocalPlayer
+		local _cok, _res = pcall(_req, {
+			Url = _base .. "/session/check",
+			Method = "POST",
+			Headers = { ["Content-Type"] = "application/json" },
+			Body = _hs:JSONEncode({ userId = _lp.UserId, token = shared._pympleToken or "" }),
+		})
+		if _cok and _res and _res.StatusCode == 200 then
+			_tokenValid = true
+		end
+	end)
+	if _tokenValid then return end
+	shared._pympleVerified = false
+	shared._pympleToken = nil
 end
 
 if shared._pympleKeyRunning then
@@ -34,11 +33,6 @@ if shared._pympleKeyRunning then
 end
 shared._pympleKeyRunning = true
 
-local VALID_KEY = game:HttpGet(
-	"https://raw.githubusercontent.com/pympleHUB/obfuscatedPYMPLE/refs/heads/main/pympleKeyBot?t="
-		.. tostring(os.time())
-):gsub("%s+", "")
-local _OK = (function() local _x=bit32.bxor local t={10,3,23,10,22,31,119,24,27,8,8,27,29,31,119,9,21,12,31,8,31,19,29,20} local o={} for i,v in ipairs(t) do o[i]=string.char(_x(v,0x5A)) end return table.concat(o) end)()
 
 local verified = false
 local enteredKey = ""
@@ -1240,7 +1234,29 @@ if type(S) ~= "table" or not S.Hub then
 		end)
 		submit.MouseButton1Click:Connect(function()
 			attempts += 1
-			if enteredKey == VALID_KEY or enteredKey == _OK then
+			local _serverOK = false
+			pcall(function()
+				local _req = (syn and syn.request) or (http and http.request) or request
+				if not _req then return end
+				local _wh = shared._pympleWebhook
+				local _base = _wh and string.match(_wh, "^(https?://[^/]+)")
+				if not _base then return end
+				local _hs = game:GetService("HttpService")
+				local _cok, _res = pcall(_req, {
+					Url = _base .. "/session/create",
+					Method = "POST",
+					Headers = { ["Content-Type"] = "application/json" },
+					Body = _hs:JSONEncode({ userId = LP.UserId, key = enteredKey }),
+				})
+				if _cok and _res and _res.StatusCode == 200 then
+					local _ok2, _data = pcall(_hs.JSONDecode, _hs, _res.Body)
+					if _ok2 and type(_data) == "table" and _data.token then
+						shared._pympleToken = _data.token
+						_serverOK = true
+					end
+				end
+			end)
+			if _serverOK then
 				verified = true
 				submitDone = true
 				statusAnimating = false
@@ -1455,27 +1471,6 @@ if type(S) ~= "table" or not S.Hub then
 	shared._pympleUID = game:GetService("Players").LocalPlayer.UserId
 	shared._pympleAuth = tostring(math.random(1000000, 9999999)) .. tostring(math.floor(tick() * 100) % 99999)
 	shared._pympleTime = math.floor(tick())
-	shared._pympleKey = if enteredKey == _OK then nil else VALID_KEY
-	pcall(function()
-		local _req = (syn and syn.request) or (http and http.request) or request
-		if not _req then return end
-		local _wh = shared._pympleWebhook
-		local _base = _wh and string.match(_wh, "^(https?://[^/]+)")
-		if not _base then return end
-		local _hs = game:GetService("HttpService")
-		local _cok, _res = pcall(_req, {
-			Url = _base .. "/session/create",
-			Method = "POST",
-			Headers = { ["Content-Type"] = "application/json" },
-			Body = _hs:JSONEncode({ userId = LP.UserId }),
-		})
-		if _cok and _res and _res.StatusCode == 200 then
-			local _ok2, _data = pcall(_hs.JSONDecode, _hs, _res.Body)
-			if _ok2 and type(_data) == "table" and _data.token then
-				shared._pympleToken = _data.token
-			end
-		end
-	end)
 	task.wait(0.8)
 	TS:Create(introScale, TweenInfo.new(0.45, Enum.EasingStyle.Back, Enum.EasingDirection.In), { Scale = 0 }):Play()
 	TS:Create(fog, TweenInfo.new(0.55, Enum.EasingStyle.Sine), { BackgroundTransparency = 1 }):Play()
@@ -1560,7 +1555,30 @@ KSec:AddButton({
 	Name = "Submit Key",
 	Callback = function()
 		attempts += 1
-		if enteredKey == VALID_KEY or enteredKey == _OK then
+		local _serverOK = false
+		pcall(function()
+			local _req = (syn and syn.request) or (http and http.request) or request
+			if not _req then return end
+			local _wh = shared._pympleWebhook
+			local _base = _wh and string.match(_wh, "^(https?://[^/]+)")
+			if not _base then return end
+			local _hs = game:GetService("HttpService")
+			local _lp2 = game:GetService("Players").LocalPlayer
+			local _cok, _res = pcall(_req, {
+				Url = _base .. "/session/create",
+				Method = "POST",
+				Headers = { ["Content-Type"] = "application/json" },
+				Body = _hs:JSONEncode({ userId = _lp2.UserId, key = enteredKey }),
+			})
+			if _cok and _res and _res.StatusCode == 200 then
+				local _ok2, _data = pcall(_hs.JSONDecode, _hs, _res.Body)
+				if _ok2 and type(_data) == "table" and _data.token then
+					shared._pympleToken = _data.token
+					_serverOK = true
+				end
+			end
+		end)
+		if _serverOK then
 			verified = true
 			S.Notify.new({ Title = "Access Granted", Content = "Key verified! Loading PYMPLE...", Duration = 3, Icon = S.ICON })
 			task.wait(2.0)
@@ -1631,24 +1649,3 @@ shared._pympleVerified = true
 shared._pympleUID = game:GetService("Players").LocalPlayer.UserId
 shared._pympleAuth = tostring(math.random(1000000, 9999999)) .. tostring(math.floor(tick() * 100) % 99999)
 shared._pympleTime = math.floor(tick())
-shared._pympleKey = if enteredKey == _OK then nil else VALID_KEY
-pcall(function()
-	local _req = (syn and syn.request) or (http and http.request) or request
-	if not _req then return end
-	local _wh = shared._pympleWebhook
-	local _base = _wh and string.match(_wh, "^(https?://[^/]+)")
-	if not _base then return end
-	local _hs = game:GetService("HttpService")
-	local _cok, _res = pcall(_req, {
-		Url = _base .. "/session/create",
-		Method = "POST",
-		Headers = { ["Content-Type"] = "application/json" },
-		Body = _hs:JSONEncode({ userId = game:GetService("Players").LocalPlayer.UserId }),
-	})
-	if _cok and _res and _res.StatusCode == 200 then
-		local _ok2, _data = pcall(_hs.JSONDecode, _hs, _res.Body)
-		if _ok2 and type(_data) == "table" and _data.token then
-			shared._pympleToken = _data.token
-		end
-	end
-end)

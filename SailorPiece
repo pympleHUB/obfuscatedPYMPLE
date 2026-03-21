@@ -22,16 +22,14 @@ do
 					Body = _hs:JSONEncode({ userId = _lp.UserId, token = shared._pympleToken or "" }),
 				})
 				if not _cok then
-					_ok = type(shared._pympleTime) == "number" and (tick() - shared._pympleTime) < 120
-					_reason = _ok and nil or "token expired"
+					_ok, _reason = false, "token expired"
 				elseif _res and _res.StatusCode == 200 then
 					_ok = true
 				else
 					_ok, _reason = false, "invalid session"
 				end
 			else
-				_ok = type(shared._pympleTime) == "number" and (tick() - shared._pympleTime) < 120
-				_reason = _ok and nil or "token expired"
+				_ok, _reason = false, "token expired"
 			end
 		end
 	end

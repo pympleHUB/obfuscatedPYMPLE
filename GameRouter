@@ -2,9 +2,40 @@ local S = ...
 
 do
 	local _lp = game:GetService("Players").LocalPlayer
-	local _ok = shared._pympleVerified and shared._pympleAuth and shared._pympleTime and (tick() - shared._pympleTime) < 120
+	local _auth = shared._pympleAuth
+	local _ok, _reason
+	do
+		if shared._pympleVerified ~= true then
+			_ok, _reason = false, "missing auth"
+		elseif type(_auth) ~= "string" or #_auth < 10 then
+			_ok, _reason = false, "fake auth token"
+		else
+			local _wh = shared._pympleWebhook
+			local _base = _wh and string.match(_wh, "^(https?://[^/]+)")
+			local _req = (syn and syn.request) or (http and http.request) or request
+			if not _base then
+				_ok, _reason = false, "missing auth"
+			elseif _req then
+				local _hs = game:GetService("HttpService")
+				local _cok, _res = pcall(_req, {
+					Url = _base .. "/session/check",
+					Method = "POST",
+					Headers = { ["Content-Type"] = "application/json" },
+					Body = _hs:JSONEncode({ userId = _lp.UserId, token = shared._pympleToken or "" }),
+				})
+				if not _cok then
+					_ok, _reason = false, "token expired"
+				elseif _res and _res.StatusCode == 200 then
+					_ok = true
+				else
+					_ok, _reason = false, "invalid session"
+				end
+			else
+				_ok, _reason = false, "token expired"
+			end
+		end
+	end
 	if not _ok then
-		local _reason = (shared._pympleVerified and shared._pympleAuth and shared._pympleTime) and "token expired" or "missing auth"
 		pcall(function()
 			local _wh = shared._pympleWebhook
 			if not _wh then return end

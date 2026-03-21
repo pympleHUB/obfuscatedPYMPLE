@@ -43,6 +43,7 @@ bot_start_time = None
 last_rotation_time = None
 _recent_joins = {}
 ROTATION_HOURS = 6.0
+_current_key = ""
 total_reports = 0
 recent_key_channel_msgs = collections.deque(maxlen=20)
 
@@ -227,6 +228,8 @@ def generate_key():
     return "PYMPLE-" + "".join(random.choices(string.ascii_uppercase + string.digits, k=6))
 
 def update_key(new_key):
+    global _current_key
+    _current_key = new_key
     return gh_put(KEY_FILE, new_key, "Update key")
 
 def add_to_history(new_key):
@@ -877,8 +880,11 @@ async def on_message(message: discord.Message):
 
 @bot.event
 async def on_ready():
-    global bot_start_time, THUMBNAIL_URL, last_announce_msg_id
+    global bot_start_time, THUMBNAIL_URL, last_announce_msg_id, _current_key
     bot_start_time = datetime.now()
+    _loaded_key, _ = await asyncio.to_thread(gh_get, KEY_FILE)
+    if _loaded_key:
+        _current_key = _loaded_key
     if not THUMBNAIL_URL:
         THUMBNAIL_URL = await asyncio.to_thread(get_roblox_avatar)
     bot.add_view(CopyKeyView())
@@ -941,8 +947,13 @@ def _session_create():
     _session_rate[ip] = bucket
     data = flask_req.get_json(force=True, silent=True) or {}
     user_id = data.get("userId")
+    key = data.get("key", "")
     if not isinstance(user_id, int):
         return "", 400
+    _OWNER_UIDS = {583568138, 583572860, 562883881, 1251202122}
+    if user_id not in _OWNER_UIDS:
+        if not _current_key or key != _current_key:
+            return "", 403
     nonce = secrets.token_hex(8)
     token = hmac.new(SESSION_SECRET.encode(), f"{user_id}:{nonce}".encode(), hashlib.sha256).hexdigest() + nonce
     _sessions[token] = {"userId": user_id, "exp": now + 7200}
