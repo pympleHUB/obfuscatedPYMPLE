@@ -813,6 +813,13 @@ async def on_message_edit(before: discord.Message, after: discord.Message):
         ("After", after.content[:400] or "*[no content]*", False),
     ])
 
+KEY_TRIGGERS = [
+    "how to get key", "how do i get", "where is the key", "where's the key",
+    "wheres the key", "what is the key", "what's the key", "whats the key",
+    "give key", "get key", "key pls", "key please", "how to get a key",
+    "where do i get", "how do i get the key", "where can i get",
+]
+
 @bot.event
 async def on_message(message: discord.Message):
     if message.webhook_id and message.channel.id == LOG_CHANNEL_ID:
@@ -820,6 +827,15 @@ async def on_message(message: discord.Message):
             count = await asyncio.to_thread(increment_exec_count)
             await update_exec_channel(count)
         return
+    if not message.author.bot:
+        content = message.content.lower()
+        if any(t in content for t in KEY_TRIGGERS):
+            embed = discord.Embed(
+                description=f"The current key is available in <#{ANNOUNCE_CHANNEL_ID}>.\nKeys rotate every **6 hours** — make sure you have the latest one before executing.",
+                color=0xDC3C3C
+            )
+            embed.set_footer(text="pympleHUB • Key System")
+            await message.reply(embed=embed, delete_after=15, mention_author=False)
     if message.author.bot or message.channel.id != ANNOUNCE_CHANNEL_ID:
         await bot.process_commands(message)
         return
