@@ -14789,18 +14789,18 @@ do
 	
 			CloseWindow.Name = _lib:_RandomString()
 			CloseWindow.Parent = PYMPLE
-			CloseWindow.AnchorPoint = Vector2.new(1, 0)
+			CloseWindow.AnchorPoint = Vector2.new(0, 1)
 			CloseWindow.BackgroundColor3 = _lib.Colors.BGDBColor
-	
+
 			table.insert(_lib.Elements.BGDBColor,{
 				Element = CloseWindow,
 				Property = 'BackgroundColor3'
 			});
-	
+
 			CloseWindow.BackgroundTransparency = 1
 			CloseWindow.BorderColor3 = Color3.fromRGB(0, 0, 0)
 			CloseWindow.BorderSizePixel = 0
-			CloseWindow.Position = UDim2.new(1, -10, 0, 10)
+			CloseWindow.Position = UDim2.new(0, 10, 1, -10)
 			CloseWindow.Size = UDim2.new(0, 0, 0, 23)
 			CloseWindow.ZIndex = 150
 			CloseWindow.ClipsDescendants = true;
