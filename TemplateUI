@@ -9895,7 +9895,7 @@ function PYMPLE.new(Config : Window)
 		for _, gd in ipairs(cwGlowData) do
 			local gf = Instance.new("Frame")
 			gf.AnchorPoint = Vector2.new(0.5, 0.5)
-			gf.BackgroundColor3 = Color3.fromRGB(220, 60, 60)
+			gf.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
 			gf.BackgroundTransparency = 1
 			gf.BorderSizePixel = 0
 			gf.Position = UDim2.new(0.5, 0, 0.5, 0)
