@@ -921,7 +921,6 @@ async def on_ready():
 
 _flask_app = Flask(__name__)
 _wh_rate: dict = {}
-_sessions: dict = {}
 _session_rate: dict = {}
 
 @_flask_app.route("/webhook/<secret>", methods=["POST"])
@@ -969,13 +968,10 @@ def _session_create():
     if user_id not in _OWNER_UIDS:
         if not _is_premium and (not _current_key or key != _current_key):
             return "", 403
-    nonce = secrets.token_hex(8)
-    token = hmac.new(SESSION_SECRET.encode(), f"{user_id}:{nonce}".encode(), hashlib.sha256).hexdigest() + nonce
-    _exp = now + (30 * 24 * 3600 if _is_premium else 7200)
-    _sessions[token] = {"userId": user_id, "exp": _exp}
-    expired = [k for k, v in _sessions.items() if v["exp"] < now]
-    for k in expired:
-        del _sessions[k]
+    _exp = int(now + (30 * 24 * 3600 if _is_premium else 7200))
+    payload = f"{user_id}:{_exp}"
+    sig = hmac.new(SESSION_SECRET.encode(), payload.encode(), hashlib.sha256).hexdigest()
+    token = sig + "." + payload
     return {"token": token}, 200
 
 @_flask_app.route("/session/check", methods=["POST"])
@@ -987,8 +983,15 @@ def _session_check():
     token = data.get("token")
     if not isinstance(user_id, int) or not isinstance(token, str):
         return "", 400
-    session = _sessions.get(token)
-    if not session or session["userId"] != user_id or time.time() > session["exp"]:
+    try:
+        sig, payload = token.split(".", 1)
+        expected = hmac.new(SESSION_SECRET.encode(), payload.encode(), hashlib.sha256).hexdigest()
+        if not hmac.compare_digest(sig, expected):
+            return "", 403
+        uid_str, exp_str = payload.split(":", 1)
+        if int(uid_str) != user_id or time.time() > int(exp_str):
+            return "", 403
+    except Exception:
         return "", 403
     return "", 200
 

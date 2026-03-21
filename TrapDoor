@@ -37,9 +37,9 @@ if shared._pympleVerified then
 end
 
 if shared._pympleKeyRunning then
-	repeat
-		task.wait(0.1)
-	until not shared._pympleKeyRunning
+	local _t0 = tick()
+	repeat task.wait(0.1) until not shared._pympleKeyRunning or tick() - _t0 > 30
+	shared._pympleKeyRunning = false
 	return
 end
 shared._pympleKeyRunning = true
