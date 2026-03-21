@@ -74,7 +74,7 @@ class CopyKeyView(discord.ui.View):
     def __init__(self):
         super().__init__(timeout=None)
 
-        loadstring_btn = discord.ui.Button(label="Get Script", style=discord.ButtonStyle.success, emoji="⚡", custom_id="pymple_loadstring")
+        loadstring_btn = discord.ui.Button(label="Script", style=discord.ButtonStyle.success, emoji="📜", custom_id="pymple_loadstring")
         loadstring_btn.callback = self._loadstring
         self.add_item(loadstring_btn)
 
