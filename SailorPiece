@@ -14803,33 +14803,28 @@ do
 			CloseWindow.Position = UDim2.new(0, 10, 1, -10)
 			CloseWindow.Size = UDim2.new(0, 0, 0, 23)
 			CloseWindow.ZIndex = 150
-			CloseWindow.ClipsDescendants = true;
+			CloseWindow.ClipsDescendants = false;
 	
 			UICorner.CornerRadius = UDim.new(0, 3)
 			UICorner.Parent = CloseWindow
 	
-			local cwGlowStroke = Instance.new("UIStroke", CloseWindow)
-			cwGlowStroke.Thickness = 2
-			cwGlowStroke.Color = Color3.fromRGB(255, 255, 255)
-			cwGlowStroke.Transparency = 1
-			local cwGlowGrad = Instance.new("UIGradient", cwGlowStroke)
-			cwGlowGrad.Transparency = NumberSequence.new({
-				NumberSequenceKeypoint.new(0,    0.98),
-				NumberSequenceKeypoint.new(0.12, 0.65),
-				NumberSequenceKeypoint.new(0.38, 0.92),
-				NumberSequenceKeypoint.new(0.62, 0.92),
-				NumberSequenceKeypoint.new(0.88, 0.65),
-				NumberSequenceKeypoint.new(1,    0.98),
-			})
-			task.spawn(function()
-				while CloseWindow and CloseWindow.Parent do
-					_lib:_Animation(cwGlowGrad, TweenInfo.new(3, Enum.EasingStyle.Linear), { Rotation = 360 })
-					task.wait(3.05)
-					if cwGlowGrad and cwGlowGrad.Parent then
-						cwGlowGrad.Rotation = 0
-					end
-				end
-			end)
+			local cwGlowLayers = {}
+			local cwGlowData = {{8, 6, 0.88}, {18, 14, 0.93}, {32, 24, 0.97}, {50, 38, 0.985}}
+			for _, gd in ipairs(cwGlowData) do
+				local gf = Instance.new("Frame")
+				gf.AnchorPoint = Vector2.new(0.5, 0.5)
+				gf.BackgroundColor3 = Color3.fromRGB(220, 60, 60)
+				gf.BackgroundTransparency = 1
+				gf.BorderSizePixel = 0
+				gf.Position = UDim2.new(0.5, 0, 0.5, 0)
+				gf.Size = UDim2.new(1, gd[1], 1, gd[2])
+				gf.ZIndex = CloseWindow.ZIndex - 1
+				gf.Parent = CloseWindow
+				local gc = Instance.new("UICorner")
+				gc.CornerRadius = UDim.new(0, 6)
+				gc.Parent = gf
+				table.insert(cwGlowLayers, {frame = gf, targetTransp = gd[3]})
+			end
 	
 			ImageLabel.Parent = CloseWindow
 			ImageLabel.AnchorPoint = Vector2.new(0.5, 0.5)
@@ -14855,7 +14850,9 @@ do
 						BackgroundTransparency = 0.025
 					})
 	
-					_lib:_Animation(cwGlowStroke, TweenInfo.new(0.2), { Transparency = 0 })
+					for _, gl in ipairs(cwGlowLayers) do
+						_lib:_Animation(gl.frame, TweenInfo.new(0.2), { BackgroundTransparency = gl.targetTransp })
+					end
 	
 					_lib:_Animation(ImageLabel,TweenInfo.new(0.2),{
 						ImageTransparency = (ImageLabel:GetAttribute('Hover') and 0.1) or 0.35
@@ -14868,7 +14865,9 @@ do
 						BackgroundTransparency = 1
 					})
 	
-					_lib:_Animation(cwGlowStroke, TweenInfo.new(0.2), { Transparency = 1 })
+					for _, gl in ipairs(cwGlowLayers) do
+						_lib:_Animation(gl.frame, TweenInfo.new(0.2), { BackgroundTransparency = 1 })
+					end
 	
 					_lib:_Animation(ImageLabel,TweenInfo.new(0.2),{
 						ImageTransparency = 1
