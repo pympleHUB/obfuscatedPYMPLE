@@ -143,16 +143,16 @@ do
 					Body = _hs2:JSONEncode({ userId = _lp.UserId, token = shared._pympleToken or "" }),
 				})
 				if not _c2 or not _r2 then
-				_reOk = true
+				_reOk = false
 			elseif _r2.StatusCode == 200 then
 				_reOk = true
 			elseif _r2.StatusCode == 403 then
 				_reOk = false
 			else
-				_reOk = true
+				_reOk = false
 			end
 			else
-				_reOk = true
+				_reOk = false
 			end
 			if not _reOk then
 				_deny("runtime auth tamper", "UNAUTHORIZED! Session tampered. Please re-launch via the official PYMPLE loader!")
