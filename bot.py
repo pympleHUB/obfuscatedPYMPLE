@@ -23,6 +23,7 @@ ROTATION_COUNT_FILE = "pympleKeyCount"
 EXEC_COUNT_FILE = "pympleExecCount"
 ANNOUNCE_CHANNEL_ID = int(os.environ["ANNOUNCE_CHANNEL_ID"])
 EXEC_STATS_CHANNEL_ID = int(os.environ.get("EXEC_STATS_CHANNEL_ID", 0))
+REPORTS_CHANNEL_ID = int(os.environ.get("REPORTS_CHANNEL_ID", 0))
 LOG_CHANNEL_ID = 1239788452623417405
 THUMBNAIL_URL = os.environ.get("THUMBNAIL_URL", "")
 ROBLOX_USER_ID = 583572860
@@ -68,6 +69,40 @@ GREETINGS = [
     "Fresh Access, Fresh Key!",
     "Time to Update Your Key!",
 ]
+
+
+class ReportModal(discord.ui.Modal, title="Report an Issue"):
+    description = discord.ui.TextInput(
+        label="Describe the issue",
+        placeholder="Tell us what went wrong...",
+        style=discord.TextStyle.long,
+        max_length=1000,
+        required=True
+    )
+
+    def __init__(self, key: str):
+        super().__init__()
+        self.key = key
+
+    async def on_submit(self, interaction: discord.Interaction):
+        global total_reports
+        total_reports += 1
+        embed = discord.Embed(title="🚨 Issue Report", color=0xE74C3C, timestamp=datetime.now())
+        embed.add_field(name="Reported By", value=f"{interaction.user} (`{interaction.user.id}`)", inline=False)
+        embed.add_field(name="Description", value=self.description.value, inline=False)
+        embed.add_field(name="Key at Report", value=f"`{self.key}`", inline=True)
+        embed.add_field(name="Total Reports", value=str(total_reports), inline=True)
+        embed.set_footer(text="pympleHUB • Reports")
+        if REPORTS_CHANNEL_ID:
+            channel = bot.get_channel(REPORTS_CHANNEL_ID)
+            if channel:
+                await channel.send(embed=embed)
+        await log("🚨 Issue Reported", 0xE74C3C, [
+            ("Reported By", f"{interaction.user} (`{interaction.user.id}`)", False),
+            ("Description", self.description.value[:1024], False),
+            ("Key at Report", f"`{self.key}`", True),
+        ])
+        await interaction.response.send_message("Your report has been submitted. Thank you!", ephemeral=True)
 
 
 class CopyKeyView(discord.ui.View):
@@ -125,26 +160,12 @@ class CopyKeyView(discord.ui.View):
         await interaction.response.send_message(embed=embed, ephemeral=True)
 
     async def _report_issue(self, interaction: discord.Interaction):
-        global total_reports
-        total_reports += 1
         key = "Unknown"
         if interaction.message and interaction.message.embeds:
             first_line = (interaction.message.embeds[0].description or "").split("\n")[0]
             key = first_line.replace("# ", "").replace("`", "").strip()
-        try:
-            owner = await bot.fetch_user(OWNER_ID)
-            await owner.send(
-                f"🚨 **Issue reported** by {interaction.user} (`{interaction.user.id}`)\n"
-                f"Key at time of report: `{key}`"
-            )
-        except:
-            pass
-        await log("🚨 Issue Reported", 0xE74C3C, [
-            ("Reported By", f"{interaction.user} (`{interaction.user.id}`)", False),
-            ("Key at Report", f"`{key}`", True),
-            ("Total Reports", str(total_reports), True),
-        ])
-        await interaction.response.send_message("Your report has been sent. Thank you!", ephemeral=True)
+        modal = ReportModal(key)
+        await interaction.response.send_modal(modal)
 
 
 # --- GitHub helpers ---
