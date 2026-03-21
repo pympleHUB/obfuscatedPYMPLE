@@ -78,16 +78,13 @@ class CopyKeyView(discord.ui.View):
         loadstring_btn.callback = self._loadstring
         self.add_item(loadstring_btn)
 
-        copy_btn = discord.ui.Button(label="Copy Key", style=discord.ButtonStyle.secondary, emoji="📋", custom_id="pymple_copy_key")
+        copy_btn = discord.ui.Button(label="Copy Key", style=discord.ButtonStyle.primary, emoji="📋", custom_id="pymple_copy_key")
         copy_btn.callback = self._copy_key
         self.add_item(copy_btn)
 
-        self.add_item(discord.ui.Button(
-            label="Watch on YouTube",
-            style=discord.ButtonStyle.link,
-            url="https://www.youtube.com/@scriptsHUB/featured",
-            emoji="📌"
-        ))
+        yt_btn = discord.ui.Button(label="Watch on YouTube", style=discord.ButtonStyle.danger, emoji="📌", custom_id="pymple_youtube")
+        yt_btn.callback = self._youtube
+        self.add_item(yt_btn)
 
         report_btn = discord.ui.Button(label="Report Issue", style=discord.ButtonStyle.danger, emoji="🚨", custom_id="pymple_report_issue")
         report_btn.callback = self._report_issue
@@ -123,6 +120,9 @@ class CopyKeyView(discord.ui.View):
         )
         embed.set_footer(text="Select all and copy the text above")
         await interaction.response.send_message(embed=embed, ephemeral=True)
+
+    async def _youtube(self, interaction: discord.Interaction):
+        await interaction.response.send_message("https://www.youtube.com/@scriptsHUB/featured", ephemeral=True)
 
     async def _report_issue(self, interaction: discord.Interaction):
         global total_reports
