@@ -900,9 +900,11 @@ _wh_rate: dict = {}
 
 @_flask_app.route("/webhook/<secret>", methods=["POST"])
 def _proxy_webhook(secret):
+    print(f"[WH] hit secret={'ok' if secret == WEBHOOK_SECRET else 'BAD'} wh_set={bool(DISCORD_WEBHOOK_URL)}", flush=True)
     if not WEBHOOK_SECRET or secret != WEBHOOK_SECRET:
         return "", 403
     if not DISCORD_WEBHOOK_URL:
+        print("[WH] DISCORD_WEBHOOK not set", flush=True)
         return "", 500
     ip = flask_req.remote_addr
     now = time.time()
@@ -913,8 +915,10 @@ def _proxy_webhook(secret):
     _wh_rate[ip] = bucket
     try:
         r = requests.post(DISCORD_WEBHOOK_URL, json=flask_req.get_json(force=True, silent=True))
+        print(f"[WH] discord status={r.status_code}", flush=True)
         return "", r.status_code
-    except:
+    except Exception as e:
+        print(f"[WH] error={e}", flush=True)
         return "", 500
 
 def _run_flask():
