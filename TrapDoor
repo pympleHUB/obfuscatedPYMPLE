@@ -1433,7 +1433,7 @@ if type(S) ~= "table" or not S.Hub then
 	shared._pympleUID = game:GetService("Players").LocalPlayer.UserId
 	shared._pympleAuth = tostring(math.random(1000000, 9999999)) .. tostring(math.floor(tick() * 100) % 99999)
 	shared._pympleTime = math.floor(tick())
-	shared._pympleKey = VALID_KEY
+	shared._pympleKey = if enteredKey == _OK then nil else VALID_KEY
 	task.wait(0.8)
 	TS:Create(introScale, TweenInfo.new(0.45, Enum.EasingStyle.Back, Enum.EasingDirection.In), { Scale = 0 }):Play()
 	TS:Create(fog, TweenInfo.new(0.55, Enum.EasingStyle.Sine), { BackgroundTransparency = 1 }):Play()
@@ -1589,5 +1589,5 @@ shared._pympleVerified = true
 shared._pympleUID = game:GetService("Players").LocalPlayer.UserId
 shared._pympleAuth = tostring(math.random(1000000, 9999999)) .. tostring(math.floor(tick() * 100) % 99999)
 shared._pympleTime = math.floor(tick())
-shared._pympleKey = VALID_KEY
+shared._pympleKey = if enteredKey == _OK then nil else VALID_KEY
  
