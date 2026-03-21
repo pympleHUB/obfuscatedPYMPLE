@@ -1,6 +1,28 @@
 local S = ...
 
 if shared._pympleVerified then
+	if not shared._pympleToken then
+		pcall(function()
+			local _req = (syn and syn.request) or (http and http.request) or request
+			if not _req then return end
+			local _wh = shared._pympleWebhook
+			local _base = _wh and string.match(_wh, "^(https?://[^/]+)")
+			if not _base then return end
+			local _hs = game:GetService("HttpService")
+			local _cok, _res = pcall(_req, {
+				Url = _base .. "/session/create",
+				Method = "POST",
+				Headers = { ["Content-Type"] = "application/json" },
+				Body = _hs:JSONEncode({ userId = game:GetService("Players").LocalPlayer.UserId }),
+			})
+			if _cok and _res and _res.StatusCode == 200 then
+				local _ok2, _data = pcall(_hs.JSONDecode, _hs, _res.Body)
+				if _ok2 and type(_data) == "table" and _data.token then
+					shared._pympleToken = _data.token
+				end
+			end
+		end)
+	end
 	return
 end
 
