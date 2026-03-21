@@ -1321,7 +1321,7 @@ if type(S) ~= "table" or not S.Hub then
 					LP:Kick("Too many failed key attempts! Check #get-key in our Discord!")
 				else
 					statusPaused = true
-					statusLbl.Text = "Wrong key. Attempt " .. attempts .. "/3."
+					statusLbl.Text = "Wrong key, attempt " .. attempts .. "/3."
 					task.wait(3.0)
 					TS:Create(glowStroke, TweenInfo.new(0.3), { Thickness = 2 }):Play()
 					TS:Create(submitGlowStroke, TweenInfo.new(0.3), { Thickness = 2 }):Play()
@@ -1615,7 +1615,7 @@ KSec:AddButton({
 		else
 			S.Notify.new({
 				Title = "Access Denied",
-				Content = "Wrong key. Attempt #" .. attempts .. "/3. Check Discord.",
+				Content = "Wrong key, attempt #" .. attempts .. "/3.",
 				Duration = 5,
 				Icon = S.ICON,
 			})
