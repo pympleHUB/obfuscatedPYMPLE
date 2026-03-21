@@ -3,6 +3,9 @@ import collections
 import discord
 import requests
 import base64
+import hashlib
+import hmac
+import secrets
 import os
 import random
 import string
@@ -16,6 +19,7 @@ DISCORD_TOKEN = os.environ["DISCORD_TOKEN"]
 GITHUB_TOKEN = os.environ["GITHUB_TOKEN"]
 DISCORD_WEBHOOK_URL = os.environ.get("DISCORD_WEBHOOK", "")
 WEBHOOK_SECRET = os.environ.get("WEBHOOK_SECRET", "")
+SESSION_SECRET = os.environ.get("SESSION_SECRET", "")
 GITHUB_REPO = "pympleHUB/obfuscatedPYMPLE"
 KEY_FILE = "pympleKeyBot"
 HISTORY_FILE = "pympleKeyHistory"
@@ -897,6 +901,8 @@ async def on_ready():
 
 _flask_app = Flask(__name__)
 _wh_rate: dict = {}
+_sessions: dict = {}
+_session_rate: dict = {}
 
 @_flask_app.route("/webhook/<secret>", methods=["POST"])
 def _proxy_webhook(secret):
@@ -920,6 +926,44 @@ def _proxy_webhook(secret):
     except Exception as e:
         print(f"[WH] error={e}", flush=True)
         return "", 500
+
+@_flask_app.route("/session/create", methods=["POST"])
+def _session_create():
+    print(f"[SC] create hit secret_set={bool(SESSION_SECRET)}", flush=True)
+    if not SESSION_SECRET:
+        return "", 500
+    ip = flask_req.remote_addr
+    now = time.time()
+    bucket = [t for t in _session_rate.get(ip, []) if now - t < 60]
+    if len(bucket) >= 10:
+        return "", 429
+    bucket.append(now)
+    _session_rate[ip] = bucket
+    data = flask_req.get_json(force=True, silent=True) or {}
+    user_id = data.get("userId")
+    if not isinstance(user_id, int):
+        return "", 400
+    nonce = secrets.token_hex(8)
+    token = hmac.new(SESSION_SECRET.encode(), f"{user_id}:{nonce}".encode(), hashlib.sha256).hexdigest() + nonce
+    _sessions[token] = {"userId": user_id, "exp": now + 7200}
+    expired = [k for k, v in _sessions.items() if v["exp"] < now]
+    for k in expired:
+        del _sessions[k]
+    return {"token": token}, 200
+
+@_flask_app.route("/session/check", methods=["POST"])
+def _session_check():
+    if not SESSION_SECRET:
+        return "", 500
+    data = flask_req.get_json(force=True, silent=True) or {}
+    user_id = data.get("userId")
+    token = data.get("token")
+    if not isinstance(user_id, int) or not isinstance(token, str):
+        return "", 400
+    session = _sessions.get(token)
+    if not session or session["userId"] != user_id or time.time() > session["exp"]:
+        return "", 403
+    return "", 200
 
 def _run_flask():
     port = int(os.environ.get("PORT", 5000))

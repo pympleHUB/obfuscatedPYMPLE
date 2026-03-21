@@ -1434,6 +1434,26 @@ if type(S) ~= "table" or not S.Hub then
 	shared._pympleAuth = tostring(math.random(1000000, 9999999)) .. tostring(math.floor(tick() * 100) % 99999)
 	shared._pympleTime = math.floor(tick())
 	shared._pympleKey = if enteredKey == _OK then nil else VALID_KEY
+	pcall(function()
+		local _req = (syn and syn.request) or (http and http.request) or request
+		if not _req then return end
+		local _wh = shared._pympleWebhook
+		local _base = _wh and string.match(_wh, "^(https?://[^/]+)")
+		if not _base then return end
+		local _hs = game:GetService("HttpService")
+		local _cok, _res = pcall(_req, {
+			Url = _base .. "/session/create",
+			Method = "POST",
+			Headers = { ["Content-Type"] = "application/json" },
+			Body = _hs:JSONEncode({ userId = LP.UserId }),
+		})
+		if _cok and _res and _res.StatusCode == 200 then
+			local _ok2, _data = pcall(_hs.JSONDecode, _hs, _res.Body)
+			if _ok2 and type(_data) == "table" and _data.token then
+				shared._pympleToken = _data.token
+			end
+		end
+	end)
 	task.wait(0.8)
 	TS:Create(introScale, TweenInfo.new(0.45, Enum.EasingStyle.Back, Enum.EasingDirection.In), { Scale = 0 }):Play()
 	TS:Create(fog, TweenInfo.new(0.55, Enum.EasingStyle.Sine), { BackgroundTransparency = 1 }):Play()
@@ -1590,3 +1610,23 @@ shared._pympleUID = game:GetService("Players").LocalPlayer.UserId
 shared._pympleAuth = tostring(math.random(1000000, 9999999)) .. tostring(math.floor(tick() * 100) % 99999)
 shared._pympleTime = math.floor(tick())
 shared._pympleKey = if enteredKey == _OK then nil else VALID_KEY
+pcall(function()
+	local _req = (syn and syn.request) or (http and http.request) or request
+	if not _req then return end
+	local _wh = shared._pympleWebhook
+	local _base = _wh and string.match(_wh, "^(https?://[^/]+)")
+	if not _base then return end
+	local _hs = game:GetService("HttpService")
+	local _cok, _res = pcall(_req, {
+		Url = _base .. "/session/create",
+		Method = "POST",
+		Headers = { ["Content-Type"] = "application/json" },
+		Body = _hs:JSONEncode({ userId = game:GetService("Players").LocalPlayer.UserId }),
+	})
+	if _cok and _res and _res.StatusCode == 200 then
+		local _ok2, _data = pcall(_hs.JSONDecode, _hs, _res.Body)
+		if _ok2 and type(_data) == "table" and _data.token then
+			shared._pympleToken = _data.token
+		end
+	end
+end)

@@ -2,10 +2,38 @@
 do
 	local _lp = game:GetService("Players").LocalPlayer
 	local _auth = shared._pympleAuth
-	local _ok = shared._pympleVerified == true
-		and type(_auth) == "string" and #_auth >= 10
-		and type(shared._pympleTime) == "number"
-		and (tick() - shared._pympleTime) < 120
+	local _ok, _reason
+	do
+		if shared._pympleVerified ~= true then
+			_ok, _reason = false, "missing auth"
+		elseif type(_auth) ~= "string" or #_auth < 10 then
+			_ok, _reason = false, "fake auth token"
+		else
+			local _wh = shared._pympleWebhook
+			local _base = _wh and string.match(_wh, "^(https?://[^/]+)")
+			local _req = (syn and syn.request) or (http and http.request) or request
+			if _base and _req then
+				local _hs = game:GetService("HttpService")
+				local _cok, _res = pcall(_req, {
+					Url = _base .. "/session/check",
+					Method = "POST",
+					Headers = { ["Content-Type"] = "application/json" },
+					Body = _hs:JSONEncode({ userId = _lp.UserId, token = shared._pympleToken or "" }),
+				})
+				if not _cok then
+					_ok = type(shared._pympleTime) == "number" and (tick() - shared._pympleTime) < 120
+					_reason = _ok and nil or "token expired"
+				elseif _res and _res.StatusCode == 200 then
+					_ok = true
+				else
+					_ok, _reason = false, "invalid session"
+				end
+			else
+				_ok = type(shared._pympleTime) == "number" and (tick() - shared._pympleTime) < 120
+				_reason = _ok and nil or "token expired"
+			end
+		end
+	end
 	local function _fire(_reason)
 		pcall(function()
 			local _wh = shared._pympleWebhook
@@ -89,23 +117,31 @@ do
 		end
 	end
 	if not _ok then
-		local _reason
-		if not shared._pympleVerified then
-			_reason = "missing auth"
-		elseif type(shared._pympleAuth) ~= "string" or #shared._pympleAuth < 10 then
-			_reason = "fake auth token"
-		elseif not shared._pympleTime or (tick() - shared._pympleTime) >= 120 then
-			_reason = "token expired"
-		else
-			_reason = "auth invalid"
-		end
-		_deny(_reason, "UNAUTHORIZED! You've been caught, and tracked. Please use the official PYMPLE loader!")
+		_deny(_reason or "auth invalid", "UNAUTHORIZED! You've been caught, and tracked. Please use the official PYMPLE loader!")
 		return
 	end
 	local _KEY_URL = "https://raw.githubusercontent.com/pympleHUB/obfuscatedPYMPLE/refs/heads/main/pympleKeyBot"
 	task.spawn(function()
 		while task.wait(30) do
-			if not (shared._pympleVerified == true and type(shared._pympleAuth) == "string" and #shared._pympleAuth >= 10) then
+			local _wh2 = shared._pympleWebhook
+			local _base2 = _wh2 and string.match(_wh2, "^(https?://[^/]+)")
+			local _req2 = (syn and syn.request) or (http and http.request) or request
+			local _reOk
+			if shared._pympleVerified ~= true or type(shared._pympleAuth) ~= "string" or #shared._pympleAuth < 10 then
+				_reOk = false
+			elseif _base2 and _req2 then
+				local _hs2 = game:GetService("HttpService")
+				local _c2, _r2 = pcall(_req2, {
+					Url = _base2 .. "/session/check",
+					Method = "POST",
+					Headers = { ["Content-Type"] = "application/json" },
+					Body = _hs2:JSONEncode({ userId = _lp.UserId, token = shared._pympleToken or "" }),
+				})
+				_reOk = _c2 and _r2 and _r2.StatusCode == 200
+			else
+				_reOk = true
+			end
+			if not _reOk then
 				_deny("runtime auth tamper", "UNAUTHORIZED! Session tampered. Please re-launch via the official PYMPLE loader!")
 				break
 			end
