@@ -14808,6 +14808,29 @@ do
 			UICorner.CornerRadius = UDim.new(0, 3)
 			UICorner.Parent = CloseWindow
 	
+			local cwGlowStroke = Instance.new("UIStroke", CloseWindow)
+			cwGlowStroke.Thickness = 2
+			cwGlowStroke.Color = Color3.fromRGB(220, 60, 60)
+			cwGlowStroke.Transparency = 1
+			local cwGlowGrad = Instance.new("UIGradient", cwGlowStroke)
+			cwGlowGrad.Transparency = NumberSequence.new({
+				NumberSequenceKeypoint.new(0,    0.98),
+				NumberSequenceKeypoint.new(0.12, 0.3),
+				NumberSequenceKeypoint.new(0.38, 0.85),
+				NumberSequenceKeypoint.new(0.62, 0.85),
+				NumberSequenceKeypoint.new(0.88, 0.3),
+				NumberSequenceKeypoint.new(1,    0.98),
+			})
+			task.spawn(function()
+				while CloseWindow and CloseWindow.Parent do
+					_lib:_Animation(cwGlowGrad, TweenInfo.new(3, Enum.EasingStyle.Linear), { Rotation = 360 })
+					task.wait(3.05)
+					if cwGlowGrad and cwGlowGrad.Parent then
+						cwGlowGrad.Rotation = 0
+					end
+				end
+			end)
+	
 			ImageLabel.Parent = CloseWindow
 			ImageLabel.AnchorPoint = Vector2.new(0.5, 0.5)
 			ImageLabel.BackgroundTransparency = 1.000
@@ -14832,6 +14855,8 @@ do
 						BackgroundTransparency = 0.025
 					})
 	
+					_lib:_Animation(cwGlowStroke, TweenInfo.new(0.2), { Transparency = 0 })
+	
 					_lib:_Animation(ImageLabel,TweenInfo.new(0.2),{
 						ImageTransparency = (ImageLabel:GetAttribute('Hover') and 0.1) or 0.35
 					})
@@ -14842,6 +14867,8 @@ do
 						Size = UDim2.new(0, 0, 0, 23),
 						BackgroundTransparency = 1
 					})
+	
+					_lib:_Animation(cwGlowStroke, TweenInfo.new(0.2), { Transparency = 1 })
 	
 					_lib:_Animation(ImageLabel,TweenInfo.new(0.2),{
 						ImageTransparency = 1
