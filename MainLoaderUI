@@ -45,6 +45,7 @@ task.spawn(function()
 end)
 
 shared._pympleWebhook = WEBHOOK
+shared._pympleGameLoaded = false
 
 local trapSrc, gameSrc
 local url = GAMES[game.PlaceId]
