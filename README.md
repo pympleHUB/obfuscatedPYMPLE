@@ -16,16 +16,8 @@ pympleHUB is a free Roblox script hub that delivers game-specific automation thr
 
 ---
 
-## How to Use
-
-1). Join the [Discord](https://discord.gg/KTZcYZzQFp) and grab the active key from the key channel.
-
-2). Paste the script below into your executor and execute it.
+## Script;
 
 ```lua
 loadstring(game:HttpGet("https://raw.githubusercontent.com/pympleHUB/obfuscatedPYMPLE/refs/heads/main/MainLoaderUI"))()
 ```
-
-3). Enter your key into the verification UI that appears.
-
-4). You're in — the hub will load automatically for your current game.
