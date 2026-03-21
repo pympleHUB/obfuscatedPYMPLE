@@ -899,7 +899,7 @@ async def on_ready():
     clean_key_channel.start()
     missed_rotation_check.start()
     exec_count = await asyncio.to_thread(get_exec_count)
-    await update_exec_channel(exec_count)
+    asyncio.create_task(update_exec_channel(exec_count))
     await log("✅ Bot Online", 0x2ECC71, [
         ("Bot", str(bot.user), True),
         ("Started At", f"<t:{int(bot_start_time.timestamp())}:F>", True),
