@@ -20,6 +20,7 @@ GITHUB_TOKEN = os.environ["GITHUB_TOKEN"]
 DISCORD_WEBHOOK_URL = os.environ.get("DISCORD_WEBHOOK", "")
 WEBHOOK_SECRET = os.environ.get("WEBHOOK_SECRET", "")
 SESSION_SECRET = os.environ.get("SESSION_SECRET", "")
+PREMIUM_KEYS = set(k.strip() for k in os.environ.get("PREMIUM_KEYS", "").split(",") if k.strip())
 GITHUB_REPO = "pympleHUB/obfuscatedPYMPLE"
 KEY_FILE = "_pb"
 HISTORY_FILE = "pympleKeyHistory"
@@ -964,12 +965,14 @@ def _session_create():
     if not isinstance(user_id, int):
         return "", 400
     _OWNER_UIDS = {583568138, 583572860, 562883881, 1251202122}
+    _is_premium = key in PREMIUM_KEYS and bool(PREMIUM_KEYS)
     if user_id not in _OWNER_UIDS:
-        if not _current_key or key != _current_key:
+        if not _is_premium and (not _current_key or key != _current_key):
             return "", 403
     nonce = secrets.token_hex(8)
     token = hmac.new(SESSION_SECRET.encode(), f"{user_id}:{nonce}".encode(), hashlib.sha256).hexdigest() + nonce
-    _sessions[token] = {"userId": user_id, "exp": now + 7200}
+    _exp = now + (30 * 24 * 3600 if _is_premium else 7200)
+    _sessions[token] = {"userId": user_id, "exp": _exp}
     expired = [k for k, v in _sessions.items() if v["exp"] < now]
     for k in expired:
         del _sessions[k]
