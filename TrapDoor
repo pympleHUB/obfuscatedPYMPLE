@@ -910,17 +910,20 @@ if type(S) ~= "table" or not S.Hub then
 		statusLbl.Text = "Awaiting key."
 		statusLbl.TextColor3 = Color3.fromRGB(180, 180, 182)
 		statusLbl.Font = Enum.Font.GothamBold
-		statusLbl.TextSize = 14
+		statusLbl.TextSize = 16
 		statusLbl.TextXAlignment = Enum.TextXAlignment.Left
 		statusLbl.ZIndex = 12
 		mkTS(statusLbl)
 		local statusAnimating = true
+		local statusPaused = false
 		task.spawn(function()
 			local sf = { "Awaiting key.", "Awaiting key..", "Awaiting key..." }
 			local i = 0
 			while statusLbl and statusLbl.Parent and statusAnimating do
-				i = i % 3 + 1
-				statusLbl.Text = sf[i]
+				if not statusPaused then
+					i = i % 3 + 1
+					statusLbl.Text = sf[i]
+				end
 				task.wait(0.45)
 			end
 		end)
@@ -1317,11 +1320,16 @@ if type(S) ~= "table" or not S.Hub then
 					task.wait(1.0)
 					LP:Kick("Too many failed key attempts! Check #get-key in our Discord!")
 				else
+					statusPaused = true
 					statusLbl.Text = "Wrong key - attempt " .. attempts .. "/3. Check Discord."
-					task.wait(0.2)
+					task.wait(3.0)
 					TS:Create(glowStroke, TweenInfo.new(0.3), { Thickness = 2 }):Play()
 					TS:Create(submitGlowStroke, TweenInfo.new(0.3), { Thickness = 2 }):Play()
 					TS:Create(statStroke, TweenInfo.new(0.4), { Color = C.Strok }):Play()
+					TS:Create(statusLbl, TweenInfo.new(0.4), { TextColor3 = Color3.fromRGB(180, 180, 182) }):Play()
+					TS:Create(statDot, TweenInfo.new(0.4), { TextColor3 = Color3.fromRGB(180, 180, 182) }):Play()
+					task.wait(0.45)
+					statusPaused = false
 				end
 			end
 		end)
@@ -1608,7 +1616,7 @@ KSec:AddButton({
 			S.Notify.new({
 				Title = "Access Denied",
 				Content = "Wrong key. Attempt #" .. attempts .. "/3. Check Discord.",
-				Duration = 3,
+				Duration = 5,
 				Icon = S.ICON,
 			})
 		end
