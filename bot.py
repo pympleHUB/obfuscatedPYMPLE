@@ -515,13 +515,12 @@ async def announce(ctx):
         return
     await log_cmd(ctx)
     await delete_cmd(ctx)
-    key, _ = await asyncio.to_thread(gh_get, KEY_FILE)
-    if not key:
+    if not _current_key:
         await ctx.author.send("No key set yet.")
         return
     next_run = auto_rotate_key.next_iteration
     expires_at = next_run.replace(tzinfo=None) if next_run else datetime.now() + timedelta(hours=ROTATION_HOURS)
-    await announce_key(key, expires_at=expires_at)
+    await announce_key(_current_key, expires_at=expires_at)
 
 @bot.command(name="bothelp")
 async def bothelp(ctx):
@@ -585,9 +584,8 @@ async def getkey(ctx):
         return
     await log_cmd(ctx)
     await delete_cmd(ctx)
-    key, _ = await asyncio.to_thread(gh_get, KEY_FILE)
-    if key:
-        await ctx.author.send(f"Current key: `{key}`")
+    if _current_key:
+        await ctx.author.send(f"Current key: `{_current_key}`")
     else:
         await ctx.author.send("No key set yet.")
 
@@ -755,12 +753,11 @@ async def status(ctx):
         return
     await log_cmd(ctx)
     await delete_cmd(ctx)
-    key, _ = await asyncio.to_thread(gh_get, KEY_FILE)
     uptime = datetime.now() - bot_start_time
     hours, rem = divmod(int(uptime.total_seconds()), 3600)
     minutes = rem // 60
     embed = discord.Embed(title="pympleHUB Bot Status", color=0x3C6EDC)
-    embed.add_field(name="Current Key", value=f"`{key or 'Unknown'}`", inline=False)
+    embed.add_field(name="Current Key", value=f"`{_current_key or 'Unknown'}`", inline=False)
     embed.add_field(name="Uptime", value=f"{hours}h {minutes}m", inline=True)
     embed.add_field(name="Rotation Interval", value=f"{ROTATION_HOURS}h", inline=True)
     rotation_state = "Running" if auto_rotate_key.is_running() else "Paused"
@@ -925,6 +922,7 @@ async def on_ready():
         if await asyncio.to_thread(update_key, _current_key):
             await asyncio.to_thread(add_to_history, _current_key)
         await log_rotation(_current_key, triggered_by="Startup (no key found)")
+        asyncio.create_task(announce_key(_current_key, expires_at=datetime.now() + timedelta(hours=ROTATION_HOURS)))
     if not THUMBNAIL_URL:
         THUMBNAIL_URL = await asyncio.to_thread(get_roblox_avatar)
     bot.add_view(CopyKeyView())
