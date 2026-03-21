@@ -968,7 +968,8 @@ def _session_create():
     if user_id not in _OWNER_UIDS:
         if not _is_premium and (not _current_key or key != _current_key):
             return "", 403
-    _exp = int(now + (30 * 24 * 3600 if _is_premium else 7200))
+    _is_owner = user_id in _OWNER_UIDS
+    _exp = int(now + (30 * 24 * 3600 if (_is_premium or _is_owner) else 7200))
     payload = f"{user_id}:{_exp}"
     sig = hmac.new(SESSION_SECRET.encode(), payload.encode(), hashlib.sha256).hexdigest()
     token = sig + "." + payload
