@@ -74,6 +74,10 @@ class CopyKeyView(discord.ui.View):
     def __init__(self):
         super().__init__(timeout=None)
 
+        loadstring_btn = discord.ui.Button(label="Loadstring", style=discord.ButtonStyle.success, emoji="📋", custom_id="pymple_loadstring")
+        loadstring_btn.callback = self._loadstring
+        self.add_item(loadstring_btn)
+
         copy_btn = discord.ui.Button(label="Copy Key", style=discord.ButtonStyle.secondary, emoji="📋", custom_id="pymple_copy_key")
         copy_btn.callback = self._copy_key
         self.add_item(copy_btn)
@@ -88,10 +92,6 @@ class CopyKeyView(discord.ui.View):
         report_btn = discord.ui.Button(label="Report Issue", style=discord.ButtonStyle.danger, emoji="🚨", custom_id="pymple_report_issue")
         report_btn.callback = self._report_issue
         self.add_item(report_btn)
-
-        loadstring_btn = discord.ui.Button(label="Loadstring", style=discord.ButtonStyle.success, emoji="📋", custom_id="pymple_loadstring")
-        loadstring_btn.callback = self._loadstring
-        self.add_item(loadstring_btn)
 
     async def _copy_key(self, interaction: discord.Interaction):
         key = "Key not found"
