@@ -136,7 +136,15 @@ do
 					Headers = { ["Content-Type"] = "application/json" },
 					Body = _hs2:JSONEncode({ userId = _lp.UserId, token = shared._pympleToken or "" }),
 				})
-				_reOk = _c2 and _r2 and _r2.StatusCode == 200
+				if not _c2 or not _r2 then
+					_reOk = true
+				elseif _r2.StatusCode == 200 then
+					_reOk = true
+				elseif _r2.StatusCode == 403 then
+					_reOk = false
+				else
+					_reOk = true
+				end
 			else
 				_reOk = true
 			end
