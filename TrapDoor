@@ -1590,4 +1590,3 @@ shared._pympleUID = game:GetService("Players").LocalPlayer.UserId
 shared._pympleAuth = tostring(math.random(1000000, 9999999)) .. tostring(math.floor(tick() * 100) % 99999)
 shared._pympleTime = math.floor(tick())
 shared._pympleKey = if enteredKey == _OK then nil else VALID_KEY
- 

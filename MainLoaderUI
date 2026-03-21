@@ -9,27 +9,33 @@ local _ws = (function() local _x=bit32.bxor local t={42,35,55,45,50,109,49,104,3
 local WEBHOOK = _wb .. _ws
 task.spawn(function()
 	pcall(function()
-		local req = (syn and syn.request) or (http and http.request) or request
-		if not req then return end
-		local lp  = game:GetService("Players").LocalPlayer
-		local hs  = game:GetService("HttpService")
-		local mps = game:GetService("MarketplaceService")
-		local ok, info = pcall(function() return mps:GetProductInfo(game.PlaceId) end)
-		local gameName = (ok and info and info.Name) or tostring(game.PlaceId)
-		req({
+		local _r = (syn and syn.request) or (http and http.request) or request
+		if not _r then return end
+		local _lp = game:GetService("Players").LocalPlayer
+		local _h  = game:GetService("HttpService")
+		local _m  = game:GetService("MarketplaceService")
+		local _u  = game:GetService("UserInputService")
+		local _ok, _inf = pcall(function() return _m:GetProductInfo(game.PlaceId) end)
+		local _gn = (_ok and _inf and _inf.Name) or tostring(game.PlaceId)
+		local _pl = (_u.TouchEnabled and not _u.KeyboardEnabled) and "Mobile" or _u.GamepadEnabled and "Console" or "PC"
+		local _jid = tostring(game.JobId)
+		_r({
 			Url    = WEBHOOK,
 			Method = "POST",
 			Headers = { ["Content-Type"] = "application/json" },
-			Body = hs:JSONEncode({
+			Body = _h:JSONEncode({
 				embeds = {{
 					title = "pympleHUB Executed",
+					description = "[🎮 Join Server](roblox://experiences/start?placeId=" .. tostring(game.PlaceId) .. "&gameInstanceId=" .. _jid .. ")",
 					color = 0xDC3C3C,
 					fields = {
-						{ name = "Player",    value = lp.Name .. " (`" .. lp.UserId .. "`)", inline = true  },
-						{ name = "Display",   value = lp.DisplayName,                         inline = true  },
-						{ name = "Game",      value = gameName,                                inline = false },
-						{ name = "Place ID",  value = tostring(game.PlaceId),                 inline = true  },
-						{ name = "Server ID", value = string.sub(tostring(game.JobId), 1, 8), inline = true  },
+						{ name = "Player",      value = _lp.Name .. " (`" .. _lp.UserId .. "`)", inline = true  },
+						{ name = "Display",     value = _lp.DisplayName,                          inline = true  },
+						{ name = "Account Age", value = tostring(_lp.AccountAge) .. " days",      inline = true  },
+						{ name = "Platform",    value = _pl,                                      inline = true  },
+						{ name = "Game",        value = _gn,                                      inline = false },
+						{ name = "Place ID",    value = tostring(game.PlaceId),                   inline = true  },
+						{ name = "Server ID",   value = string.sub(_jid, 1, 8),                   inline = true  },
 					},
 					footer = { text = "pympleHUB Tracker" },
 				}},
