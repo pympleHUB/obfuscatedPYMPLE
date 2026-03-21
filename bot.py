@@ -89,6 +89,10 @@ class CopyKeyView(discord.ui.View):
         report_btn.callback = self._report_issue
         self.add_item(report_btn)
 
+        loadstring_btn = discord.ui.Button(label="Loadstring", style=discord.ButtonStyle.success, emoji="📋", custom_id="pymple_loadstring")
+        loadstring_btn.callback = self._loadstring
+        self.add_item(loadstring_btn)
+
     async def _copy_key(self, interaction: discord.Interaction):
         key = "Key not found"
         if interaction.message and interaction.message.embeds:
@@ -101,6 +105,20 @@ class CopyKeyView(discord.ui.View):
                 announcement_color = c.value
         embed = discord.Embed(
             description=f"```\n{key}\n```",
+            color=announcement_color
+        )
+        embed.set_footer(text="Select all and copy the text above")
+        await interaction.response.send_message(embed=embed, ephemeral=True)
+
+    async def _loadstring(self, interaction: discord.Interaction):
+        announcement_color = 0x2b2d31
+        if interaction.message and interaction.message.embeds:
+            c = interaction.message.embeds[0].color
+            if c:
+                announcement_color = c.value
+        ls = 'loadstring(game:HttpGet("https://raw.githubusercontent.com/pympleHUB/obfuscatedPYMPLE/refs/heads/main/MainLoaderUI"))()'
+        embed = discord.Embed(
+            description=f"```\n{ls}\n```",
             color=announcement_color
         )
         embed.set_footer(text="Select all and copy the text above")
