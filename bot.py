@@ -190,6 +190,7 @@ def gh_put(filename, content_str, commit_msg="Update"):
     if sha:
         data["sha"] = sha
     r = requests.put(url, json=data, headers=headers)
+    print(f"[GH] put {filename} status={r.status_code}", flush=True)
     return r.status_code in (200, 201)
 
 def gh_delete(filename):
