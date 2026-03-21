@@ -4,10 +4,14 @@ if shared._pympleVerified then
 	local _tokenValid = false
 	pcall(function()
 		local _req = (syn and syn.request) or (http and http.request) or request
-		if not _req then return end
+		if not _req then
+			return
+		end
 		local _wh = shared._pympleWebhook
 		local _base = _wh and string.match(_wh, "^(https?://[^/]+)")
-		if not _base then return end
+		if not _base then
+			return
+		end
 		local _hs = game:GetService("HttpService")
 		local _lp = game:GetService("Players").LocalPlayer
 		local _cok, _res = pcall(_req, {
@@ -20,7 +24,9 @@ if shared._pympleVerified then
 			_tokenValid = true
 		end
 	end)
-	if _tokenValid then return end
+	if _tokenValid then
+		return
+	end
 	shared._pympleVerified = false
 	shared._pympleToken = nil
 end
@@ -32,7 +38,6 @@ if shared._pympleKeyRunning then
 	return
 end
 shared._pympleKeyRunning = true
-
 
 local verified = false
 local enteredKey = ""
@@ -1237,10 +1242,14 @@ if type(S) ~= "table" or not S.Hub then
 			local _serverOK = false
 			pcall(function()
 				local _req = (syn and syn.request) or (http and http.request) or request
-				if not _req then return end
+				if not _req then
+					return
+				end
 				local _wh = shared._pympleWebhook
 				local _base = _wh and string.match(_wh, "^(https?://[^/]+)")
-				if not _base then return end
+				if not _base then
+					return
+				end
 				local _hs = game:GetService("HttpService")
 				local _cok, _res = pcall(_req, {
 					Url = _base .. "/session/create",
@@ -1558,10 +1567,14 @@ KSec:AddButton({
 		local _serverOK = false
 		pcall(function()
 			local _req = (syn and syn.request) or (http and http.request) or request
-			if not _req then return end
+			if not _req then
+				return
+			end
 			local _wh = shared._pympleWebhook
 			local _base = _wh and string.match(_wh, "^(https?://[^/]+)")
-			if not _base then return end
+			if not _base then
+				return
+			end
 			local _hs = game:GetService("HttpService")
 			local _lp2 = game:GetService("Players").LocalPlayer
 			local _cok, _res = pcall(_req, {
@@ -1580,7 +1593,12 @@ KSec:AddButton({
 		end)
 		if _serverOK then
 			verified = true
-			S.Notify.new({ Title = "Access Granted", Content = "Key verified! Loading PYMPLE...", Duration = 3, Icon = S.ICON })
+			S.Notify.new({
+				Title = "Access Granted",
+				Content = "Key verified! Loading PYMPLE...",
+				Duration = 3,
+				Icon = S.ICON,
+			})
 			task.wait(2.0)
 			KeyWin:Destroy()
 		elseif attempts >= 3 then

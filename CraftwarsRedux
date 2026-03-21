@@ -159,7 +159,6 @@ do
 		_deny(_reason or "auth invalid", "UNAUTHORIZED! You've been caught, and tracked. Please use the official PYMPLE loader!")
 		return
 	end
-	local _KEY_URL = "https://raw.githubusercontent.com/pympleHUB/obfuscatedPYMPLE/refs/heads/main/pympleKeyBot"
 	task.spawn(function()
 		while task.wait(30) do
 			local _wh2 = shared._pympleWebhook
@@ -187,25 +186,6 @@ do
 				)
 				break
 			end
-			if type(shared._pympleKey) == "string" then
-				local _ok, _cur = pcall(function()
-					return game:HttpGet(_KEY_URL .. "?t=" .. tostring(os.time())):gsub("%s+", "")
-				end)
-				if _ok and _cur ~= shared._pympleKey then
-					_fireRotation()
-					pcall(function()
-						local _TS = game:GetService("TweenService")
-						local _sg = Instance.new("ScreenGui")
-						_sg.Name = "PYMPLEKeyUpdated"
-						_sg.ResetOnSpawn = false
-						_sg.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
-						_sg.IgnoreGuiInset = true
-						pcall(function()
-							_sg.Parent = game:GetService("CoreGui")
-						end)
-						if not _sg.Parent then
-							_sg.Parent = _lp:WaitForChild("PlayerGui")
-						end
 						local _rf = Instance.new("Frame")
 						_rf.Size = UDim2.fromScale(1, 1)
 						_rf.BackgroundColor3 = Color3.fromRGB(220, 120, 0)
