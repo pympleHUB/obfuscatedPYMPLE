@@ -14,6 +14,7 @@ import time
 from datetime import datetime, timedelta
 from discord.ext import commands, tasks
 from flask import Flask, request as flask_req
+from werkzeug.middleware.proxy_fix import ProxyFix
 
 DISCORD_TOKEN = os.environ["DISCORD_TOKEN"]
 GITHUB_TOKEN = os.environ["GITHUB_TOKEN"]
@@ -944,6 +945,7 @@ async def on_ready():
     print(f"Bot is online as {bot.user}")
 
 _flask_app = Flask(__name__)
+_flask_app.wsgi_app = ProxyFix(_flask_app.wsgi_app, x_for=1, x_proto=1, x_host=1)
 _wh_rate: dict = {}
 _session_rate: dict = {}
 _check_rate: dict = {}

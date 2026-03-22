@@ -9891,7 +9891,7 @@ function PYMPLE.new(Config : Window)
 		UICorner.Parent = CloseWindow
 
 		local cwGlowLayers = {}
-		local cwGlowData = {{3,2,0.75},{5,4,0.82},{7,5,0.87},{9,7,0.905},{11,8,0.928},{14,10,0.950},{17,13,0.968},{20,15,0.982}}
+		local cwGlowData = {{3,2,0.88},{5,4,0.92},{7,5,0.94},{9,7,0.955},{11,8,0.965},{14,10,0.975},{17,13,0.983},{20,15,0.990}}
 		for _, gd in ipairs(cwGlowData) do
 			local gf = Instance.new("Frame")
 			gf.AnchorPoint = Vector2.new(0.5, 0.5)
